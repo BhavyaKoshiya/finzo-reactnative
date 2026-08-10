@@ -12,28 +12,26 @@ import { ROUTES } from '../../navigation/routes';
 export const HomeScreen = ({ navigation }) => {
   const { currentTheme } = useAppTheme();
 
-  const renderHeader = () => (
-    <View style={styles.heroSection}>
-      <AppText variant="caption" color={currentTheme.primary} style={styles.brandTitle}>
-        FINZO
-      </AppText>
-      <AppText variant="screenTitle" style={styles.greetingTitle}>
-        Good day
-      </AppText>
-      <AppText variant="bodySmall" color={currentTheme.textSecondary}>
-        What would you like to calculate today?
-      </AppText>
-    </View>
-  );
-
   return (
     <ScreenContainer
       scrollable
-      header={renderHeader()}
       useSafeAreaTop={true}
       useSafeAreaBottom={false}
       style={styles.container}
     >
+      {/* Hero Greeting Section */}
+      <View style={styles.heroSection}>
+        <AppText variant="caption" color={currentTheme.primary} style={styles.brandTitle}>
+          FINZO
+        </AppText>
+        <AppText variant="screenTitle" style={styles.greetingTitle}>
+          Good day
+        </AppText>
+        <AppText variant="bodySmall" color={currentTheme.textSecondary}>
+          What would you like to calculate today?
+        </AppText>
+      </View>
+
       {/* Search Placeholder */}
       <TouchableOpacity
         activeOpacity={0.8}
@@ -60,7 +58,7 @@ export const HomeScreen = ({ navigation }) => {
           title="Home Loan EMI"
           description="Calculate monthly installments & interest split"
           icon={Calculator}
-          onPress={() => navigation.navigate(ROUTES.CALCULATORS)}
+          onPress={() => navigation.navigate(ROUTES.EMI_CALCULATOR)}
           style={styles.cardMargin}
         />
         <CalculatorCard
@@ -90,7 +88,7 @@ export const HomeScreen = ({ navigation }) => {
             title="Loans"
             count={4}
             icon={Calculator}
-            onPress={() => navigation.navigate(ROUTES.CALCULATORS)}
+            onPress={() => navigation.navigate(ROUTES.EMI_CALCULATOR)}
             style={styles.gridCard}
           />
           <CategoryCard
@@ -129,7 +127,7 @@ const styles = StyleSheet.create({
   },
   heroSection: {
     paddingTop: 8,
-    paddingBottom: 12,
+    paddingBottom: 16,
   },
   brandTitle: {
     fontWeight: '700',
@@ -153,7 +151,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     marginBottom: 24,
-    marginTop: 4,
   },
   searchIcon: {
     marginRight: 10,

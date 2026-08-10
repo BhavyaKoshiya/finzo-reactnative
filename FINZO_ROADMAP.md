@@ -4,27 +4,13 @@
 - [x] Phase 1 — Design System
 - [x] Phase 2 — Navigation Shell
 - [x] Phase 3 — Calculation Engine
-- [ ] Phase 4 — Calculation Audit
-- [ ] Phase 5 — EMI Vertical Slice
-- [ ] Phase 6 — Saved Calculations
-- [ ] Phase 7 — Share
-- [ ] Phase 8 — Calculator Registry
-- [ ] Phase 9 — Search
-- [ ] Phase 10 — SIP
-- [ ] Phase 11 — FD
-- [ ] Phase 12 — RD
-- [ ] Phase 13 — GST
-- [ ] Phase 14 — CAGR / ROI
-- [ ] Phase 15 — Everyday Calculators
-- [ ] Phase 16 — Loan Comparison
-- [ ] Phase 17 — Home Dashboard
-- [ ] Phase 18 — Charts & Polish
-- [ ] Phase 19 — Ads
-- [ ] Phase 20 — Premium
-- [ ] Phase 21 — PDF
-- [ ] Phase 22 — Privacy Audit
-- [ ] Phase 23 — Performance Audit
-- [ ] Phase 24 — Financial Calculation QA
-- [ ] Phase 25 — Android Release
-- [ ] Phase 26 — iOS Release
-- [ ] Phase 27 — Store Compliance
+- [x] Phase 4 — EMI Vertical Slice
+- [ ] Phase 5 — Calculator Framework + Registry
+- [ ] Phase 6 — Loan Calculators
+- [ ] Phase 7 — Investment Calculators
+- [ ] Phase 8 — Tax & General Financial Calculators
+- [ ] Phase 9 — Saved Calculations
+- [ ] Phase 10 — Home Dashboard + Search
+- [ ] Phase 11 — Share / Export
+- [ ] Phase 12 — Monetization
+- [ ] Phase 13 — Final QA + Store Preparation

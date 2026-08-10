@@ -41,8 +41,6 @@ export const ScreenContainer = ({
   };
 
   const fixedHeaderStyle = {
-    paddingTop: useSafeAreaTop ? insets.top : 0,
-    paddingHorizontal,
     backgroundColor: containerBg,
   };
 

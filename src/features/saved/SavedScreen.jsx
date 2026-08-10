@@ -9,22 +9,19 @@ import { useAppTheme } from '../../hooks/useAppTheme';
 export const SavedScreen = () => {
   const { currentTheme } = useAppTheme();
 
-  const renderHeader = () => (
-    <View style={styles.headerGroup}>
-      <AppText variant="screenTitle">Saved Calculations</AppText>
-      <AppText variant="bodySmall" color={currentTheme.textSecondary}>
-        Your bookmarked and saved calculation records.
-      </AppText>
-    </View>
-  );
-
   return (
     <ScreenContainer
-      header={renderHeader()}
       useSafeAreaTop={true}
       useSafeAreaBottom={false}
       style={styles.container}
     >
+      <View style={styles.headerGroup}>
+        <AppText variant="screenTitle">Saved Calculations</AppText>
+        <AppText variant="bodySmall" color={currentTheme.textSecondary}>
+          Your bookmarked and saved calculation records.
+        </AppText>
+      </View>
+
       <View style={styles.emptyContainer}>
         <EmptyState
           title="No saved calculations"
@@ -42,7 +39,7 @@ const styles = StyleSheet.create({
   },
   headerGroup: {
     paddingTop: 8,
-    paddingBottom: 12,
+    paddingBottom: 16,
   },
   emptyContainer: {
     flex: 1,

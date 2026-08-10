@@ -18,23 +18,21 @@ export const SettingsScreen = ({ navigation }) => {
     { label: 'Dark Mode', value: 'dark', icon: Moon },
   ];
 
-  const renderHeader = () => (
-    <View style={styles.headerGroup}>
-      <AppText variant="screenTitle">Settings</AppText>
-      <AppText variant="bodySmall" color={currentTheme.textSecondary}>
-        Preferences & app details.
-      </AppText>
-    </View>
-  );
-
   return (
     <ScreenContainer
       scrollable
-      header={renderHeader()}
       useSafeAreaTop={true}
       useSafeAreaBottom={false}
       style={styles.container}
     >
+      {/* Title Header */}
+      <View style={styles.headerGroup}>
+        <AppText variant="screenTitle">Settings</AppText>
+        <AppText variant="bodySmall" color={currentTheme.textSecondary}>
+          Preferences & app details.
+        </AppText>
+      </View>
+
       {/* Appearance Section */}
       <View style={styles.section}>
         <AppText variant="sectionTitle" style={styles.sectionTitle}>
@@ -141,7 +139,7 @@ const styles = StyleSheet.create({
   },
   headerGroup: {
     paddingTop: 8,
-    paddingBottom: 12,
+    paddingBottom: 16,
   },
   section: {
     marginBottom: 24,
