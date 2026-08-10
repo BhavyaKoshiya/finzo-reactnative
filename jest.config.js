@@ -1,6 +1,9 @@
 module.exports = {
   preset: 'react-native',
+  transform: {
+    '^.+\\.(js|jsx|ts|tsx|mjs)$': 'babel-jest',
+  },
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|@reduxjs/toolkit|react-redux|immer|redux-persist|@react-native-async-storage/async-storage|lucide-react-native|react-native-svg|react-native-reanimated|react-native-worklets-core)/)',
+    'node_modules/(?!(react-native|@react-native|@reduxjs/toolkit|react-redux|immer|redux-persist|@react-native-async-storage/async-storage|lucide-react-native|react-native-svg|react-native-reanimated|react-native-worklets|react-native-worklets-core|react-native-gesture-handler|@gorhom/bottom-sheet|@react-native-community/slider|@d11/react-native-fast-image|react-native-fast-shadow)/)',
   ],
 };
