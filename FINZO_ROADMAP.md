@@ -5,7 +5,7 @@
 - [x] Phase 2 — Navigation Shell
 - [x] Phase 3 — Calculation Engine
 - [x] Phase 4 — EMI Vertical Slice
-- [ ] Phase 5 — Calculator Framework + Registry
+- [x] Phase 5 — Calculator Framework + Registry
 - [ ] Phase 6 — Loan Calculators
 - [ ] Phase 7 — Investment Calculators
 - [ ] Phase 8 — Tax & General Financial Calculators

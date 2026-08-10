@@ -1,22 +1,15 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Calculator, TrendingUp, Briefcase, Calendar } from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
-import CategoryCard from '../../components/cards/CategoryCard';
+import CalculatorCard from '../../components/cards/CalculatorCard';
 import InfoCard from '../../components/cards/InfoCard';
 import { useAppTheme } from '../../hooks/useAppTheme';
-import { ROUTES } from '../../navigation/routes';
+import { getCalculatorCategories } from '../../calculators';
 
 export const CalculatorsScreen = ({ navigation }) => {
   const { currentTheme } = useAppTheme();
-
-  const categories = [
-    { id: 'loans', title: 'Loans', count: 4, icon: Calculator, desc: 'EMI, Prepayment, Comparison, Tenure', route: ROUTES.EMI_CALCULATOR },
-    { id: 'investments', title: 'Investments', count: 5, icon: TrendingUp, desc: 'SIP, Lumpsum, FD, RD, PPF', route: null },
-    { id: 'business', title: 'Business', count: 3, icon: Briefcase, desc: 'GST, Profit Margin, Break-even', route: null },
-    { id: 'everyday', title: 'Everyday', count: 3, icon: Calendar, desc: 'Inflation, Simple & Compound Interest', route: null },
-  ];
+  const categories = getCalculatorCategories();
 
   return (
     <ScreenContainer
@@ -33,27 +26,33 @@ export const CalculatorsScreen = ({ navigation }) => {
         </AppText>
       </View>
 
-      {/* Category List */}
-      <View style={styles.list}>
-        {categories.map((cat) => (
-          <View key={cat.id} style={styles.categoryItem}>
-            <CategoryCard
-              variant="row"
-              title={cat.title}
-              count={cat.count}
-              icon={cat.icon}
-              onPress={() => {
-                if (cat.route) {
-                  navigation.navigate(cat.route);
+      {/* Category Groups & Calculators */}
+      {categories.map((cat) => (
+        <View key={cat.id} style={styles.categorySection}>
+          <AppText variant="sectionTitle" style={styles.categoryTitle}>
+            {cat.name}
+          </AppText>
+          <AppText variant="caption" color={currentTheme.textSecondary} style={styles.categoryDesc}>
+            {cat.description}
+          </AppText>
+
+          <View style={styles.calculatorList}>
+            {cat.calculators.map((calc) => (
+              <CalculatorCard
+                key={calc.id}
+                title={calc.name}
+                description={calc.description}
+                icon={calc.icon}
+                status={calc.status}
+                onPress={
+                  calc.route ? () => navigation.navigate(calc.route) : null
                 }
-              }}
-            />
-            <AppText variant="caption" color={currentTheme.textMuted} style={styles.desc}>
-              Includes: {cat.desc}
-            </AppText>
+                style={styles.calcCardMargin}
+              />
+            ))}
           </View>
-        ))}
-      </View>
+        </View>
+      ))}
 
       <InfoCard
         title="100% Offline Calculations"
@@ -73,16 +72,20 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 16,
   },
-  list: {
-    marginTop: 4,
+  categorySection: {
+    marginBottom: 20,
+  },
+  categoryTitle: {
+    marginBottom: 2,
+  },
+  categoryDesc: {
     marginBottom: 12,
   },
-  categoryItem: {
-    marginBottom: 16,
+  calculatorList: {
+    marginTop: 4,
   },
-  desc: {
-    marginTop: 6,
-    marginLeft: 4,
+  calcCardMargin: {
+    marginBottom: 10,
   },
   infoCard: {
     marginTop: 8,

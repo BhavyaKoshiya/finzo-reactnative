@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Calculator, TrendingUp, Briefcase, Calendar, Search } from 'lucide-react-native';
+import { Search } from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
 import AppIcon from '../../components/common/AppIcon';
@@ -8,9 +8,13 @@ import CalculatorCard from '../../components/cards/CalculatorCard';
 import CategoryCard from '../../components/cards/CategoryCard';
 import { useAppTheme } from '../../hooks/useAppTheme';
 import { ROUTES } from '../../navigation/routes';
+import { getPopularCalculators, getCalculatorCategories } from '../../calculators';
 
 export const HomeScreen = ({ navigation }) => {
   const { currentTheme } = useAppTheme();
+
+  const popularCalculators = getPopularCalculators();
+  const categories = getCalculatorCategories();
 
   return (
     <ScreenContainer
@@ -54,27 +58,19 @@ export const HomeScreen = ({ navigation }) => {
         <AppText variant="sectionTitle" style={styles.sectionTitle}>
           Popular Calculators
         </AppText>
-        <CalculatorCard
-          title="Home Loan EMI"
-          description="Calculate monthly installments & interest split"
-          icon={Calculator}
-          onPress={() => navigation.navigate(ROUTES.EMI_CALCULATOR)}
-          style={styles.cardMargin}
-        />
-        <CalculatorCard
-          title="SIP Investment"
-          description="Project wealth growth from regular SIPs"
-          icon={TrendingUp}
-          onPress={() => navigation.navigate(ROUTES.CALCULATORS)}
-          style={styles.cardMargin}
-        />
-        <CalculatorCard
-          title="Fixed Deposit (FD)"
-          description="Calculate maturity value with compound interest"
-          icon={Briefcase}
-          onPress={() => navigation.navigate(ROUTES.CALCULATORS)}
-          style={styles.cardMargin}
-        />
+        {popularCalculators.map((calc) => (
+          <CalculatorCard
+            key={calc.id}
+            title={calc.name}
+            description={calc.description}
+            icon={calc.icon}
+            status={calc.status}
+            onPress={
+              calc.route ? () => navigation.navigate(calc.route) : null
+            }
+            style={styles.cardMargin}
+          />
+        ))}
       </View>
 
       {/* Categories Section */}
@@ -83,38 +79,17 @@ export const HomeScreen = ({ navigation }) => {
           Explore Categories
         </AppText>
         <View style={styles.categoryGrid}>
-          <CategoryCard
-            variant="grid"
-            title="Loans"
-            count={4}
-            icon={Calculator}
-            onPress={() => navigation.navigate(ROUTES.EMI_CALCULATOR)}
-            style={styles.gridCard}
-          />
-          <CategoryCard
-            variant="grid"
-            title="Investments"
-            count={5}
-            icon={TrendingUp}
-            onPress={() => navigation.navigate(ROUTES.CALCULATORS)}
-            style={styles.gridCard}
-          />
-          <CategoryCard
-            variant="grid"
-            title="Business"
-            count={3}
-            icon={Briefcase}
-            onPress={() => navigation.navigate(ROUTES.CALCULATORS)}
-            style={styles.gridCard}
-          />
-          <CategoryCard
-            variant="grid"
-            title="Everyday"
-            count={3}
-            icon={Calendar}
-            onPress={() => navigation.navigate(ROUTES.CALCULATORS)}
-            style={styles.gridCard}
-          />
+          {categories.map((cat) => (
+            <CategoryCard
+              key={cat.id}
+              variant="grid"
+              title={cat.name}
+              count={cat.count}
+              icon={cat.icon}
+              onPress={() => navigation.navigate(ROUTES.CALCULATORS)}
+              style={styles.gridCard}
+            />
+          ))}
         </View>
       </View>
     </ScreenContainer>
