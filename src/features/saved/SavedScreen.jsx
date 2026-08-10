@@ -9,7 +9,6 @@ import EmptyState from '../../components/feedback/EmptyState';
 import SavedCalculationCard from './components/SavedCalculationCard';
 import { useAppTheme } from '../../hooks/useAppTheme';
 import { getCalculatorById } from '../../calculators';
-import { ROUTES } from '../../navigation/routes';
 
 import {
   selectSavedCalculations,
@@ -125,6 +124,7 @@ export const SavedScreen = ({ navigation }) => {
   return (
     <ScreenContainer
       header={renderHeader()}
+      paddingHorizontal={0}
       useSafeAreaTop={false}
       useSafeAreaBottom={false}
       style={styles.container}
@@ -139,12 +139,6 @@ export const SavedScreen = ({ navigation }) => {
                 : 'Save calculations from any tool to quickly return to them later.'
             }
             icon={filterMode === 'favorites' ? Star : Bookmark}
-            actionLabel={filterMode === 'all' ? 'Explore Calculators' : undefined}
-            onAction={
-              filterMode === 'all'
-                ? () => navigation.navigate(ROUTES.CALCULATORS_TAB)
-                : undefined
-            }
           />
         </View>
       ) : (

@@ -33,8 +33,9 @@ export const SavedCalculationCard = ({
       activeOpacity={0.7}
       accessibilityRole="button"
       accessibilityLabel={`Open saved calculation ${item.title || calcName}`}
+      style={[styles.touchable, style]}
     >
-      <AppCard style={[styles.card, style]}>
+      <AppCard style={styles.card}>
         <View style={styles.topRow}>
           <View style={styles.iconTitleGroup}>
             <View style={[styles.iconBox, { backgroundColor: `${currentTheme.primary}12` }]}>
@@ -106,9 +107,14 @@ export const SavedCalculationCard = ({
 };
 
 const styles = StyleSheet.create({
+  touchable: {
+    width: '100%',
+    marginBottom: 14,
+  },
   card: {
-    padding: 16,
-    marginBottom: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 18,
+    width: '100%',
   },
   topRow: {
     flexDirection: 'row',
@@ -122,12 +128,12 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   iconBox: {
-    width: 38,
-    height: 38,
+    width: 42,
+    height: 42,
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+    marginRight: 12,
   },
   titleTextGroup: {
     flex: 1,
@@ -142,7 +148,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    marginVertical: 12,
+    marginVertical: 14,
   },
   bottomRow: {
     flexDirection: 'row',
