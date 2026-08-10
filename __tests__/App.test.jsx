@@ -16,25 +16,25 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 
 jest.mock('@d11/react-native-fast-image', () => {
   const { View } = require('react-native');
-  const FastImageMock = (props: any) => <View {...props} />;
+  const FastImageMock = (props) => <View {...props} />;
   FastImageMock.resizeMode = { cover: 'cover', contain: 'contain' };
   return FastImageMock;
 });
 
 jest.mock('react-native-fast-shadow', () => {
   const { View } = require('react-native');
-  return { ShadowedView: (props: any) => <View {...props} /> };
+  return { ShadowedView: (props) => <View {...props} /> };
 });
 
 jest.mock('@gorhom/bottom-sheet', () => {
   const ReactMock = require('react');
   const { View } = require('react-native');
-  const BottomSheet = ReactMock.forwardRef((props: any, _ref: any) => <View {...props} />);
+  const BottomSheet = ReactMock.forwardRef((props, _ref) => <View {...props} />);
   return {
     __esModule: true,
     default: BottomSheet,
-    BottomSheetView: (props: any) => <View {...props} />,
-    BottomSheetBackdrop: (props: any) => <View {...props} />,
+    BottomSheetView: (props) => <View {...props} />,
+    BottomSheetBackdrop: (props) => <View {...props} />,
   };
 });
 

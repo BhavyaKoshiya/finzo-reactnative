@@ -33,7 +33,7 @@ Finzo is an offline-first financial calculator and planning utility. It provides
 - **Prohibited**: Do NOT introduce Expo, Expo Router, MobX, Zustand, Recoil, Jotai, Redux Saga, or Redux Observable.
 - **State Management**: Redux Toolkit + React Redux + `redux-persist` + `@react-native-async-storage/async-storage`.
 - **Styling & UI**: React Native Reanimated, React Native SVG, `lucide-react-native`, React Native Safe Area Context.
-- **Language**: Strict TypeScript (`noImplicitAny`, strict mode, explicit return types where applicable).
+- **Language**: JavaScript (`.js` / `.jsx`). Do not introduce TypeScript configuration or `.ts` / `.tsx` files.
 
 ---
 
@@ -74,7 +74,7 @@ tests/           # Integration / End-to-end tests
 ---
 
 ## 7. FINANCIAL CALCULATION ENGINE SEPARATION
-- Financial formulas must be written as **pure TypeScript functions**.
+- Financial formulas must be written as **pure JavaScript functions**.
 - Calculation modules must NEVER import React, React Native, Redux, AsyncStorage, or UI components.
 - Formulas must be fully testable in isolation using pure Jest tests.
 

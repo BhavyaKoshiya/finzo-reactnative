@@ -11,7 +11,7 @@ import rootReducer from '../rootReducer';
 
 describe('settingsSlice', () => {
   const initialState = {
-    themeMode: 'system' as const,
+    themeMode: 'system',
     currency: 'INR',
     locale: 'en-IN',
   };
@@ -39,7 +39,7 @@ describe('settingsSlice', () => {
 
   it('should handle resetSettings', () => {
     const modifiedState = {
-      themeMode: 'dark' as const,
+      themeMode: 'dark',
       currency: 'USD',
       locale: 'en-US',
     };
@@ -50,14 +50,14 @@ describe('settingsSlice', () => {
   it('selectors should return correct values', () => {
     const rootState = {
       settings: {
-        themeMode: 'light' as const,
+        themeMode: 'light',
         currency: 'INR',
         locale: 'en-IN',
       },
     };
-    expect(selectThemeMode(rootState as any)).toEqual('light');
-    expect(selectCurrency(rootState as any)).toEqual('INR');
-    expect(selectLocale(rootState as any)).toEqual('en-IN');
+    expect(selectThemeMode(rootState)).toEqual('light');
+    expect(selectCurrency(rootState)).toEqual('INR');
+    expect(selectLocale(rootState)).toEqual('en-IN');
   });
 });
 

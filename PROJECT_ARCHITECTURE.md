@@ -66,5 +66,5 @@ Financial logic lives in `src/calculations/` as pure functions:
 ---
 
 ## 6. SHARED VS PLATFORM-SPECIFIC CODE
-- **Default Policy**: Write cross-platform TSX/TS code.
-- **Platform Files**: Use `.android.ts` or `.ios.ts` only when native behavior (e.g., status bar handling, haptic feedback) genuinely differs.
+- **Default Policy**: Write cross-platform JavaScript (`.js` / `.jsx`) code.
+- **Platform Files**: Use `.android.js` or `.ios.js` only when native behavior (e.g., status bar handling, haptic feedback) genuinely differs.
