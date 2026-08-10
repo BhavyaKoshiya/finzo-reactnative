@@ -22,7 +22,7 @@ Phase 3 Calculation Engine (Pure Math Functions)
 
 ## 2. Calculation Engine Boundary Laws
 - **Pure Math**: Financial formulas reside under `src/calculations/`. They are pure JavaScript functions that NEVER import React, React Native, Redux, or UI elements.
-- **Local Hook State**: Calculator form state (live input values, interest rates, tenures) lives strictly inside feature hooks (e.g. `useSIPCalculator.js`). Zero transient form state is placed into Redux or `redux-persist`.
+- **Local Hook State**: Calculator form state (live input values, interest rates, tenures) lives strictly inside feature hooks (e.g. `useGSTCalculator.js`). Zero transient form state is placed into Redux or `redux-persist`.
 - **No Direct Formula Calls from UI**: Screen components interact exclusively with their feature hook; they do not call math formulas directly.
 
 ---
@@ -33,8 +33,8 @@ Location: `src/calculators/`
 - **Single Source of Truth**: `CALCULATOR_REGISTRY` contains all discovery metadata for cataloging, search, navigation, and category grouping across `HomeScreen` and `CalculatorsScreen`.
 - **Metadata Contract**:
   - `id`: Stable string identifier (from `CALCULATOR_IDS`)
-  - `name`: Display title (e.g., `'Systematic Investment Plan'`)
-  - `shortName`: Abbreviated title (e.g., `'SIP Calculator'`)
+  - `name`: Display title (e.g., `'Goods & Services Tax'`)
+  - `shortName`: Abbreviated title (e.g., `'GST Calculator'`)
   - `description`: Subtitle explanation of functionality
   - `category`: Domain category ID (from `CATEGORY_IDS`)
   - `icon`: Lucide icon component
@@ -86,33 +86,38 @@ src/features/calculators/investments/
 └── roi/   → useROICalculator()   → calculateROI()   → ROIResultCard
 ```
 
-- **Dedicated Hooks**: Each investment calculator owns its local inputs, validation, calculation trigger, and reset logic.
-- **Zero Math Duplication**: All investment calculators execute pure Phase 3 formulas.
-- **Non-Guaranteed Language**: Results use neutral, non-guaranteed wording (e.g. "Estimated Future Value", "Estimated Returns", "Maturity Amount").
+---
+
+## 7. Tax & General Financial Calculator Architecture
+Location: `src/features/calculators/business/` & `src/features/calculators/everyday/`
+
+The 4 tax and general financial calculators (**GST**, **Simple Interest**, **Compound Interest**, and **Percentage**) support domain-specific modes and frequencies:
+
+```text
+src/features/calculators/
+├── business/gst/               → useGSTCalculator()               → calculateGST()               → GSTResultCard
+├── everyday/simpleInterest/    → useSimpleInterestCalculator()    → calculateSimpleInterest()    → SimpleInterestResultCard
+├── everyday/compoundInterest/  → useCompoundInterestCalculator()  → calculateCompoundInterest()  → CompoundInterestResultCard & Chart
+└── everyday/percentage/        → usePercentageCalculator()        → percentageOf/Change/Diff     → PercentageResultCard
+```
+
+- **GST Modes**: Supports `exclusive` (Add GST to Base) and `inclusive` (Extract GST from Total) with preset rate selection (`5%`, `12%`, `18%`, `28%`, Custom).
+- **Interest Calculators**: Keeps Simple Interest (non-compounded) and Compound Interest (supports `monthly`, `quarterly`, `half-yearly`, `yearly` compounding) cleanly separated into distinct calculators.
+- **Percentage Modes**: Supports `percentage-of` ($X\%$ of $Y$), `percentage-change` ($Old \to New$), and `percentage-difference` ($A$ vs $B$) with strict zero-denominator error handling.
+- **Non-Tax-Advice Language**: Results use neutral terms ("Base Amount", "GST Amount", "Total Amount", "Interest Earned") avoiding legal claims.
 
 ---
 
-## 7. Step-by-Step Guide: Adding a New Calculator (e.g. GST)
+## 8. Step-by-Step Guide: Adding a New Calculator
 
-To add a new calculator (e.g., GST) in future phases:
+To add a new calculator in future phases:
 
-1. **Add Calculator ID**:
-   Add `GST: 'gst'` in `src/calculators/registry/calculatorIds.js`.
-2. **Add Navigation Route**:
-   Add `GST_CALCULATOR: 'GSTCalculator'` in `src/navigation/routes.js`.
-3. **Register Route in Navigator**:
-   Import `GSTCalculatorScreen` in `src/navigation/RootNavigator.jsx`.
-4. **Create Feature Folder**:
-   Create `src/features/calculators/business/gst/`.
-5. **Create Feature Hook**:
-   Create `useGSTCalculator.js` managing local inputs, validating using Phase 3 `validateGSTInput()`, and calling Phase 3 `calculateGST()`.
-6. **Create Screen Component**:
-   Build `GSTCalculatorScreen.jsx` using `ScreenContainer`, `AppHeader`, `CalculatorInputSection`, `CalculatorResultSection`, and `CalculatorActionBar`.
-7. **Add Unit Tests**:
-   Create `useGSTCalculator.test.js` under `src/features/calculators/business/gst/__tests__/`.
-8. **Update Registry Metadata**:
-   In `src/calculators/registry/calculatorRegistry.js`, update the GST entry:
-   - Change `route: ROUTES.GST_CALCULATOR`
-   - Change `status: CALCULATOR_STATUS.AVAILABLE`
-9. **Verify**:
-   Run `npm run lint` and `npm test`. The registry will automatically expose GST on `HomeScreen` and `CalculatorsScreen` without modifying tab screens!
+1. **Add Calculator ID**: Add identifier in `src/calculators/registry/calculatorIds.js`.
+2. **Add Navigation Route**: Add route constant in `src/navigation/routes.js`.
+3. **Register Route in Navigator**: Import screen component in `src/navigation/RootNavigator.jsx`.
+4. **Create Feature Folder**: Create dedicated directory under `src/features/calculators/<category>/<calculatorName>/`.
+5. **Create Feature Hook**: Create custom hook managing local inputs, validating using Phase 3 validation, and calling Phase 3 formulas.
+6. **Create Screen Component**: Build screen using `ScreenContainer`, `AppHeader`, `CalculatorInputSection`, `CalculatorResultSection`, and `CalculatorActionBar`.
+7. **Add Unit Tests**: Create `use<CalculatorName>.test.js` under `__tests__/`.
+8. **Update Registry Metadata**: In `src/calculators/registry/calculatorRegistry.js`, set `route: ROUTES.<ROUTE_KEY>` and `status: CALCULATOR_STATUS.AVAILABLE`.
+9. **Verify**: Run `npm run lint` and `npm test`.

@@ -43,12 +43,11 @@ describe('Calculator Registry Architecture', () => {
       });
     });
 
-    test('coming-soon calculators must have status comingSoon', () => {
+    test('all calculators in registry should be available after Phase 8', () => {
+      const available = getAvailableCalculators();
+      expect(available.length).toBe(CALCULATOR_REGISTRY.length);
       const comingSoon = getComingSoonCalculators();
-      expect(comingSoon.length).toBeGreaterThan(0);
-      comingSoon.forEach((calc) => {
-        expect(calc.status).toBe(CALCULATOR_STATUS.COMING_SOON);
-      });
+      expect(comingSoon).toHaveLength(0);
     });
   });
 
@@ -83,6 +82,12 @@ describe('Calculator Registry Architecture', () => {
       investmentCalcs.forEach((calc) => {
         expect(calc.category).toBe(CATEGORY_IDS.INVESTMENTS);
       });
+
+      const businessCalcs = getCalculatorsByCategory(CATEGORY_IDS.BUSINESS);
+      expect(businessCalcs.length).toBe(1); // GST
+
+      const everydayCalcs = getCalculatorsByCategory(CATEGORY_IDS.EVERYDAY);
+      expect(everydayCalcs.length).toBe(3); // Simple Interest, Compound Interest, Percentage
     });
 
     test('getCalculatorCategories should return all categories with counts and items', () => {

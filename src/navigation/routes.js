@@ -18,6 +18,10 @@ export const ROUTES = {
   RD_CALCULATOR: 'RDCalculator',
   CAGR_CALCULATOR: 'CAGRCalculator',
   ROI_CALCULATOR: 'ROICalculator',
+  GST_CALCULATOR: 'GSTCalculator',
+  SIMPLE_INTEREST_CALCULATOR: 'SimpleInterestCalculator',
+  COMPOUND_INTEREST_CALCULATOR: 'CompoundInterestCalculator',
+  PERCENTAGE_CALCULATOR: 'PercentageCalculator',
 };
 
 export default ROUTES;

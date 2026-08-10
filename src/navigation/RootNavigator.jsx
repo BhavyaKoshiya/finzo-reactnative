@@ -16,6 +16,12 @@ import {
   CAGRCalculatorScreen,
   ROICalculatorScreen,
 } from '../features/calculators/investments';
+import { GSTCalculatorScreen } from '../features/calculators/business';
+import {
+  SimpleInterestCalculatorScreen,
+  CompoundInterestCalculatorScreen,
+  PercentageCalculatorScreen,
+} from '../features/calculators/everyday';
 import ComponentShowcaseScreen from '../features/showcase/ComponentShowcaseScreen';
 import { ROUTES } from './routes';
 
@@ -38,6 +44,12 @@ export const RootNavigator = () => {
       <Stack.Screen name={ROUTES.RD_CALCULATOR} component={RDCalculatorScreen} />
       <Stack.Screen name={ROUTES.CAGR_CALCULATOR} component={CAGRCalculatorScreen} />
       <Stack.Screen name={ROUTES.ROI_CALCULATOR} component={ROICalculatorScreen} />
+
+      {/* Tax & General Financial Calculator Screens */}
+      <Stack.Screen name={ROUTES.GST_CALCULATOR} component={GSTCalculatorScreen} />
+      <Stack.Screen name={ROUTES.SIMPLE_INTEREST_CALCULATOR} component={SimpleInterestCalculatorScreen} />
+      <Stack.Screen name={ROUTES.COMPOUND_INTEREST_CALCULATOR} component={CompoundInterestCalculatorScreen} />
+      <Stack.Screen name={ROUTES.PERCENTAGE_CALCULATOR} component={PercentageCalculatorScreen} />
 
       {__DEV__ && (
         <Stack.Screen

@@ -11,6 +11,7 @@ import {
   Landmark,
   DollarSign,
   Scale,
+  Divide,
 } from 'lucide-react-native';
 import { CALCULATOR_IDS } from './calculatorIds';
 import { CATEGORY_IDS, CALCULATOR_CATEGORIES } from './calculatorCategories';
@@ -149,10 +150,10 @@ export const CALCULATOR_REGISTRY = [
     description: 'Calculate Goods & Services Tax inclusive and exclusive amounts.',
     category: CATEGORY_IDS.BUSINESS,
     icon: Percent,
-    route: null,
-    status: CALCULATOR_STATUS.COMING_SOON,
-    popular: false,
-    keywords: ['gst', 'tax', 'business', 'inclusive', 'exclusive', 'vat'],
+    route: ROUTES.GST_CALCULATOR,
+    status: CALCULATOR_STATUS.AVAILABLE,
+    popular: true,
+    keywords: ['gst', 'goods and services tax', 'gst calculator', 'tax', 'business', 'inclusive', 'exclusive', 'vat'],
   },
   {
     id: CALCULATOR_IDS.SIMPLE_INTEREST,
@@ -161,10 +162,10 @@ export const CALCULATOR_REGISTRY = [
     description: 'Calculate simple interest on principal amounts over time.',
     category: CATEGORY_IDS.EVERYDAY,
     icon: Calendar,
-    route: null,
-    status: CALCULATOR_STATUS.COMING_SOON,
+    route: ROUTES.SIMPLE_INTEREST_CALCULATOR,
+    status: CALCULATOR_STATUS.AVAILABLE,
     popular: false,
-    keywords: ['interest', 'simple interest', 'rate', 'borrowing'],
+    keywords: ['simple interest', 'interest', 'si calculator', 'rate', 'borrowing'],
   },
   {
     id: CALCULATOR_IDS.COMPOUND_INTEREST,
@@ -173,10 +174,22 @@ export const CALCULATOR_REGISTRY = [
     description: 'Calculate compound interest growth across various frequencies.',
     category: CATEGORY_IDS.EVERYDAY,
     icon: PieChart,
-    route: null,
-    status: CALCULATOR_STATUS.COMING_SOON,
+    route: ROUTES.COMPOUND_INTEREST_CALCULATOR,
+    status: CALCULATOR_STATUS.AVAILABLE,
     popular: false,
-    keywords: ['compound', 'interest', 'compounding', 'growth'],
+    keywords: ['compound interest', 'ci calculator', 'compound', 'interest', 'compounding', 'growth'],
+  },
+  {
+    id: CALCULATOR_IDS.PERCENTAGE,
+    name: 'Percentage Calculator',
+    shortName: 'Percentage',
+    description: 'Calculate percentage of, percentage change, and percentage differences.',
+    category: CATEGORY_IDS.EVERYDAY,
+    icon: Divide,
+    route: ROUTES.PERCENTAGE_CALCULATOR,
+    status: CALCULATOR_STATUS.AVAILABLE,
+    popular: false,
+    keywords: ['percentage', 'percent', 'percentage change', 'percentage difference', 'percentage calculator'],
   },
 ];
 

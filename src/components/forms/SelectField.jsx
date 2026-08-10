@@ -104,10 +104,8 @@ export const SelectField = ({
                     activeOpacity={0.7}
                     style={[
                       styles.optionRow,
-                      index < options.length - 1 && {
-                        borderBottomWidth: 1,
-                        borderBottomColor: currentTheme.border,
-                      },
+                      index < options.length - 1 && styles.borderBottom,
+                      index < options.length - 1 && { borderBottomColor: currentTheme.border },
                     ]}
                   >
                     <AppText
@@ -156,6 +154,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 14,
+  },
+  borderBottom: {
+    borderBottomWidth: 1,
   },
   selectedText: {
     fontWeight: '700',
