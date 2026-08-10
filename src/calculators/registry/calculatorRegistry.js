@@ -1,4 +1,17 @@
-import { Calculator, TrendingUp, Briefcase, Calendar, Percent, PieChart, Landmark, DollarSign, Scale } from 'lucide-react-native';
+import {
+  Home,
+  User,
+  Car,
+  GraduationCap,
+  Briefcase,
+  TrendingUp,
+  Calendar,
+  Percent,
+  PieChart,
+  Landmark,
+  DollarSign,
+  Scale,
+} from 'lucide-react-native';
 import { CALCULATOR_IDS } from './calculatorIds';
 import { CATEGORY_IDS, CALCULATOR_CATEGORIES } from './calculatorCategories';
 import { ROUTES } from '../../navigation/routes';
@@ -10,16 +23,64 @@ export const CALCULATOR_STATUS = {
 
 export const CALCULATOR_REGISTRY = [
   {
-    id: CALCULATOR_IDS.EMI,
+    id: CALCULATOR_IDS.HOME_LOAN_EMI,
     name: 'Home Loan EMI',
-    shortName: 'EMI Calculator',
-    description: 'Calculate monthly installments, total interest, and payment split.',
+    shortName: 'Home Loan',
+    description: 'Estimate your monthly home loan EMI, total interest, and payment split.',
     category: CATEGORY_IDS.LOANS,
-    icon: Calculator,
-    route: ROUTES.EMI_CALCULATOR,
+    icon: Home,
+    route: ROUTES.HOME_LOAN_EMI,
     status: CALCULATOR_STATUS.AVAILABLE,
     popular: true,
-    keywords: ['emi', 'loan', 'home loan', 'car loan', 'installment', 'mortgage'],
+    keywords: ['home loan', 'housing loan', 'property', 'emi', 'mortgage', 'loan'],
+  },
+  {
+    id: CALCULATOR_IDS.PERSONAL_LOAN_EMI,
+    name: 'Personal Loan EMI',
+    shortName: 'Personal Loan',
+    description: 'Calculate your personal loan EMI, total interest, and repayment amount.',
+    category: CATEGORY_IDS.LOANS,
+    icon: User,
+    route: ROUTES.PERSONAL_LOAN_EMI,
+    status: CALCULATOR_STATUS.AVAILABLE,
+    popular: true,
+    keywords: ['personal loan', 'cash loan', 'instant loan', 'emi', 'borrowing'],
+  },
+  {
+    id: CALCULATOR_IDS.CAR_LOAN_EMI,
+    name: 'Car Loan EMI',
+    shortName: 'Car Loan',
+    description: 'Estimate your monthly car loan payment and total interest.',
+    category: CATEGORY_IDS.LOANS,
+    icon: Car,
+    route: ROUTES.CAR_LOAN_EMI,
+    status: CALCULATOR_STATUS.AVAILABLE,
+    popular: true,
+    keywords: ['car loan', 'auto loan', 'vehicle loan', 'emi', 'automobile'],
+  },
+  {
+    id: CALCULATOR_IDS.EDUCATION_LOAN_EMI,
+    name: 'Education Loan EMI',
+    shortName: 'Education Loan',
+    description: 'Estimate your education loan EMI and total repayment cost.',
+    category: CATEGORY_IDS.LOANS,
+    icon: GraduationCap,
+    route: ROUTES.EDUCATION_LOAN_EMI,
+    status: CALCULATOR_STATUS.AVAILABLE,
+    popular: false,
+    keywords: ['education loan', 'student loan', 'study loan', 'college', 'emi'],
+  },
+  {
+    id: CALCULATOR_IDS.BUSINESS_LOAN_EMI,
+    name: 'Business Loan EMI',
+    shortName: 'Business Loan',
+    description: 'Calculate your business loan EMI and total repayment.',
+    category: CATEGORY_IDS.LOANS,
+    icon: Briefcase,
+    route: ROUTES.BUSINESS_LOAN_EMI,
+    status: CALCULATOR_STATUS.AVAILABLE,
+    popular: false,
+    keywords: ['business loan', 'commercial loan', 'startup loan', 'enterprise', 'emi'],
   },
   {
     id: CALCULATOR_IDS.SIP,
@@ -42,7 +103,7 @@ export const CALCULATOR_REGISTRY = [
     icon: Briefcase,
     route: null,
     status: CALCULATOR_STATUS.COMING_SOON,
-    popular: true,
+    popular: false,
     keywords: ['fd', 'fixed deposit', 'bank', 'interest', 'compounding'],
   },
   {
@@ -120,7 +181,12 @@ export const CALCULATOR_REGISTRY = [
 ];
 
 export const getCalculatorById = (id) => {
-  return CALCULATOR_REGISTRY.find((item) => item.id === id) || null;
+  if (!id) return null;
+  return (
+    CALCULATOR_REGISTRY.find(
+      (item) => item.id === id || (id === CALCULATOR_IDS.EMI && item.id === CALCULATOR_IDS.HOME_LOAN_EMI)
+    ) || null
+  );
 };
 
 export const getAvailableCalculators = () => {

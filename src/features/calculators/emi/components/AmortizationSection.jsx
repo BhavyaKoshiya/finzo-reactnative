@@ -14,9 +14,12 @@ export const AmortizationSection = ({
   onToggleExpand,
   viewMode = 'monthly',
   onToggleViewMode,
+  onViewModeChange,
   style,
 }) => {
   const { currentTheme } = useAppTheme();
+
+  const handleModeChange = onViewModeChange || onToggleViewMode || (() => {});
 
   const yearlySchedule = useMemo(() => {
     return getYearlyAmortizationSummary(schedule);
@@ -64,7 +67,7 @@ export const AmortizationSection = ({
           {/* Monthly / Yearly Switcher */}
           <View style={styles.tabSwitcher}>
             <TouchableOpacity
-              onPress={() => onToggleViewMode('monthly')}
+              onPress={() => handleModeChange('monthly')}
               activeOpacity={0.7}
               style={[
                 styles.tabButton,
@@ -83,7 +86,7 @@ export const AmortizationSection = ({
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => onToggleViewMode('yearly')}
+              onPress={() => handleModeChange('yearly')}
               activeOpacity={0.7}
               style={[
                 styles.tabButton,

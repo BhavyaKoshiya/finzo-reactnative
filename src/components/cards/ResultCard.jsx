@@ -4,8 +4,10 @@ import AppCard from './AppCard';
 import AppText from '../common/AppText';
 import { useAppTheme } from '../../hooks/useAppTheme';
 
-export const ResultCard = ({ title, value, subtitle, children, style, ...props }) => {
+export const ResultCard = ({ title, value, primaryValue, subtitle, children, style, ...props }) => {
   const { currentTheme } = useAppTheme();
+
+  const displayValue = value || primaryValue;
 
   return (
     <AppCard
@@ -17,7 +19,11 @@ export const ResultCard = ({ title, value, subtitle, children, style, ...props }
       {...props}
     >
       {title && <AppText variant="resultLabel" color={currentTheme.textSecondary}>{title}</AppText>}
-      {value && <AppText variant="resultValue" color={currentTheme.primary} style={styles.value}>{value}</AppText>}
+      {displayValue && (
+        <AppText variant="resultValue" color={currentTheme.primary} style={styles.value}>
+          {displayValue}
+        </AppText>
+      )}
       {subtitle && <AppText variant="caption" color={currentTheme.textMuted}>{subtitle}</AppText>}
       {children}
     </AppCard>

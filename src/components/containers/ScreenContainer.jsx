@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import {
   View,
   ScrollView,
@@ -9,7 +9,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../hooks/useAppTheme';
 
-export const ScreenContainer = ({
+export const ScreenContainer = forwardRef(({
   children,
   header = null,
   scrollable = false,
@@ -20,12 +20,14 @@ export const ScreenContainer = ({
   keyboardVerticalOffset = 0,
   useSafeAreaTop = true,
   useSafeAreaBottom = true,
+  scrollViewRef,
   ...otherProps
-}) => {
+}, ref) => {
   const insets = useSafeAreaInsets();
   const { currentTheme } = useAppTheme();
 
   const containerBg = backgroundColor || currentTheme.background;
+  const targetScrollRef = ref || scrollViewRef;
 
   const contentStyle = [
     styles.content,
@@ -60,6 +62,7 @@ export const ScreenContainer = ({
       <View style={[styles.safeAreaContainer, safeAreaInsetsStyle]}>
         {scrollable ? (
           <ScrollView
+            ref={targetScrollRef}
             style={styles.scroll}
             contentContainerStyle={contentStyle}
             keyboardShouldPersistTaps="handled"
@@ -75,7 +78,9 @@ export const ScreenContainer = ({
       </View>
     </KeyboardAvoidingView>
   );
-};
+});
+
+ScreenContainer.displayName = 'ScreenContainer';
 
 const styles = StyleSheet.create({
   keyboardView: {

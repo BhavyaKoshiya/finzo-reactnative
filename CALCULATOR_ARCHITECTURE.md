@@ -22,7 +22,7 @@ Phase 3 Calculation Engine (Pure Math Functions)
 
 ## 2. Calculation Engine Boundary Laws
 - **Pure Math**: Financial formulas reside under `src/calculations/`. They are pure JavaScript functions that NEVER import React, React Native, Redux, or UI elements.
-- **Local Hook State**: Calculator form state (live input values, interest rates, tenures) lives strictly inside feature hooks (e.g. `useEMICalculator.js`). Zero transient form state is placed into Redux or `redux-persist`.
+- **Local Hook State**: Calculator form state (live input values, interest rates, tenures) lives strictly inside feature hooks (e.g. `useLoanCalculator.js`). Zero transient form state is placed into Redux or `redux-persist`.
 - **No Direct Formula Calls from UI**: Screen components interact exclusively with their feature hook; they do not call math formulas directly.
 
 ---
@@ -55,7 +55,27 @@ Location: `src/components/calculator/`
 
 ---
 
-## 5. Step-by-Step Guide: Adding a New Calculator (e.g. SIP)
+## 5. Loan Calculator Family Architecture
+Location: `src/features/calculators/loans/`
+
+All 5 loan calculators (**Home Loan**, **Personal Loan**, **Car Loan**, **Education Loan**, **Business Loan**) share a unified architecture:
+
+```text
+Loan Calculator Screen (LoanCalculatorScreen.jsx)
+        ↓
+Loan Preset Config (loanConfigs.js)
+        ↓
+Generic Loan Hook (useLoanCalculator.js)
+        ↓
+Phase 3 Math Engine (calculateEMI & calculateAmortization)
+```
+
+- **Zero Math Duplication**: All loan calculators execute pure Phase 3 `calculateEMI` and `calculateAmortization`.
+- **Configurable Defaults**: Each loan type defines realistic presets (e.g. ₹10L @ 8.5% for Home, ₹5L @ 12% for Personal, ₹8L @ 9% for Car, ₹10L @ 9% for Education, ₹10L @ 11% for Business).
+
+---
+
+## 6. Step-by-Step Guide: Adding a New Calculator (e.g. SIP)
 
 To add a new calculator (e.g., SIP) in future phases:
 

@@ -54,11 +54,16 @@ describe('Calculator Registry Architecture', () => {
 
   describe('Registry API Helpers', () => {
     test('getCalculatorById should return the correct calculator object', () => {
-      const emi = getCalculatorById(CALCULATOR_IDS.EMI);
-      expect(emi).toBeDefined();
-      expect(emi.id).toBe(CALCULATOR_IDS.EMI);
-      expect(emi.name).toBe('Home Loan EMI');
-      expect(emi.status).toBe(CALCULATOR_STATUS.AVAILABLE);
+      const homeLoan = getCalculatorById(CALCULATOR_IDS.HOME_LOAN_EMI);
+      expect(homeLoan).toBeDefined();
+      expect(homeLoan.id).toBe(CALCULATOR_IDS.HOME_LOAN_EMI);
+      expect(homeLoan.name).toBe('Home Loan EMI');
+      expect(homeLoan.status).toBe(CALCULATOR_STATUS.AVAILABLE);
+
+      // Backward-compatible alias lookup
+      const emiAlias = getCalculatorById(CALCULATOR_IDS.EMI);
+      expect(emiAlias).toBeDefined();
+      expect(emiAlias.id).toBe(CALCULATOR_IDS.HOME_LOAN_EMI);
     });
 
     test('getCalculatorById should return null for unknown ID', () => {
@@ -68,7 +73,7 @@ describe('Calculator Registry Architecture', () => {
 
     test('getCalculatorsByCategory should filter calculators correctly', () => {
       const loanCalcs = getCalculatorsByCategory(CATEGORY_IDS.LOANS);
-      expect(loanCalcs.length).toBeGreaterThan(0);
+      expect(loanCalcs.length).toBe(5); // Home, Personal, Car, Education, Business
       loanCalcs.forEach((calc) => {
         expect(calc.category).toBe(CATEGORY_IDS.LOANS);
       });

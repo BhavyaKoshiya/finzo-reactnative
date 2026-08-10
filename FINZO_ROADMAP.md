@@ -6,7 +6,7 @@
 - [x] Phase 3 — Calculation Engine
 - [x] Phase 4 — EMI Vertical Slice
 - [x] Phase 5 — Calculator Framework + Registry
-- [ ] Phase 6 — Loan Calculators
+- [x] Phase 6 — Loan Calculator Family
 - [ ] Phase 7 — Investment Calculators
 - [ ] Phase 8 — Tax & General Financial Calculators
 - [ ] Phase 9 — Saved Calculations
