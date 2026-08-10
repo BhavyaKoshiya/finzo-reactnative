@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Search } from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
@@ -12,30 +13,33 @@ import { getPopularCalculators, getCalculatorCategories } from '../../calculator
 
 export const HomeScreen = ({ navigation }) => {
   const { currentTheme } = useAppTheme();
+  const insets = useSafeAreaInsets();
 
   const popularCalculators = getPopularCalculators();
   const categories = getCalculatorCategories();
 
+  const renderHeader = () => (
+    <View style={[styles.heroSection, { paddingTop: Math.max(insets.top, 8), backgroundColor: currentTheme.background }]}>
+      <AppText variant="caption" color={currentTheme.primary} style={styles.brandTitle}>
+        FINZO
+      </AppText>
+      <AppText variant="screenTitle" style={styles.greetingTitle}>
+        Good day
+      </AppText>
+      <AppText variant="bodySmall" color={currentTheme.textSecondary}>
+        What would you like to calculate today?
+      </AppText>
+    </View>
+  );
+
   return (
     <ScreenContainer
       scrollable
-      useSafeAreaTop={true}
+      header={renderHeader()}
+      useSafeAreaTop={false}
       useSafeAreaBottom={false}
       style={styles.container}
     >
-      {/* Hero Greeting Section */}
-      <View style={styles.heroSection}>
-        <AppText variant="caption" color={currentTheme.primary} style={styles.brandTitle}>
-          FINZO
-        </AppText>
-        <AppText variant="screenTitle" style={styles.greetingTitle}>
-          Good day
-        </AppText>
-        <AppText variant="bodySmall" color={currentTheme.textSecondary}>
-          What would you like to calculate today?
-        </AppText>
-      </View>
-
       {/* Search Placeholder */}
       <TouchableOpacity
         activeOpacity={0.8}
@@ -101,8 +105,10 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   heroSection: {
-    paddingTop: 8,
+    paddingHorizontal: 16,
     paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'transparent',
   },
   brandTitle: {
     fontWeight: '700',
@@ -125,6 +131,7 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 12,
     borderWidth: 1,
+    marginTop: 8,
     marginBottom: 24,
   },
   searchIcon: {

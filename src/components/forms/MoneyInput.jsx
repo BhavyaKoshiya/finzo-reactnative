@@ -131,7 +131,10 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: '500',
+    paddingTop: 0,
+    paddingBottom: 0,
     paddingVertical: 0,
+    includeFontPadding: false,
   },
 });
 

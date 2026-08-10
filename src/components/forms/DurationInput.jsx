@@ -103,7 +103,10 @@ const styles = StyleSheet.create({
     height: '100%',
     fontSize: 16,
     fontWeight: '500',
+    paddingTop: 0,
+    paddingBottom: 0,
     paddingVertical: 0,
+    includeFontPadding: false,
   },
   toggleContainer: {
     flexDirection: 'row',

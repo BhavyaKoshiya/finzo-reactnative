@@ -1,6 +1,9 @@
 import { toDecimal, decimalToNumber } from './decimal';
 import { roundPercentage } from './rounding';
 import { createSuccessResult, createErrorResult, normalizeNumberInput, ERROR_CODES } from './validation';
+import { formatPercentage } from '../../utils/financeFormatters';
+
+export { formatPercentage };
 
 /**
  * Calculates percentage of a value: (value * percentage) / 100
@@ -140,4 +143,5 @@ export default {
   percentageOf,
   percentageChange,
   percentageDifference,
+  formatPercentage,
 };

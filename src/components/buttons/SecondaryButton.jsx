@@ -38,6 +38,7 @@ export const SecondaryButton = ({
       ) : (
         <AppText
           variant="button"
+          numberOfLines={1}
           color={disabled ? currentTheme.textMuted : currentTheme.textPrimary}
           style={textStyle}
         >
@@ -55,7 +56,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 12,
   },
 });
 

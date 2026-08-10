@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   calcButton: {
-    flex: 2,
+    flex: 2.2,
     marginRight: 8,
   },
   resetButton: {

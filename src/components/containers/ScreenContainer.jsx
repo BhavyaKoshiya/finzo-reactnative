@@ -87,7 +87,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   fixedHeaderContainer: {
-    zIndex: 10,
+    zIndex: 100,
+    elevation: 4,
+    width: '100%',
   },
   safeAreaContainer: {
     flex: 1,

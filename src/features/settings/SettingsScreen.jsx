@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Sun, Moon, Monitor, Code, ShieldCheck } from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
@@ -11,6 +12,7 @@ import { ROUTES } from '../../navigation/routes';
 
 export const SettingsScreen = ({ navigation }) => {
   const { currentTheme, themeMode, setThemeMode } = useAppTheme();
+  const insets = useSafeAreaInsets();
 
   const themeOptions = [
     { label: 'System Default', value: 'system', icon: Monitor },
@@ -18,21 +20,23 @@ export const SettingsScreen = ({ navigation }) => {
     { label: 'Dark Mode', value: 'dark', icon: Moon },
   ];
 
+  const renderHeader = () => (
+    <View style={[styles.headerGroup, { paddingTop: Math.max(insets.top, 8) }]}>
+      <AppText variant="screenTitle">Settings</AppText>
+      <AppText variant="bodySmall" color={currentTheme.textSecondary}>
+        Preferences & app details.
+      </AppText>
+    </View>
+  );
+
   return (
     <ScreenContainer
       scrollable
-      useSafeAreaTop={true}
+      header={renderHeader()}
+      useSafeAreaTop={false}
       useSafeAreaBottom={false}
       style={styles.container}
     >
-      {/* Title Header */}
-      <View style={styles.headerGroup}>
-        <AppText variant="screenTitle">Settings</AppText>
-        <AppText variant="bodySmall" color={currentTheme.textSecondary}>
-          Preferences & app details.
-        </AppText>
-      </View>
-
       {/* Appearance Section */}
       <View style={styles.section}>
         <AppText variant="sectionTitle" style={styles.sectionTitle}>
@@ -138,10 +142,11 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   headerGroup: {
-    paddingTop: 8,
+    paddingHorizontal: 16,
     paddingBottom: 16,
   },
   section: {
+    marginTop: 8,
     marginBottom: 24,
   },
   sectionTitle: {

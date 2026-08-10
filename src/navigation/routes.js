@@ -13,6 +13,11 @@ export const ROUTES = {
   CAR_LOAN_EMI: 'CarLoanEMI',
   EDUCATION_LOAN_EMI: 'EducationLoanEMI',
   BUSINESS_LOAN_EMI: 'BusinessLoanEMI',
+  SIP_CALCULATOR: 'SIPCalculator',
+  FD_CALCULATOR: 'FDCalculator',
+  RD_CALCULATOR: 'RDCalculator',
+  CAGR_CALCULATOR: 'CAGRCalculator',
+  ROI_CALCULATOR: 'ROICalculator',
 };
 
 export default ROUTES;

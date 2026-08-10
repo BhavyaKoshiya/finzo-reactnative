@@ -38,6 +38,7 @@ export const MainTabNavigator = () => {
       initialRouteName={ROUTES.HOME}
       screenOptions={{
         headerShown: false,
+        tabBarHideOnKeyboard: true,
         tabBarActiveTintColor: currentTheme.primary,
         tabBarInactiveTintColor: currentTheme.textMuted,
         tabBarStyle: [
@@ -45,8 +46,8 @@ export const MainTabNavigator = () => {
           {
             backgroundColor: currentTheme.surface,
             borderTopColor: currentTheme.border,
-            height: 52 + insets.bottom,
-            paddingBottom: Math.max(insets.bottom, 6),
+            height: 56 + insets.bottom,
+            paddingBottom: Math.max(insets.bottom, 8),
           },
         ],
         tabBarLabelStyle: styles.tabBarLabel,

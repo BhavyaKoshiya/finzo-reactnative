@@ -9,6 +9,13 @@ import {
   EducationLoanEMIScreen,
   BusinessLoanEMIScreen,
 } from '../features/calculators/loans';
+import {
+  SIPCalculatorScreen,
+  FDCalculatorScreen,
+  RDCalculatorScreen,
+  CAGRCalculatorScreen,
+  ROICalculatorScreen,
+} from '../features/calculators/investments';
 import ComponentShowcaseScreen from '../features/showcase/ComponentShowcaseScreen';
 import { ROUTES } from './routes';
 
@@ -24,6 +31,14 @@ export const RootNavigator = () => {
       <Stack.Screen name={ROUTES.CAR_LOAN_EMI} component={CarLoanEMIScreen} />
       <Stack.Screen name={ROUTES.EDUCATION_LOAN_EMI} component={EducationLoanEMIScreen} />
       <Stack.Screen name={ROUTES.BUSINESS_LOAN_EMI} component={BusinessLoanEMIScreen} />
+
+      {/* Investment Calculator Family Screens */}
+      <Stack.Screen name={ROUTES.SIP_CALCULATOR} component={SIPCalculatorScreen} />
+      <Stack.Screen name={ROUTES.FD_CALCULATOR} component={FDCalculatorScreen} />
+      <Stack.Screen name={ROUTES.RD_CALCULATOR} component={RDCalculatorScreen} />
+      <Stack.Screen name={ROUTES.CAGR_CALCULATOR} component={CAGRCalculatorScreen} />
+      <Stack.Screen name={ROUTES.ROI_CALCULATOR} component={ROICalculatorScreen} />
+
       {__DEV__ && (
         <Stack.Screen
           name={ROUTES.SHOWCASE}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Bookmark } from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
@@ -8,20 +9,24 @@ import { useAppTheme } from '../../hooks/useAppTheme';
 
 export const SavedScreen = () => {
   const { currentTheme } = useAppTheme();
+  const insets = useSafeAreaInsets();
+
+  const renderHeader = () => (
+    <View style={[styles.headerGroup, { paddingTop: Math.max(insets.top, 8) }]}>
+      <AppText variant="screenTitle">Saved Calculations</AppText>
+      <AppText variant="bodySmall" color={currentTheme.textSecondary}>
+        Your bookmarked and saved calculation records.
+      </AppText>
+    </View>
+  );
 
   return (
     <ScreenContainer
-      useSafeAreaTop={true}
+      header={renderHeader()}
+      useSafeAreaTop={false}
       useSafeAreaBottom={false}
       style={styles.container}
     >
-      <View style={styles.headerGroup}>
-        <AppText variant="screenTitle">Saved Calculations</AppText>
-        <AppText variant="bodySmall" color={currentTheme.textSecondary}>
-          Your bookmarked and saved calculation records.
-        </AppText>
-      </View>
-
       <View style={styles.emptyContainer}>
         <EmptyState
           title="No saved calculations"
@@ -38,7 +43,7 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   headerGroup: {
-    paddingTop: 8,
+    paddingHorizontal: 16,
     paddingBottom: 16,
   },
   emptyContainer: {

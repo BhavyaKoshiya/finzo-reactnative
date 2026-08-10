@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
 import CalculatorCard from '../../components/cards/CalculatorCard';
@@ -9,23 +10,26 @@ import { getCalculatorCategories } from '../../calculators';
 
 export const CalculatorsScreen = ({ navigation }) => {
   const { currentTheme } = useAppTheme();
+  const insets = useSafeAreaInsets();
   const categories = getCalculatorCategories();
+
+  const renderHeader = () => (
+    <View style={[styles.headerGroup, { paddingTop: Math.max(insets.top, 8), backgroundColor: currentTheme.background }]}>
+      <AppText variant="screenTitle">Calculators</AppText>
+      <AppText variant="bodySmall" color={currentTheme.textSecondary}>
+        Select a category to explore available financial tools.
+      </AppText>
+    </View>
+  );
 
   return (
     <ScreenContainer
       scrollable
-      useSafeAreaTop={true}
+      header={renderHeader()}
+      useSafeAreaTop={false}
       useSafeAreaBottom={false}
       style={styles.container}
     >
-      {/* Header Title Section */}
-      <View style={styles.headerGroup}>
-        <AppText variant="screenTitle">Calculators</AppText>
-        <AppText variant="bodySmall" color={currentTheme.textSecondary}>
-          Select a category to explore available financial tools.
-        </AppText>
-      </View>
-
       {/* Category Groups & Calculators */}
       {categories.map((cat) => (
         <View key={cat.id} style={styles.categorySection}>
@@ -69,10 +73,11 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   headerGroup: {
-    paddingTop: 8,
+    paddingHorizontal: 16,
     paddingBottom: 16,
   },
   categorySection: {
+    marginTop: 8,
     marginBottom: 20,
   },
   categoryTitle: {
