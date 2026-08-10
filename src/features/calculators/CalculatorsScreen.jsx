@@ -3,7 +3,6 @@ import { View, StyleSheet } from 'react-native';
 import { Calculator, TrendingUp, Briefcase, Calendar } from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
-import AppHeader from '../../components/navigation/AppHeader';
 import CategoryCard from '../../components/cards/CategoryCard';
 import InfoCard from '../../components/cards/InfoCard';
 import { useAppTheme } from '../../hooks/useAppTheme';
@@ -18,21 +17,29 @@ export const CalculatorsScreen = () => {
     { id: 'everyday', title: 'Everyday', count: 3, icon: Calendar, desc: 'Inflation, Simple & Compound Interest' },
   ];
 
+  const renderHeader = () => (
+    <View style={styles.headerGroup}>
+      <AppText variant="screenTitle">Calculators</AppText>
+      <AppText variant="bodySmall" color={currentTheme.textSecondary}>
+        Select a category to explore available financial tools.
+      </AppText>
+    </View>
+  );
+
   return (
-    <View style={[styles.root, { backgroundColor: currentTheme.background }]}>
-      <AppHeader title="Calculators" subtitle="Browse all financial tools" />
-
-      <ScreenContainer scrollable style={styles.container}>
-        <View style={styles.headerGroup}>
-          <AppText variant="screenTitle">Calculator Categories</AppText>
-          <AppText variant="bodySmall" color={currentTheme.textSecondary}>
-            Select a category to view available calculators.
-          </AppText>
-        </View>
-
+    <ScreenContainer
+      scrollable
+      header={renderHeader()}
+      useSafeAreaTop={true}
+      useSafeAreaBottom={false}
+      style={styles.container}
+    >
+      {/* Category List */}
+      <View style={styles.list}>
         {categories.map((cat) => (
           <View key={cat.id} style={styles.categoryItem}>
             <CategoryCard
+              variant="row"
               title={cat.title}
               count={cat.count}
               icon={cat.icon}
@@ -43,27 +50,29 @@ export const CalculatorsScreen = () => {
             </AppText>
           </View>
         ))}
+      </View>
 
-        <InfoCard
-          title="Offline First"
-          message="All calculators perform 100% offline calculations on your device."
-          type="info"
-          style={styles.infoCard}
-        />
-      </ScreenContainer>
-    </View>
+      <InfoCard
+        title="100% Offline Calculations"
+        message="All calculation formulas execute locally on your device with complete privacy."
+        type="info"
+        style={styles.infoCard}
+      />
+    </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
   container: {
     paddingBottom: 24,
   },
   headerGroup: {
-    marginBottom: 20,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  list: {
+    marginTop: 4,
+    marginBottom: 12,
   },
   categoryItem: {
     marginBottom: 16,
@@ -73,7 +82,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   infoCard: {
-    marginTop: 12,
+    marginTop: 8,
   },
 });
 

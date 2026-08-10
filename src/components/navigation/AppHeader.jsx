@@ -21,7 +21,7 @@ export const AppHeader = ({
       style={[
         styles.container,
         {
-          paddingTop: Math.max(insets.top, 12),
+          paddingTop: Math.max(insets.top, 8),
           backgroundColor: currentTheme.surface,
           borderBottomColor: currentTheme.border,
         },
@@ -95,30 +95,30 @@ export const AppHeader = ({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingBottom: 12,
+    paddingBottom: 10,
     borderBottomWidth: 1,
   },
   contentRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    minHeight: 40,
+    minHeight: 36,
   },
   titleGroup: {
     flex: 1,
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
   },
   centeredTitle: {
     alignItems: 'center',
   },
   actionButton: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     justifyContent: 'center',
     alignItems: 'center',
   },
   actionPlaceholder: {
-    width: 40,
+    width: 36,
   },
 });
 

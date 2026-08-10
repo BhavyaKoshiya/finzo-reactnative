@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Home, Calculator, Bookmark, Settings } from 'lucide-react-native';
 import HomeScreen from '../features/home/HomeScreen';
 import CalculatorsScreen from '../features/calculators/CalculatorsScreen';
@@ -30,6 +31,7 @@ const renderSettingsIcon = ({ color, size }) => (
 
 export const MainTabNavigator = () => {
   const { currentTheme } = useAppTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
@@ -43,6 +45,8 @@ export const MainTabNavigator = () => {
           {
             backgroundColor: currentTheme.surface,
             borderTopColor: currentTheme.border,
+            height: 52 + insets.bottom,
+            paddingBottom: Math.max(insets.bottom, 6),
           },
         ],
         tabBarLabelStyle: styles.tabBarLabel,
@@ -86,8 +90,6 @@ export const MainTabNavigator = () => {
 
 const styles = StyleSheet.create({
   tabBar: {
-    height: 60,
-    paddingBottom: 8,
     paddingTop: 6,
     borderTopWidth: 1,
     elevation: 0,
