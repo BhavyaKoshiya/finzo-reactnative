@@ -117,3 +117,11 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+configurations.all {
+    resolutionStrategy {
+        dependencySubstitution {
+            substitute module('com.caverock:androidsvg') using module('com.caverock:androidsvg-aar:1.4')
+        }
+    }
+}

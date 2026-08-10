@@ -2,7 +2,7 @@
 
 - [x] Phase 0 — Foundation
 - [x] Phase 1 — Design System
-- [ ] Phase 2 — Navigation Shell
+- [x] Phase 2 — Navigation Shell
 - [ ] Phase 3 — Calculation Engine
 - [ ] Phase 4 — Calculation Audit
 - [ ] Phase 5 — EMI Vertical Slice

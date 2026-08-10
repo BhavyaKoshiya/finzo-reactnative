@@ -5,7 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar, StyleSheet } from 'react-native';
 import { store, persistor } from './src/store';
-import ComponentShowcaseScreen from './src/features/showcase/ComponentShowcaseScreen';
+import AppNavigator from './src/navigation/AppNavigator';
 
 export default function App() {
   return (
@@ -14,7 +14,7 @@ export default function App() {
         <PersistGate loading={null} persistor={persistor}>
           <SafeAreaProvider>
             <StatusBar barStyle="dark-content" />
-            <ComponentShowcaseScreen />
+            <AppNavigator />
           </SafeAreaProvider>
         </PersistGate>
       </Provider>
