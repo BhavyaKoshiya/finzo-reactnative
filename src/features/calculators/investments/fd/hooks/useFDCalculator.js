@@ -1,103 +1,134 @@
 import { useState, useCallback, useEffect } from 'react';
 import { calculateFD } from '../../../../../calculations/fd/calculateFD';
-import { validateFDInput } from '../../../../../calculations/fd/fdValidation';
-import { normalizeNumberInput } from '../../../../../calculations/core/validation';
 import logger from '../../../../../services/logger';
 
-export const DEFAULT_FD_INPUTS = {
-  principal: '100000', // ₹1,00,000
-  annualInterestRate: '7', // 7% p.a.
-  tenureValue: '5', // 5 Years
-  tenureUnit: 'years',
-  compoundingFrequency: 'quarterly',
-};
-
 export const COMPOUNDING_OPTIONS = [
-  { label: 'Quarterly (Standard)', value: 'quarterly' },
   { label: 'Monthly', value: 'monthly' },
+  { label: 'Quarterly', value: 'quarterly' },
   { label: 'Half-Yearly', value: 'half-yearly' },
   { label: 'Yearly', value: 'yearly' },
 ];
 
-export const useFDCalculator = () => {
-  const [principal, setPrincipal] = useState(DEFAULT_FD_INPUTS.principal);
-  const [annualInterestRate, setAnnualInterestRate] = useState(DEFAULT_FD_INPUTS.annualInterestRate);
-  const [tenureValue, setTenureValue] = useState(DEFAULT_FD_INPUTS.tenureValue);
-  const [tenureUnit, setTenureUnit] = useState(DEFAULT_FD_INPUTS.tenureUnit);
-  const [compoundingFrequency, setCompoundingFrequency] = useState(DEFAULT_FD_INPUTS.compoundingFrequency);
+export const DEFAULT_FD_INPUTS = {
+  principal: '100000',
+  annualInterestRate: '7',
+  tenureValue: '5',
+  tenureUnit: 'years',
+  compoundingFrequency: 'quarterly',
+};
+
+export const useFDCalculator = (initialInputs = {}) => {
+  const defaults = { ...DEFAULT_FD_INPUTS, ...initialInputs };
+
+  const [principal, setPrincipalState] = useState(defaults.principal);
+  const [annualInterestRate, setAnnualInterestRateState] = useState(defaults.annualInterestRate);
+  const [tenureValue, setTenureValueState] = useState(defaults.tenureValue);
+  const [tenureUnit, setTenureUnitState] = useState(defaults.tenureUnit);
+  const [compoundingFrequency, setCompoundingFrequencyState] = useState(defaults.compoundingFrequency);
+  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs.editingSavedCalculationId || null);
+  const [savedTitle, setSavedTitle] = useState(initialInputs.savedTitle || '');
 
   const [fieldErrors, setFieldErrors] = useState({});
   const [result, setResult] = useState(null);
   const [isCalculated, setIsCalculated] = useState(false);
+  const [isResultStale, setIsResultStale] = useState(false);
 
-  const computeTenureYears = useCallback((val, unit) => {
-    const numVal = normalizeNumberInput(val);
-    if (numVal === null) return 0;
-    return unit === 'months' ? numVal / 12 : numVal;
-  }, []);
+  const setPrincipal = (val) => {
+    setPrincipalState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
 
-  const calculate = useCallback((amt, rate, tVal, tUnit, freq) => {
-    const tenureYears = computeTenureYears(tVal, tUnit);
+  const setAnnualInterestRate = (val) => {
+    setAnnualInterestRateState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
 
-    const validationRes = validateFDInput(amt, rate, tenureYears, freq);
-    if (validationRes && !validationRes.success) {
-      const errorsObj = {};
-      validationRes.errors.forEach((err) => {
-        errorsObj[err.field] = err.message;
-      });
-      setFieldErrors(errorsObj);
+  const setTenureValue = (val) => {
+    setTenureValueState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setTenureUnit = (val) => {
+    setTenureUnitState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setCompoundingFrequency = (val) => {
+    setCompoundingFrequencyState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const compute = useCallback((p, r, tValue, tUnit, freq) => {
+    let tenureInYears = parseFloat(tValue);
+    if (!isNaN(tenureInYears) && tUnit === 'months') {
+      tenureInYears = tenureInYears / 12;
+    }
+
+    logger.info('FD calculation initiated', { p, r, tenureInYears, freq });
+    const calculationResult = calculateFD(p, r, tenureInYears, freq);
+
+    if (calculationResult.success) {
+      setFieldErrors({});
+      setResult(calculationResult.data);
+      setIsCalculated(true);
+      setIsResultStale(false);
+      logger.info('FD calculation completed', calculationResult.data);
+      return true;
+    } else {
+      const errorsByField = {};
+      if (Array.isArray(calculationResult.errors)) {
+        calculationResult.errors.forEach((err) => {
+          errorsByField[err.field] = err.message;
+        });
+      }
+      setFieldErrors(errorsByField);
+      setResult(null);
+      setIsCalculated(false);
+      setIsResultStale(false);
+      logger.warn('FD calculation failed validation', errorsByField);
       return false;
     }
+  }, []);
 
-    setFieldErrors({});
-    logger.info('FD calculation initiated');
-
-    const fdRes = calculateFD(amt, rate, tenureYears, freq);
-    if (fdRes.success) {
-      setResult(fdRes.data);
-      setIsCalculated(true);
-      logger.info('FD calculation completed');
-      return true;
-    }
-
-    return false;
-  }, [computeTenureYears]);
-
+  // Initial calculation on mount
   useEffect(() => {
-    calculate(
-      DEFAULT_FD_INPUTS.principal,
-      DEFAULT_FD_INPUTS.annualInterestRate,
-      DEFAULT_FD_INPUTS.tenureValue,
-      DEFAULT_FD_INPUTS.tenureUnit,
-      DEFAULT_FD_INPUTS.compoundingFrequency
+    compute(
+      defaults.principal,
+      defaults.annualInterestRate,
+      defaults.tenureValue,
+      defaults.tenureUnit,
+      defaults.compoundingFrequency,
     );
-  }, [calculate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const handleCalculate = useCallback((customAmt, customRate, customTenureVal, customTenureUnit, customFreq) => {
-    const amt = typeof customAmt === 'string' || typeof customAmt === 'number' ? customAmt : principal;
-    const rate = typeof customRate === 'string' || typeof customRate === 'number' ? customRate : annualInterestRate;
-    const tVal = typeof customTenureVal === 'string' || typeof customTenureVal === 'number' ? customTenureVal : tenureValue;
-    const tUnit = typeof customTenureUnit === 'string' ? customTenureUnit : tenureUnit;
-    const freq = typeof customFreq === 'string' ? customFreq : compoundingFrequency;
-    return calculate(amt, rate, tVal, tUnit, freq);
-  }, [calculate, principal, annualInterestRate, tenureValue, tenureUnit, compoundingFrequency]);
+  const handleCalculate = (
+    overrideP = principal,
+    overrideR = annualInterestRate,
+    overrideTVal = tenureValue,
+    overrideTUnit = tenureUnit,
+    overrideFreq = compoundingFrequency,
+  ) => {
+    return compute(overrideP, overrideR, overrideTVal, overrideTUnit, overrideFreq);
+  };
 
   const handleReset = useCallback(() => {
-    setPrincipal(DEFAULT_FD_INPUTS.principal);
-    setAnnualInterestRate(DEFAULT_FD_INPUTS.annualInterestRate);
-    setTenureValue(DEFAULT_FD_INPUTS.tenureValue);
-    setTenureUnit(DEFAULT_FD_INPUTS.tenureUnit);
-    setCompoundingFrequency(DEFAULT_FD_INPUTS.compoundingFrequency);
+    setPrincipalState(DEFAULT_FD_INPUTS.principal);
+    setAnnualInterestRateState(DEFAULT_FD_INPUTS.annualInterestRate);
+    setTenureValueState(DEFAULT_FD_INPUTS.tenureValue);
+    setTenureUnitState(DEFAULT_FD_INPUTS.tenureUnit);
+    setCompoundingFrequencyState(DEFAULT_FD_INPUTS.compoundingFrequency);
+    setEditingSavedCalculationId(null);
+    setSavedTitle('');
     setFieldErrors({});
-
-    calculate(
+    compute(
       DEFAULT_FD_INPUTS.principal,
       DEFAULT_FD_INPUTS.annualInterestRate,
       DEFAULT_FD_INPUTS.tenureValue,
       DEFAULT_FD_INPUTS.tenureUnit,
-      DEFAULT_FD_INPUTS.compoundingFrequency
+      DEFAULT_FD_INPUTS.compoundingFrequency,
     );
-  }, [calculate]);
+  }, [compute]);
 
   return {
     principal,
@@ -110,9 +141,12 @@ export const useFDCalculator = () => {
     setTenureUnit,
     compoundingFrequency,
     setCompoundingFrequency,
+    editingSavedCalculationId,
+    savedTitle,
     fieldErrors,
     result,
     isCalculated,
+    isResultStale,
     handleCalculate,
     handleReset,
   };

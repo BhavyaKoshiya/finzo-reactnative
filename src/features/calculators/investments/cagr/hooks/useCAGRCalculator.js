@@ -1,86 +1,121 @@
 import { useState, useCallback, useEffect } from 'react';
 import { calculateCAGR } from '../../../../../calculations/investment/calculateCAGR';
-import { normalizeNumberInput } from '../../../../../calculations/core/validation';
 import logger from '../../../../../services/logger';
 
 export const DEFAULT_CAGR_INPUTS = {
-  beginningValue: '100000', // ₹1,00,000 initial
-  endingValue: '175000', // ₹1,75,000 final
-  tenureValue: '5', // 5 Years
+  beginningValue: '100000',
+  endingValue: '175000',
+  tenureValue: '5',
   tenureUnit: 'years',
 };
 
-export const useCAGRCalculator = () => {
-  const [beginningValue, setBeginningValue] = useState(DEFAULT_CAGR_INPUTS.beginningValue);
-  const [endingValue, setEndingValue] = useState(DEFAULT_CAGR_INPUTS.endingValue);
-  const [tenureValue, setTenureValue] = useState(DEFAULT_CAGR_INPUTS.tenureValue);
-  const [tenureUnit, setTenureUnit] = useState(DEFAULT_CAGR_INPUTS.tenureUnit);
+export const useCAGRCalculator = (initialInputs = {}) => {
+  const defaults = {
+    beginningValue: initialInputs?.beginningValue || DEFAULT_CAGR_INPUTS.beginningValue,
+    endingValue: initialInputs?.endingValue || DEFAULT_CAGR_INPUTS.endingValue,
+    tenureValue: initialInputs?.tenureValue || DEFAULT_CAGR_INPUTS.tenureValue,
+    tenureUnit: initialInputs?.tenureUnit || DEFAULT_CAGR_INPUTS.tenureUnit,
+  };
+
+  const [beginningValue, setBeginningValueState] = useState(defaults.beginningValue);
+  const [endingValue, setEndingValueState] = useState(defaults.endingValue);
+  const [tenureValue, setTenureValueState] = useState(defaults.tenureValue);
+  const [tenureUnit, setTenureUnitState] = useState(defaults.tenureUnit);
+  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs?.editingSavedCalculationId || null);
+  const [savedTitle, setSavedTitle] = useState(initialInputs?.savedTitle || '');
 
   const [fieldErrors, setFieldErrors] = useState({});
   const [result, setResult] = useState(null);
   const [isCalculated, setIsCalculated] = useState(false);
+  const [isResultStale, setIsResultStale] = useState(false);
 
-  const computeTenureYears = useCallback((val, unit) => {
-    const numVal = normalizeNumberInput(val);
-    if (numVal === null) return 0;
-    return unit === 'months' ? numVal / 12 : numVal;
+  const setBeginningValue = (val) => {
+    setBeginningValueState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setEndingValue = (val) => {
+    setEndingValueState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setTenureValue = (val) => {
+    setTenureValueState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setTenureUnit = (val) => {
+    setTenureUnitState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const compute = useCallback((bv, ev, tValue, tUnit) => {
+    let tenureYears = parseFloat(tValue);
+    if (!isNaN(tenureYears) && tUnit === 'months') {
+      tenureYears = tenureYears / 12;
+    }
+
+    logger.info('CAGR calculation initiated', { bv, ev, tenureYears });
+    const calculationResult = calculateCAGR(bv, ev, tenureYears);
+
+    if (calculationResult.success) {
+      setFieldErrors({});
+      setResult(calculationResult.data);
+      setIsCalculated(true);
+      setIsResultStale(false);
+      logger.info('CAGR calculation completed', calculationResult.data);
+      return true;
+    } else {
+      const errorsByField = {};
+      if (Array.isArray(calculationResult.errors)) {
+        calculationResult.errors.forEach((err) => {
+          errorsByField[err.field] = err.message;
+        });
+      }
+      setFieldErrors(errorsByField);
+      setResult(null);
+      setIsCalculated(false);
+      setIsResultStale(false);
+      logger.warn('CAGR calculation failed validation', errorsByField);
+      return false;
+    }
   }, []);
 
-  const calculate = useCallback((bv, ev, tVal, tUnit) => {
-    const tenureYears = computeTenureYears(tVal, tUnit);
-
-    logger.info('CAGR calculation initiated');
-
-    const cagrRes = calculateCAGR(bv, ev, tenureYears);
-    if (cagrRes.success) {
-      setFieldErrors({});
-      setResult(cagrRes.data);
-      setIsCalculated(true);
-      logger.info('CAGR calculation completed');
-      return true;
-    }
-
-    const errorsObj = {};
-    if (cagrRes.errors) {
-      cagrRes.errors.forEach((err) => {
-        errorsObj[err.field] = err.message;
-      });
-    }
-    setFieldErrors(errorsObj);
-    return false;
-  }, [computeTenureYears]);
-
+  // Initial calculation on mount
   useEffect(() => {
-    calculate(
-      DEFAULT_CAGR_INPUTS.beginningValue,
-      DEFAULT_CAGR_INPUTS.endingValue,
-      DEFAULT_CAGR_INPUTS.tenureValue,
-      DEFAULT_CAGR_INPUTS.tenureUnit
+    compute(
+      defaults.beginningValue,
+      defaults.endingValue,
+      defaults.tenureValue,
+      defaults.tenureUnit,
     );
-  }, [calculate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const handleCalculate = useCallback((customBv, customEv, customTenureVal, customTenureUnit) => {
-    const bv = typeof customBv === 'string' || typeof customBv === 'number' ? customBv : beginningValue;
-    const ev = typeof customEv === 'string' || typeof customEv === 'number' ? customEv : endingValue;
-    const tVal = typeof customTenureVal === 'string' || typeof customTenureVal === 'number' ? customTenureVal : tenureValue;
-    const tUnit = typeof customTenureUnit === 'string' ? customTenureUnit : tenureUnit;
-    return calculate(bv, ev, tVal, tUnit);
-  }, [calculate, beginningValue, endingValue, tenureValue, tenureUnit]);
+  const handleCalculate = (
+    overrideBV = beginningValue,
+    overrideEV = endingValue,
+    overrideTVal = tenureValue,
+    overrideTUnit = tenureUnit,
+  ) => {
+    return compute(overrideBV, overrideEV, overrideTVal, overrideTUnit);
+  };
 
   const handleReset = useCallback(() => {
-    setBeginningValue(DEFAULT_CAGR_INPUTS.beginningValue);
-    setEndingValue(DEFAULT_CAGR_INPUTS.endingValue);
-    setTenureValue(DEFAULT_CAGR_INPUTS.tenureValue);
-    setTenureUnit(DEFAULT_CAGR_INPUTS.tenureUnit);
+    setBeginningValueState(DEFAULT_CAGR_INPUTS.beginningValue);
+    setEndingValueState(DEFAULT_CAGR_INPUTS.endingValue);
+    setTenureValueState(DEFAULT_CAGR_INPUTS.tenureValue);
+    setTenureUnitState(DEFAULT_CAGR_INPUTS.tenureUnit);
+    setEditingSavedCalculationId(null);
+    setSavedTitle('');
     setFieldErrors({});
-
-    calculate(
+    compute(
       DEFAULT_CAGR_INPUTS.beginningValue,
       DEFAULT_CAGR_INPUTS.endingValue,
       DEFAULT_CAGR_INPUTS.tenureValue,
-      DEFAULT_CAGR_INPUTS.tenureUnit
+      DEFAULT_CAGR_INPUTS.tenureUnit,
     );
-  }, [calculate]);
+  }, [compute]);
 
   return {
     beginningValue,
@@ -91,9 +126,12 @@ export const useCAGRCalculator = () => {
     setTenureValue,
     tenureUnit,
     setTenureUnit,
+    editingSavedCalculationId,
+    savedTitle,
     fieldErrors,
     result,
     isCalculated,
+    isResultStale,
     handleCalculate,
     handleReset,
   };

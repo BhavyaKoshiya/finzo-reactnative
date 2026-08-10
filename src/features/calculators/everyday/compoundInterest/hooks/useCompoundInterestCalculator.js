@@ -20,15 +20,43 @@ export const DEFAULT_COMPOUND_INTEREST_INPUTS = {
 export const useCompoundInterestCalculator = (initialInputs = {}) => {
   const defaults = { ...DEFAULT_COMPOUND_INTEREST_INPUTS, ...initialInputs };
 
-  const [principal, setPrincipal] = useState(defaults.principal);
-  const [annualInterestRate, setAnnualInterestRate] = useState(defaults.annualInterestRate);
-  const [tenureValue, setTenureValue] = useState(defaults.tenureValue);
-  const [tenureUnit, setTenureUnit] = useState(defaults.tenureUnit);
-  const [compoundingFrequency, setCompoundingFrequency] = useState(defaults.compoundingFrequency);
+  const [principal, setPrincipalState] = useState(defaults.principal);
+  const [annualInterestRate, setAnnualInterestRateState] = useState(defaults.annualInterestRate);
+  const [tenureValue, setTenureValueState] = useState(defaults.tenureValue);
+  const [tenureUnit, setTenureUnitState] = useState(defaults.tenureUnit);
+  const [compoundingFrequency, setCompoundingFrequencyState] = useState(defaults.compoundingFrequency);
+  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs.editingSavedCalculationId || null);
+  const [savedTitle, setSavedTitle] = useState(initialInputs.savedTitle || '');
 
   const [fieldErrors, setFieldErrors] = useState({});
   const [result, setResult] = useState(null);
   const [isCalculated, setIsCalculated] = useState(false);
+  const [isResultStale, setIsResultStale] = useState(false);
+
+  const setPrincipal = (val) => {
+    setPrincipalState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setAnnualInterestRate = (val) => {
+    setAnnualInterestRateState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setTenureValue = (val) => {
+    setTenureValueState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setTenureUnit = (val) => {
+    setTenureUnitState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setCompoundingFrequency = (val) => {
+    setCompoundingFrequencyState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
 
   const compute = useCallback(
     (p, r, tValue, tUnit, freq) => {
@@ -44,6 +72,7 @@ export const useCompoundInterestCalculator = (initialInputs = {}) => {
         setFieldErrors({});
         setResult(calculationResult.data);
         setIsCalculated(true);
+        setIsResultStale(false);
         logger.info('Compound Interest calculation completed', calculationResult.data);
         return true;
       } else {
@@ -56,6 +85,7 @@ export const useCompoundInterestCalculator = (initialInputs = {}) => {
         setFieldErrors(errorsByField);
         setResult(null);
         setIsCalculated(false);
+        setIsResultStale(false);
         logger.warn('Compound Interest calculation failed validation', errorsByField);
         return false;
       }
@@ -86,20 +116,22 @@ export const useCompoundInterestCalculator = (initialInputs = {}) => {
   };
 
   const handleReset = useCallback(() => {
-    setPrincipal(defaults.principal);
-    setAnnualInterestRate(defaults.annualInterestRate);
-    setTenureValue(defaults.tenureValue);
-    setTenureUnit(defaults.tenureUnit);
-    setCompoundingFrequency(defaults.compoundingFrequency);
+    setPrincipalState(DEFAULT_COMPOUND_INTEREST_INPUTS.principal);
+    setAnnualInterestRateState(DEFAULT_COMPOUND_INTEREST_INPUTS.annualInterestRate);
+    setTenureValueState(DEFAULT_COMPOUND_INTEREST_INPUTS.tenureValue);
+    setTenureUnitState(DEFAULT_COMPOUND_INTEREST_INPUTS.tenureUnit);
+    setCompoundingFrequencyState(DEFAULT_COMPOUND_INTEREST_INPUTS.compoundingFrequency);
+    setEditingSavedCalculationId(null);
+    setSavedTitle('');
     setFieldErrors({});
     compute(
-      defaults.principal,
-      defaults.annualInterestRate,
-      defaults.tenureValue,
-      defaults.tenureUnit,
-      defaults.compoundingFrequency,
+      DEFAULT_COMPOUND_INTEREST_INPUTS.principal,
+      DEFAULT_COMPOUND_INTEREST_INPUTS.annualInterestRate,
+      DEFAULT_COMPOUND_INTEREST_INPUTS.tenureValue,
+      DEFAULT_COMPOUND_INTEREST_INPUTS.tenureUnit,
+      DEFAULT_COMPOUND_INTEREST_INPUTS.compoundingFrequency,
     );
-  }, [defaults.principal, defaults.annualInterestRate, defaults.tenureValue, defaults.tenureUnit, defaults.compoundingFrequency, compute]);
+  }, [compute]);
 
   return {
     principal,
@@ -112,9 +144,12 @@ export const useCompoundInterestCalculator = (initialInputs = {}) => {
     setTenureUnit,
     compoundingFrequency,
     setCompoundingFrequency,
+    editingSavedCalculationId,
+    savedTitle,
     fieldErrors,
     result,
     isCalculated,
+    isResultStale,
     handleCalculate,
     handleReset,
   };

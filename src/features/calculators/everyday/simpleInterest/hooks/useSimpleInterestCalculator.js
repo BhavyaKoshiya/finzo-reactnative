@@ -12,14 +12,37 @@ export const DEFAULT_SIMPLE_INTEREST_INPUTS = {
 export const useSimpleInterestCalculator = (initialInputs = {}) => {
   const defaults = { ...DEFAULT_SIMPLE_INTEREST_INPUTS, ...initialInputs };
 
-  const [principal, setPrincipal] = useState(defaults.principal);
-  const [annualInterestRate, setAnnualInterestRate] = useState(defaults.annualInterestRate);
-  const [tenureValue, setTenureValue] = useState(defaults.tenureValue);
-  const [tenureUnit, setTenureUnit] = useState(defaults.tenureUnit);
+  const [principal, setPrincipalState] = useState(defaults.principal);
+  const [annualInterestRate, setAnnualInterestRateState] = useState(defaults.annualInterestRate);
+  const [tenureValue, setTenureValueState] = useState(defaults.tenureValue);
+  const [tenureUnit, setTenureUnitState] = useState(defaults.tenureUnit);
+  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs.editingSavedCalculationId || null);
+  const [savedTitle, setSavedTitle] = useState(initialInputs.savedTitle || '');
 
   const [fieldErrors, setFieldErrors] = useState({});
   const [result, setResult] = useState(null);
   const [isCalculated, setIsCalculated] = useState(false);
+  const [isResultStale, setIsResultStale] = useState(false);
+
+  const setPrincipal = (val) => {
+    setPrincipalState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setAnnualInterestRate = (val) => {
+    setAnnualInterestRateState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setTenureValue = (val) => {
+    setTenureValueState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setTenureUnit = (val) => {
+    setTenureUnitState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
 
   const compute = useCallback(
     (p, r, tValue, tUnit) => {
@@ -35,6 +58,7 @@ export const useSimpleInterestCalculator = (initialInputs = {}) => {
         setFieldErrors({});
         setResult(calculationResult.data);
         setIsCalculated(true);
+        setIsResultStale(false);
         logger.info('Simple Interest calculation completed', calculationResult.data);
         return true;
       } else {
@@ -47,6 +71,7 @@ export const useSimpleInterestCalculator = (initialInputs = {}) => {
         setFieldErrors(errorsByField);
         setResult(null);
         setIsCalculated(false);
+        setIsResultStale(false);
         logger.warn('Simple Interest calculation failed validation', errorsByField);
         return false;
       }
@@ -70,13 +95,20 @@ export const useSimpleInterestCalculator = (initialInputs = {}) => {
   };
 
   const handleReset = useCallback(() => {
-    setPrincipal(defaults.principal);
-    setAnnualInterestRate(defaults.annualInterestRate);
-    setTenureValue(defaults.tenureValue);
-    setTenureUnit(defaults.tenureUnit);
+    setPrincipalState(DEFAULT_SIMPLE_INTEREST_INPUTS.principal);
+    setAnnualInterestRateState(DEFAULT_SIMPLE_INTEREST_INPUTS.annualInterestRate);
+    setTenureValueState(DEFAULT_SIMPLE_INTEREST_INPUTS.tenureValue);
+    setTenureUnitState(DEFAULT_SIMPLE_INTEREST_INPUTS.tenureUnit);
+    setEditingSavedCalculationId(null);
+    setSavedTitle('');
     setFieldErrors({});
-    compute(defaults.principal, defaults.annualInterestRate, defaults.tenureValue, defaults.tenureUnit);
-  }, [defaults.principal, defaults.annualInterestRate, defaults.tenureValue, defaults.tenureUnit, compute]);
+    compute(
+      DEFAULT_SIMPLE_INTEREST_INPUTS.principal,
+      DEFAULT_SIMPLE_INTEREST_INPUTS.annualInterestRate,
+      DEFAULT_SIMPLE_INTEREST_INPUTS.tenureValue,
+      DEFAULT_SIMPLE_INTEREST_INPUTS.tenureUnit,
+    );
+  }, [compute]);
 
   return {
     principal,
@@ -87,9 +119,12 @@ export const useSimpleInterestCalculator = (initialInputs = {}) => {
     setTenureValue,
     tenureUnit,
     setTenureUnit,
+    editingSavedCalculationId,
+    savedTitle,
     fieldErrors,
     result,
     isCalculated,
+    isResultStale,
     handleCalculate,
     handleReset,
   };

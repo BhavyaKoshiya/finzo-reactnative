@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
+import { Bookmark } from 'lucide-react-native';
 import PrimaryButton from '../buttons/PrimaryButton';
 import SecondaryButton from '../buttons/SecondaryButton';
 
@@ -10,6 +11,8 @@ export const CalculatorActionBar = ({
   secondaryTitle = 'Reset',
   secondaryIcon,
   onSecondaryPress,
+  onSavePress,
+  isSaveDisabled = false,
   style,
 }) => {
   return (
@@ -27,6 +30,16 @@ export const CalculatorActionBar = ({
         onPress={onSecondaryPress}
         style={styles.resetButton}
       />
+
+      {onSavePress && (
+        <SecondaryButton
+          title="Save"
+          icon={Bookmark}
+          onPress={onSavePress}
+          disabled={isSaveDisabled}
+          style={styles.saveButton}
+        />
+      )}
     </View>
   );
 };
@@ -39,9 +52,13 @@ const styles = StyleSheet.create({
   },
   calcButton: {
     flex: 2.2,
-    marginRight: 8,
+    marginRight: 6,
   },
   resetButton: {
+    flex: 1,
+    marginRight: 6,
+  },
+  saveButton: {
     flex: 1,
   },
 });

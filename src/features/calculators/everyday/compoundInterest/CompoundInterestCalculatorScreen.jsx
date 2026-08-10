@@ -1,5 +1,6 @@
-import React, { useRef } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, StyleSheet, Alert } from 'react-native';
+import { useDispatch } from 'react-redux';
 import { ArrowLeft } from 'lucide-react-native';
 import ScreenContainer from '../../../../components/containers/ScreenContainer';
 import AppHeader from '../../../../components/navigation/AppHeader';
@@ -10,6 +11,8 @@ import SelectField from '../../../../components/forms/SelectField';
 import CalculatorInputSection from '../../../../components/calculator/CalculatorInputSection';
 import CalculatorResultSection from '../../../../components/calculator/CalculatorResultSection';
 import CalculatorActionBar from '../../../../components/calculator/CalculatorActionBar';
+import StaleResultBanner from '../../../../components/calculator/StaleResultBanner';
+import SaveModal from '../../../../components/modals/SaveModal';
 
 import {
   useCompoundInterestCalculator,
@@ -18,9 +21,19 @@ import {
 import CompoundInterestResultCard from './components/CompoundInterestResultCard';
 import CompoundInterestChart from './components/CompoundInterestChart';
 
-export const CompoundInterestCalculatorScreen = ({ navigation }) => {
+import { createCalculationSnapshot } from '../../../saved/types/savedTypes';
+import { restoreSavedCalculationInputs } from '../../../saved/utils/calculationRestoreAdapters';
+import { addSavedCalculation, updateSavedCalculation } from '../../../../store/slices/savedCalculationsSlice';
+
+export const CompoundInterestCalculatorScreen = ({ route, navigation }) => {
+  const dispatch = useDispatch();
   const scrollViewRef = useRef(null);
   const resultsYRef = useRef(0);
+  const [saveModalVisible, setSaveModalVisible] = useState(false);
+
+  const restoredInputs = route?.params?.savedCalculation
+    ? restoreSavedCalculationInputs(route.params.savedCalculation)
+    : {};
 
   const {
     principal,
@@ -33,12 +46,15 @@ export const CompoundInterestCalculatorScreen = ({ navigation }) => {
     setTenureUnit,
     compoundingFrequency,
     setCompoundingFrequency,
+    editingSavedCalculationId,
+    savedTitle,
     fieldErrors,
     result,
     isCalculated,
+    isResultStale,
     handleCalculate,
     handleReset,
-  } = useCompoundInterestCalculator();
+  } = useCompoundInterestCalculator(restoredInputs);
 
   const onCalculatePress = () => {
     const success = handleCalculate();
@@ -52,10 +68,34 @@ export const CompoundInterestCalculatorScreen = ({ navigation }) => {
     }
   };
 
+  const onSaveConfirm = ({ title, saveMode }) => {
+    setSaveModalVisible(false);
+    if (saveMode === 'update' && editingSavedCalculationId) {
+      dispatch(
+        updateSavedCalculation({
+          id: editingSavedCalculationId,
+          title,
+          inputs: { principal, annualInterestRate, tenureValue, tenureUnit, compoundingFrequency },
+          result,
+        }),
+      );
+      Alert.alert('Saved', 'Calculation updated successfully!');
+    } else {
+      const snapshot = createCalculationSnapshot({
+        calculatorId: 'compound-interest',
+        title,
+        inputs: { principal, annualInterestRate, tenureValue, tenureUnit, compoundingFrequency },
+        result,
+      });
+      dispatch(addSavedCalculation(snapshot));
+      Alert.alert('Saved', 'Calculation saved successfully!');
+    }
+  };
+
   const renderHeader = () => (
     <AppHeader
-      title="Compound Interest"
-      subtitle="Exponential Growth & Compounding Frequencies"
+      title="Compound Interest Calculator"
+      subtitle="Exponential Wealth & Compounded Growth"
       leftAction={{
         icon: ArrowLeft,
         onPress: () => navigation.goBack(),
@@ -74,8 +114,8 @@ export const CompoundInterestCalculatorScreen = ({ navigation }) => {
       style={styles.container}
     >
       <CalculatorInputSection
-        title="Compound Interest Details"
-        subtitle="Enter principal amount, interest rate, duration & compounding frequency"
+        title="Compound Interest Inputs"
+        subtitle="Select compounding frequency, interest rate & principal"
       >
         <MoneyInput
           label="Principal Amount"
@@ -85,19 +125,19 @@ export const CompoundInterestCalculatorScreen = ({ navigation }) => {
         />
 
         <PercentageInput
-          label="Annual Interest Rate (% p.a.)"
+          label="Interest Rate (% p.a.)"
           value={annualInterestRate}
           onChangeText={setAnnualInterestRate}
           error={fieldErrors.annualInterestRate}
         />
 
         <DurationInput
-          label="Duration"
+          label="Investment Duration"
           value={tenureValue}
           unit={tenureUnit}
           onChangeText={setTenureValue}
           onUnitChange={setTenureUnit}
-          error={fieldErrors.tenureYears}
+          error={fieldErrors.tenureInYears}
         />
 
         <SelectField
@@ -108,10 +148,12 @@ export const CompoundInterestCalculatorScreen = ({ navigation }) => {
         />
 
         <CalculatorActionBar
-          primaryTitle="Calculate CI"
+          primaryTitle="Calculate Returns"
           onPrimaryPress={onCalculatePress}
           secondaryTitle="Reset"
           onSecondaryPress={handleReset}
+          onSavePress={() => setSaveModalVisible(true)}
+          isSaveDisabled={!isCalculated || isResultStale}
         />
       </CalculatorInputSection>
 
@@ -121,12 +163,24 @@ export const CompoundInterestCalculatorScreen = ({ navigation }) => {
             resultsYRef.current = e.nativeEvent.layout.y;
           }}
         >
-          <CalculatorResultSection title="Compounded Growth Projection">
+          <CalculatorResultSection title="Compounded Growth Breakdown">
+            {isResultStale && <StaleResultBanner style={styles.cardMargin} />}
+
             <CompoundInterestResultCard result={result} style={styles.cardMargin} />
+
             <CompoundInterestChart result={result} style={styles.cardMargin} />
           </CalculatorResultSection>
         </View>
       )}
+
+      <SaveModal
+        visible={saveModalVisible}
+        defaultTitle="Compound Interest Calculator"
+        isEditing={Boolean(editingSavedCalculationId)}
+        existingTitle={savedTitle}
+        onClose={() => setSaveModalVisible(false)}
+        onSave={onSaveConfirm}
+      />
 
       <View style={styles.bottomSpacer} />
     </ScreenContainer>

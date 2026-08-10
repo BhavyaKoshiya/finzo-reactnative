@@ -51,7 +51,8 @@ Location: `src/components/calculator/`
 - **`CalculatorInputSection`**: Card container for grouping input fields with title & subtitle.
 - **`CalculatorResultSection`**: Container for output metrics, breakdown charts, and summary rows.
 - **`CalculatorSummaryRow`**: Key-value metric row supporting bolding and highlight states.
-- **`CalculatorActionBar`**: Standard primary/secondary button row (e.g., Calculate & Reset).
+- **`CalculatorActionBar`**: Standard primary/secondary/save button row (e.g., Calculate, Reset & Save).
+- **`StaleResultBanner`**: Subtle notification banner displayed above results when inputs are edited post-calculation.
 
 ---
 
@@ -101,14 +102,32 @@ src/features/calculators/
 └── everyday/percentage/        → usePercentageCalculator()        → percentageOf/Change/Diff     → PercentageResultCard
 ```
 
-- **GST Modes**: Supports `exclusive` (Add GST to Base) and `inclusive` (Extract GST from Total) with preset rate selection (`5%`, `12%`, `18%`, `28%`, Custom).
-- **Interest Calculators**: Keeps Simple Interest (non-compounded) and Compound Interest (supports `monthly`, `quarterly`, `half-yearly`, `yearly` compounding) cleanly separated into distinct calculators.
-- **Percentage Modes**: Supports `percentage-of` ($X\%$ of $Y$), `percentage-change` ($Old \to New$), and `percentage-difference` ($A$ vs $B$) with strict zero-denominator error handling.
-- **Non-Tax-Advice Language**: Results use neutral terms ("Base Amount", "GST Amount", "Total Amount", "Interest Earned") avoiding legal claims.
+---
+
+## 8. Saved Calculation & Persistence Architecture
+Location: `src/store/slices/savedCalculationsSlice.js` & `src/features/saved/`
+
+```text
+Calculator Screen (Save Action)
+        ↓
+Save Modal (Custom Title / Update Existing / Save New)
+        ↓
+Snapshot Creator (createCalculationSnapshot)
+        ↓
+Redux Store (savedCalculationsSlice)
+        ↓
+Redux Persist (@react-native-async-storage/async-storage)
+```
+
+- **Snapshot Contract**: Saved items store serializable normalized inputs, calculated results, custom titles, ISO 8601 timestamps, favorite flags, and `schemaVersion: 1`.
+- **Pre-Calculated Defaults**: Valid default inputs auto-calculate on mount (`isCalculated = true`, `isResultStale = false`).
+- **Stale Result UX**: Editing inputs after calculation sets `isResultStale = true` and displays `StaleResultBanner`. The Save action is disabled while `isResultStale === true`.
+- **Primary Result Presenter**: `getSavedCalculationPrimaryResult(savedItem)` extracts domain-specific primary metrics (EMI, Maturity Amount, CAGR %, GST total) for list card rendering.
+- **Input Restoration**: Opening a saved item from `SavedScreen` navigates to its calculator route passing `savedCalculation: item` in params to populate initial hook inputs.
 
 ---
 
-## 8. Step-by-Step Guide: Adding a New Calculator
+## 9. Step-by-Step Guide: Adding a New Calculator
 
 To add a new calculator in future phases:
 
@@ -116,8 +135,8 @@ To add a new calculator in future phases:
 2. **Add Navigation Route**: Add route constant in `src/navigation/routes.js`.
 3. **Register Route in Navigator**: Import screen component in `src/navigation/RootNavigator.jsx`.
 4. **Create Feature Folder**: Create dedicated directory under `src/features/calculators/<category>/<calculatorName>/`.
-5. **Create Feature Hook**: Create custom hook managing local inputs, validating using Phase 3 validation, and calling Phase 3 formulas.
-6. **Create Screen Component**: Build screen using `ScreenContainer`, `AppHeader`, `CalculatorInputSection`, `CalculatorResultSection`, and `CalculatorActionBar`.
+5. **Create Feature Hook**: Create custom hook managing local inputs, validating using Phase 3 validation, calling Phase 3 formulas, and exposing `isResultStale`.
+6. **Create Screen Component**: Build screen using `ScreenContainer`, `AppHeader`, `CalculatorInputSection`, `CalculatorResultSection`, `StaleResultBanner`, and `SaveModal`.
 7. **Add Unit Tests**: Create `use<CalculatorName>.test.js` under `__tests__/`.
 8. **Update Registry Metadata**: In `src/calculators/registry/calculatorRegistry.js`, set `route: ROUTES.<ROUTE_KEY>` and `status: CALCULATOR_STATUS.AVAILABLE`.
 9. **Verify**: Run `npm run lint` and `npm test`.

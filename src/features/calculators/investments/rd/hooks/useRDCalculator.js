@@ -1,90 +1,116 @@
 import { useState, useCallback, useEffect } from 'react';
 import { calculateRD } from '../../../../../calculations/rd/calculateRD';
-import { validateRDInput } from '../../../../../calculations/rd/rdValidation';
-import { normalizeNumberInput } from '../../../../../calculations/core/validation';
 import logger from '../../../../../services/logger';
 
 export const DEFAULT_RD_INPUTS = {
-  monthlyDeposit: '5000', // ₹5,000 / month
-  annualInterestRate: '7', // 7% p.a.
-  tenureValue: '3', // 3 Years
+  monthlyDeposit: '5000',
+  annualInterestRate: '7',
+  tenureValue: '3',
   tenureUnit: 'years',
 };
 
-export const useRDCalculator = () => {
-  const [monthlyDeposit, setMonthlyDeposit] = useState(DEFAULT_RD_INPUTS.monthlyDeposit);
-  const [annualInterestRate, setAnnualInterestRate] = useState(DEFAULT_RD_INPUTS.annualInterestRate);
-  const [tenureValue, setTenureValue] = useState(DEFAULT_RD_INPUTS.tenureValue);
-  const [tenureUnit, setTenureUnit] = useState(DEFAULT_RD_INPUTS.tenureUnit);
+export const useRDCalculator = (initialInputs = {}) => {
+  const defaults = { ...DEFAULT_RD_INPUTS, ...initialInputs };
+
+  const [monthlyDeposit, setMonthlyDepositState] = useState(defaults.monthlyDeposit);
+  const [annualInterestRate, setAnnualInterestRateState] = useState(defaults.annualInterestRate);
+  const [tenureValue, setTenureValueState] = useState(defaults.tenureValue);
+  const [tenureUnit, setTenureUnitState] = useState(defaults.tenureUnit);
+  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs.editingSavedCalculationId || null);
+  const [savedTitle, setSavedTitle] = useState(initialInputs.savedTitle || '');
 
   const [fieldErrors, setFieldErrors] = useState({});
   const [result, setResult] = useState(null);
   const [isCalculated, setIsCalculated] = useState(false);
+  const [isResultStale, setIsResultStale] = useState(false);
 
-  const computeTenureMonths = useCallback((val, unit) => {
-    const numVal = normalizeNumberInput(val);
-    if (numVal === null) return 0;
-    return unit === 'years' ? Math.round(numVal * 12) : Math.round(numVal);
-  }, []);
+  const setMonthlyDeposit = (val) => {
+    setMonthlyDepositState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
 
-  const calculate = useCallback((amt, rate, tVal, tUnit) => {
-    const tenureMonths = computeTenureMonths(tVal, tUnit);
+  const setAnnualInterestRate = (val) => {
+    setAnnualInterestRateState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
 
-    const validationRes = validateRDInput(amt, rate, tenureMonths);
-    if (validationRes && !validationRes.success) {
-      const errorsObj = {};
-      validationRes.errors.forEach((err) => {
-        errorsObj[err.field] = err.message;
-      });
-      setFieldErrors(errorsObj);
+  const setTenureValue = (val) => {
+    setTenureValueState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setTenureUnit = (val) => {
+    setTenureUnitState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const compute = useCallback((dep, rate, tValue, tUnit) => {
+    let tenureMonths = parseFloat(tValue);
+    if (!isNaN(tenureMonths) && tUnit === 'years') {
+      tenureMonths = tenureMonths * 12;
+    }
+
+    logger.info('RD calculation initiated', { dep, rate, tenureMonths });
+    const calculationResult = calculateRD(dep, rate, tenureMonths);
+
+    if (calculationResult.success) {
+      setFieldErrors({});
+      setResult(calculationResult.data);
+      setIsCalculated(true);
+      setIsResultStale(false);
+      logger.info('RD calculation completed', calculationResult.data);
+      return true;
+    } else {
+      const errorsByField = {};
+      if (Array.isArray(calculationResult.errors)) {
+        calculationResult.errors.forEach((err) => {
+          errorsByField[err.field] = err.message;
+        });
+      }
+      setFieldErrors(errorsByField);
+      setResult(null);
+      setIsCalculated(false);
+      setIsResultStale(false);
+      logger.warn('RD calculation failed validation', errorsByField);
       return false;
     }
+  }, []);
 
-    setFieldErrors({});
-    logger.info('RD calculation initiated');
-
-    const rdRes = calculateRD(amt, rate, tenureMonths);
-    if (rdRes.success) {
-      setResult(rdRes.data);
-      setIsCalculated(true);
-      logger.info('RD calculation completed');
-      return true;
-    }
-
-    return false;
-  }, [computeTenureMonths]);
-
+  // Initial calculation on mount
   useEffect(() => {
-    calculate(
-      DEFAULT_RD_INPUTS.monthlyDeposit,
-      DEFAULT_RD_INPUTS.annualInterestRate,
-      DEFAULT_RD_INPUTS.tenureValue,
-      DEFAULT_RD_INPUTS.tenureUnit
+    compute(
+      defaults.monthlyDeposit,
+      defaults.annualInterestRate,
+      defaults.tenureValue,
+      defaults.tenureUnit,
     );
-  }, [calculate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const handleCalculate = useCallback((customAmt, customRate, customTenureVal, customTenureUnit) => {
-    const amt = typeof customAmt === 'string' || typeof customAmt === 'number' ? customAmt : monthlyDeposit;
-    const rate = typeof customRate === 'string' || typeof customRate === 'number' ? customRate : annualInterestRate;
-    const tVal = typeof customTenureVal === 'string' || typeof customTenureVal === 'number' ? customTenureVal : tenureValue;
-    const tUnit = typeof customTenureUnit === 'string' ? customTenureUnit : tenureUnit;
-    return calculate(amt, rate, tVal, tUnit);
-  }, [calculate, monthlyDeposit, annualInterestRate, tenureValue, tenureUnit]);
+  const handleCalculate = (
+    overrideDep = monthlyDeposit,
+    overrideRate = annualInterestRate,
+    overrideTVal = tenureValue,
+    overrideTUnit = tenureUnit,
+  ) => {
+    return compute(overrideDep, overrideRate, overrideTVal, overrideTUnit);
+  };
 
   const handleReset = useCallback(() => {
-    setMonthlyDeposit(DEFAULT_RD_INPUTS.monthlyDeposit);
-    setAnnualInterestRate(DEFAULT_RD_INPUTS.annualInterestRate);
-    setTenureValue(DEFAULT_RD_INPUTS.tenureValue);
-    setTenureUnit(DEFAULT_RD_INPUTS.tenureUnit);
+    setMonthlyDepositState(DEFAULT_RD_INPUTS.monthlyDeposit);
+    setAnnualInterestRateState(DEFAULT_RD_INPUTS.annualInterestRate);
+    setTenureValueState(DEFAULT_RD_INPUTS.tenureValue);
+    setTenureUnitState(DEFAULT_RD_INPUTS.tenureUnit);
+    setEditingSavedCalculationId(null);
+    setSavedTitle('');
     setFieldErrors({});
-
-    calculate(
+    compute(
       DEFAULT_RD_INPUTS.monthlyDeposit,
       DEFAULT_RD_INPUTS.annualInterestRate,
       DEFAULT_RD_INPUTS.tenureValue,
-      DEFAULT_RD_INPUTS.tenureUnit
+      DEFAULT_RD_INPUTS.tenureUnit,
     );
-  }, [calculate]);
+  }, [compute]);
 
   return {
     monthlyDeposit,
@@ -95,9 +121,12 @@ export const useRDCalculator = () => {
     setTenureValue,
     tenureUnit,
     setTenureUnit,
+    editingSavedCalculationId,
+    savedTitle,
     fieldErrors,
     result,
     isCalculated,
+    isResultStale,
     handleCalculate,
     handleReset,
   };

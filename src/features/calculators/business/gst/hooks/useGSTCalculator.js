@@ -24,14 +24,32 @@ export const DEFAULT_GST_INPUTS = {
 export const useGSTCalculator = (initialInputs = {}) => {
   const defaults = { ...DEFAULT_GST_INPUTS, ...initialInputs };
 
-  const [amount, setAmount] = useState(defaults.amount);
-  const [gstRate, setGstRate] = useState(defaults.gstRate);
-  const [mode, setMode] = useState(defaults.mode);
+  const [amount, setAmountState] = useState(defaults.amount);
+  const [gstRate, setGstRateState] = useState(defaults.gstRate);
+  const [mode, setModeState] = useState(defaults.mode);
   const [selectedRatePreset, setSelectedRatePreset] = useState('18');
+  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs.editingSavedCalculationId || null);
+  const [savedTitle, setSavedTitle] = useState(initialInputs.savedTitle || '');
 
   const [fieldErrors, setFieldErrors] = useState({});
   const [result, setResult] = useState(null);
   const [isCalculated, setIsCalculated] = useState(false);
+  const [isResultStale, setIsResultStale] = useState(false);
+
+  const setAmount = (val) => {
+    setAmountState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setGstRate = (val) => {
+    setGstRateState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setMode = (val) => {
+    setModeState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
 
   const compute = useCallback(
     (amt, rate, m) => {
@@ -42,6 +60,7 @@ export const useGSTCalculator = (initialInputs = {}) => {
         setFieldErrors({});
         setResult(calculationResult.data);
         setIsCalculated(true);
+        setIsResultStale(false);
         logger.info('GST calculation completed', calculationResult.data);
         return true;
       } else {
@@ -54,6 +73,7 @@ export const useGSTCalculator = (initialInputs = {}) => {
         setFieldErrors(errorsByField);
         setResult(null);
         setIsCalculated(false);
+        setIsResultStale(false);
         logger.warn('GST calculation failed validation', errorsByField);
         return false;
       }
@@ -76,7 +96,6 @@ export const useGSTCalculator = (initialInputs = {}) => {
 
   const handleModeChange = (newMode) => {
     setMode(newMode);
-    setIsCalculated(false);
   };
 
   const handleCalculate = (
@@ -88,13 +107,15 @@ export const useGSTCalculator = (initialInputs = {}) => {
   };
 
   const handleReset = useCallback(() => {
-    setAmount(defaults.amount);
-    setGstRate(defaults.gstRate);
-    setMode(defaults.mode);
+    setAmountState(DEFAULT_GST_INPUTS.amount);
+    setGstRateState(DEFAULT_GST_INPUTS.gstRate);
+    setModeState(DEFAULT_GST_INPUTS.mode);
     setSelectedRatePreset('18');
+    setEditingSavedCalculationId(null);
+    setSavedTitle('');
     setFieldErrors({});
-    compute(defaults.amount, defaults.gstRate, defaults.mode);
-  }, [defaults.amount, defaults.gstRate, defaults.mode, compute]);
+    compute(DEFAULT_GST_INPUTS.amount, DEFAULT_GST_INPUTS.gstRate, DEFAULT_GST_INPUTS.mode);
+  }, [compute]);
 
   return {
     amount,
@@ -106,9 +127,12 @@ export const useGSTCalculator = (initialInputs = {}) => {
     selectedRatePreset,
     handleRatePresetChange,
     handleModeChange,
+    editingSavedCalculationId,
+    savedTitle,
     fieldErrors,
     result,
     isCalculated,
+    isResultStale,
     handleCalculate,
     handleReset,
   };

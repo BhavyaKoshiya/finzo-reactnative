@@ -1,5 +1,6 @@
-import React, { useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { useDispatch } from 'react-redux';
 import { ArrowLeft } from 'lucide-react-native';
 import ScreenContainer from '../../../../components/containers/ScreenContainer';
 import AppHeader from '../../../../components/navigation/AppHeader';
@@ -10,6 +11,8 @@ import SelectField from '../../../../components/forms/SelectField';
 import CalculatorInputSection from '../../../../components/calculator/CalculatorInputSection';
 import CalculatorResultSection from '../../../../components/calculator/CalculatorResultSection';
 import CalculatorActionBar from '../../../../components/calculator/CalculatorActionBar';
+import StaleResultBanner from '../../../../components/calculator/StaleResultBanner';
+import SaveModal from '../../../../components/modals/SaveModal';
 import { useAppTheme } from '../../../../hooks/useAppTheme';
 
 import {
@@ -19,10 +22,20 @@ import {
 } from './hooks/useGSTCalculator';
 import GSTResultCard from './components/GSTResultCard';
 
-export const GSTCalculatorScreen = ({ navigation }) => {
+import { createCalculationSnapshot } from '../../../saved/types/savedTypes';
+import { restoreSavedCalculationInputs } from '../../../saved/utils/calculationRestoreAdapters';
+import { addSavedCalculation, updateSavedCalculation } from '../../../../store/slices/savedCalculationsSlice';
+
+export const GSTCalculatorScreen = ({ route, navigation }) => {
+  const dispatch = useDispatch();
   const { currentTheme } = useAppTheme();
   const scrollViewRef = useRef(null);
   const resultsYRef = useRef(0);
+  const [saveModalVisible, setSaveModalVisible] = useState(false);
+
+  const restoredInputs = route?.params?.savedCalculation
+    ? restoreSavedCalculationInputs(route.params.savedCalculation)
+    : {};
 
   const {
     amount,
@@ -33,12 +46,15 @@ export const GSTCalculatorScreen = ({ navigation }) => {
     handleModeChange,
     selectedRatePreset,
     handleRatePresetChange,
+    editingSavedCalculationId,
+    savedTitle,
     fieldErrors,
     result,
     isCalculated,
+    isResultStale,
     handleCalculate,
     handleReset,
-  } = useGSTCalculator();
+  } = useGSTCalculator(restoredInputs);
 
   const onCalculatePress = () => {
     const success = handleCalculate();
@@ -49,6 +65,30 @@ export const GSTCalculatorScreen = ({ navigation }) => {
           animated: true,
         });
       }, 60);
+    }
+  };
+
+  const onSaveConfirm = ({ title, saveMode }) => {
+    setSaveModalVisible(false);
+    if (saveMode === 'update' && editingSavedCalculationId) {
+      dispatch(
+        updateSavedCalculation({
+          id: editingSavedCalculationId,
+          title,
+          inputs: { amount, gstRate, mode },
+          result,
+        }),
+      );
+      Alert.alert('Saved', 'Calculation updated successfully!');
+    } else {
+      const snapshot = createCalculationSnapshot({
+        calculatorId: 'gst',
+        title,
+        inputs: { amount, gstRate, mode },
+        result,
+      });
+      dispatch(addSavedCalculation(snapshot));
+      Alert.alert('Saved', 'Calculation saved successfully!');
     }
   };
 
@@ -140,6 +180,8 @@ export const GSTCalculatorScreen = ({ navigation }) => {
           onPrimaryPress={onCalculatePress}
           secondaryTitle="Reset"
           onSecondaryPress={handleReset}
+          onSavePress={() => setSaveModalVisible(true)}
+          isSaveDisabled={!isCalculated || isResultStale}
         />
       </CalculatorInputSection>
 
@@ -150,10 +192,21 @@ export const GSTCalculatorScreen = ({ navigation }) => {
           }}
         >
           <CalculatorResultSection title="GST Breakdown & Summary">
+            {isResultStale && <StaleResultBanner style={styles.cardMargin} />}
+
             <GSTResultCard result={result} style={styles.cardMargin} />
           </CalculatorResultSection>
         </View>
       )}
+
+      <SaveModal
+        visible={saveModalVisible}
+        defaultTitle="GST Calculator"
+        isEditing={Boolean(editingSavedCalculationId)}
+        existingTitle={savedTitle}
+        onClose={() => setSaveModalVisible(false)}
+        onSave={onSaveConfirm}
+      />
 
       <View style={styles.bottomSpacer} />
     </ScreenContainer>

@@ -1,5 +1,6 @@
-import React, { useRef } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, StyleSheet, Alert } from 'react-native';
+import { useDispatch } from 'react-redux';
 import { ArrowLeft } from 'lucide-react-native';
 import ScreenContainer from '../../../components/containers/ScreenContainer';
 import AppHeader from '../../../components/navigation/AppHeader';
@@ -9,15 +10,27 @@ import DurationInput from '../../../components/forms/DurationInput';
 import CalculatorInputSection from '../../../components/calculator/CalculatorInputSection';
 import CalculatorResultSection from '../../../components/calculator/CalculatorResultSection';
 import CalculatorActionBar from '../../../components/calculator/CalculatorActionBar';
+import StaleResultBanner from '../../../components/calculator/StaleResultBanner';
+import SaveModal from '../../../components/modals/SaveModal';
 
 import { useLoanCalculator } from './hooks/useLoanCalculator';
 import EMIResultCard from '../emi/components/EMIResultCard';
 import EMIBreakdownChart from '../emi/components/EMIBreakdownChart';
 import AmortizationSection from '../emi/components/AmortizationSection';
 
-export const LoanCalculatorScreen = ({ config, navigation }) => {
+import { createCalculationSnapshot } from '../../saved/types/savedTypes';
+import { restoreSavedCalculationInputs } from '../../saved/utils/calculationRestoreAdapters';
+import { addSavedCalculation, updateSavedCalculation } from '../../../store/slices/savedCalculationsSlice';
+
+export const LoanCalculatorScreen = ({ config, route, navigation }) => {
+  const dispatch = useDispatch();
   const scrollViewRef = useRef(null);
   const resultsYRef = useRef(0);
+  const [saveModalVisible, setSaveModalVisible] = useState(false);
+
+  const restoredInputs = route?.params?.savedCalculation
+    ? restoreSavedCalculationInputs(route.params.savedCalculation)
+    : {};
 
   const {
     loanAmount,
@@ -28,17 +41,20 @@ export const LoanCalculatorScreen = ({ config, navigation }) => {
     setTenureValue,
     tenureUnit,
     setTenureUnit,
+    editingSavedCalculationId,
+    savedTitle,
     fieldErrors,
     result,
     amortizationSchedule,
     isCalculated,
+    isResultStale,
     isAmortizationExpanded,
     setIsAmortizationExpanded,
     scheduleViewMode,
     setScheduleViewMode,
     handleCalculate,
     handleReset,
-  } = useLoanCalculator(config);
+  } = useLoanCalculator(config, restoredInputs);
 
   const onCalculatePress = () => {
     const success = handleCalculate();
@@ -49,6 +65,30 @@ export const LoanCalculatorScreen = ({ config, navigation }) => {
           animated: true,
         });
       }, 60);
+    }
+  };
+
+  const onSaveConfirm = ({ title, saveMode }) => {
+    setSaveModalVisible(false);
+    if (saveMode === 'update' && editingSavedCalculationId) {
+      dispatch(
+        updateSavedCalculation({
+          id: editingSavedCalculationId,
+          title,
+          inputs: { loanAmount, interestRate, tenureValue, tenureUnit },
+          result,
+        }),
+      );
+      Alert.alert('Saved', 'Calculation updated successfully!');
+    } else {
+      const snapshot = createCalculationSnapshot({
+        calculatorId: config.id,
+        title,
+        inputs: { loanAmount, interestRate, tenureValue, tenureUnit },
+        result,
+      });
+      dispatch(addSavedCalculation(snapshot));
+      Alert.alert('Saved', 'Calculation saved successfully!');
     }
   };
 
@@ -106,6 +146,8 @@ export const LoanCalculatorScreen = ({ config, navigation }) => {
           onPrimaryPress={onCalculatePress}
           secondaryTitle="Reset"
           onSecondaryPress={handleReset}
+          onSavePress={() => setSaveModalVisible(true)}
+          isSaveDisabled={!isCalculated || isResultStale}
         />
       </CalculatorInputSection>
 
@@ -117,6 +159,8 @@ export const LoanCalculatorScreen = ({ config, navigation }) => {
           }}
         >
           <CalculatorResultSection title="Calculation Results">
+            {isResultStale && <StaleResultBanner style={styles.cardMargin} />}
+
             <EMIResultCard result={result} style={styles.cardMargin} />
 
             <EMIBreakdownChart result={result} style={styles.cardMargin} />
@@ -133,6 +177,15 @@ export const LoanCalculatorScreen = ({ config, navigation }) => {
           </CalculatorResultSection>
         </View>
       )}
+
+      <SaveModal
+        visible={saveModalVisible}
+        defaultTitle={config.title}
+        isEditing={Boolean(editingSavedCalculationId)}
+        existingTitle={savedTitle}
+        onClose={() => setSaveModalVisible(false)}
+        onSave={onSaveConfirm}
+      />
 
       <View style={styles.bottomSpacer} />
     </ScreenContainer>

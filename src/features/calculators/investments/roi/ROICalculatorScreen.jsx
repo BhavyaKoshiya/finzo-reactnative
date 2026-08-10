@@ -1,5 +1,6 @@
-import React, { useRef } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, StyleSheet, Alert } from 'react-native';
+import { useDispatch } from 'react-redux';
 import { ArrowLeft } from 'lucide-react-native';
 import ScreenContainer from '../../../../components/containers/ScreenContainer';
 import AppHeader from '../../../../components/navigation/AppHeader';
@@ -7,25 +8,40 @@ import MoneyInput from '../../../../components/forms/MoneyInput';
 import CalculatorInputSection from '../../../../components/calculator/CalculatorInputSection';
 import CalculatorResultSection from '../../../../components/calculator/CalculatorResultSection';
 import CalculatorActionBar from '../../../../components/calculator/CalculatorActionBar';
+import StaleResultBanner from '../../../../components/calculator/StaleResultBanner';
+import SaveModal from '../../../../components/modals/SaveModal';
 
 import { useROICalculator } from './hooks/useROICalculator';
 import ROIResultCard from './components/ROIResultCard';
 
-export const ROICalculatorScreen = ({ navigation }) => {
+import { createCalculationSnapshot } from '../../../saved/types/savedTypes';
+import { restoreSavedCalculationInputs } from '../../../saved/utils/calculationRestoreAdapters';
+import { addSavedCalculation, updateSavedCalculation } from '../../../../store/slices/savedCalculationsSlice';
+
+export const ROICalculatorScreen = ({ route, navigation }) => {
+  const dispatch = useDispatch();
   const scrollViewRef = useRef(null);
   const resultsYRef = useRef(0);
+  const [saveModalVisible, setSaveModalVisible] = useState(false);
+
+  const restoredInputs = route?.params?.savedCalculation
+    ? restoreSavedCalculationInputs(route.params.savedCalculation)
+    : {};
 
   const {
     initialInvestment,
     setInitialInvestment,
     finalValue,
     setFinalValue,
+    editingSavedCalculationId,
+    savedTitle,
     fieldErrors,
     result,
     isCalculated,
+    isResultStale,
     handleCalculate,
     handleReset,
-  } = useROICalculator();
+  } = useROICalculator(restoredInputs);
 
   const onCalculatePress = () => {
     const success = handleCalculate();
@@ -39,10 +55,34 @@ export const ROICalculatorScreen = ({ navigation }) => {
     }
   };
 
+  const onSaveConfirm = ({ title, saveMode }) => {
+    setSaveModalVisible(false);
+    if (saveMode === 'update' && editingSavedCalculationId) {
+      dispatch(
+        updateSavedCalculation({
+          id: editingSavedCalculationId,
+          title,
+          inputs: { initialInvestment, finalValue },
+          result,
+        }),
+      );
+      Alert.alert('Saved', 'Calculation updated successfully!');
+    } else {
+      const snapshot = createCalculationSnapshot({
+        calculatorId: 'roi',
+        title,
+        inputs: { initialInvestment, finalValue },
+        result,
+      });
+      dispatch(addSavedCalculation(snapshot));
+      Alert.alert('Saved', 'Calculation saved successfully!');
+    }
+  };
+
   const renderHeader = () => (
     <AppHeader
       title="ROI Calculator"
-      subtitle="Return on Investment"
+      subtitle="Return on Investment Percentage & Gain"
       leftAction={{
         icon: ArrowLeft,
         onPress: () => navigation.goBack(),
@@ -61,18 +101,18 @@ export const ROICalculatorScreen = ({ navigation }) => {
       style={styles.container}
     >
       <CalculatorInputSection
-        title="Investment Values"
-        subtitle="Enter initial cost and final value returned"
+        title="ROI Investment Details"
+        subtitle="Enter initial cost & current/returned value"
       >
         <MoneyInput
-          label="Initial Investment (Cost)"
+          label="Initial Investment Cost"
           value={initialInvestment}
           onChangeText={setInitialInvestment}
           error={fieldErrors.initialInvestment}
         />
 
         <MoneyInput
-          label="Final Value Returned"
+          label="Final / Returned Value"
           value={finalValue}
           onChangeText={setFinalValue}
           error={fieldErrors.finalValue}
@@ -83,6 +123,8 @@ export const ROICalculatorScreen = ({ navigation }) => {
           onPrimaryPress={onCalculatePress}
           secondaryTitle="Reset"
           onSecondaryPress={handleReset}
+          onSavePress={() => setSaveModalVisible(true)}
+          isSaveDisabled={!isCalculated || isResultStale}
         />
       </CalculatorInputSection>
 
@@ -92,11 +134,22 @@ export const ROICalculatorScreen = ({ navigation }) => {
             resultsYRef.current = e.nativeEvent.layout.y;
           }}
         >
-          <CalculatorResultSection title="Percentage Return Result">
+          <CalculatorResultSection title="Return Output">
+            {isResultStale && <StaleResultBanner style={styles.cardMargin} />}
+
             <ROIResultCard result={result} style={styles.cardMargin} />
           </CalculatorResultSection>
         </View>
       )}
+
+      <SaveModal
+        visible={saveModalVisible}
+        defaultTitle="ROI Calculator"
+        isEditing={Boolean(editingSavedCalculationId)}
+        existingTitle={savedTitle}
+        onClose={() => setSaveModalVisible(false)}
+        onSave={onSaveConfirm}
+      />
 
       <View style={styles.bottomSpacer} />
     </ScreenContainer>

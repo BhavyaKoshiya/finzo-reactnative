@@ -1,5 +1,6 @@
-import React, { useRef } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, StyleSheet, Alert } from 'react-native';
+import { useDispatch } from 'react-redux';
 import { ArrowLeft } from 'lucide-react-native';
 import ScreenContainer from '../../../../components/containers/ScreenContainer';
 import AppHeader from '../../../../components/navigation/AppHeader';
@@ -8,13 +9,25 @@ import DurationInput from '../../../../components/forms/DurationInput';
 import CalculatorInputSection from '../../../../components/calculator/CalculatorInputSection';
 import CalculatorResultSection from '../../../../components/calculator/CalculatorResultSection';
 import CalculatorActionBar from '../../../../components/calculator/CalculatorActionBar';
+import StaleResultBanner from '../../../../components/calculator/StaleResultBanner';
+import SaveModal from '../../../../components/modals/SaveModal';
 
 import { useCAGRCalculator } from './hooks/useCAGRCalculator';
 import CAGRResultCard from './components/CAGRResultCard';
 
-export const CAGRCalculatorScreen = ({ navigation }) => {
+import { createCalculationSnapshot } from '../../../saved/types/savedTypes';
+import { restoreSavedCalculationInputs } from '../../../saved/utils/calculationRestoreAdapters';
+import { addSavedCalculation, updateSavedCalculation } from '../../../../store/slices/savedCalculationsSlice';
+
+export const CAGRCalculatorScreen = ({ route, navigation }) => {
+  const dispatch = useDispatch();
   const scrollViewRef = useRef(null);
   const resultsYRef = useRef(0);
+  const [saveModalVisible, setSaveModalVisible] = useState(false);
+
+  const restoredInputs = route?.params?.savedCalculation
+    ? restoreSavedCalculationInputs(route.params.savedCalculation)
+    : {};
 
   const {
     beginningValue,
@@ -25,12 +38,15 @@ export const CAGRCalculatorScreen = ({ navigation }) => {
     setTenureValue,
     tenureUnit,
     setTenureUnit,
+    editingSavedCalculationId,
+    savedTitle,
     fieldErrors,
     result,
     isCalculated,
+    isResultStale,
     handleCalculate,
     handleReset,
-  } = useCAGRCalculator();
+  } = useCAGRCalculator(restoredInputs);
 
   const onCalculatePress = () => {
     const success = handleCalculate();
@@ -44,10 +60,34 @@ export const CAGRCalculatorScreen = ({ navigation }) => {
     }
   };
 
+  const onSaveConfirm = ({ title, saveMode }) => {
+    setSaveModalVisible(false);
+    if (saveMode === 'update' && editingSavedCalculationId) {
+      dispatch(
+        updateSavedCalculation({
+          id: editingSavedCalculationId,
+          title,
+          inputs: { beginningValue, endingValue, tenureValue, tenureUnit },
+          result,
+        }),
+      );
+      Alert.alert('Saved', 'Calculation updated successfully!');
+    } else {
+      const snapshot = createCalculationSnapshot({
+        calculatorId: 'cagr',
+        title,
+        inputs: { beginningValue, endingValue, tenureValue, tenureUnit },
+        result,
+      });
+      dispatch(addSavedCalculation(snapshot));
+      Alert.alert('Saved', 'Calculation saved successfully!');
+    }
+  };
+
   const renderHeader = () => (
     <AppHeader
       title="CAGR Calculator"
-      subtitle="Compound Annual Growth Rate"
+      subtitle="Compound Annual Growth Rate of Investment"
       leftAction={{
         icon: ArrowLeft,
         onPress: () => navigation.goBack(),
@@ -66,30 +106,30 @@ export const CAGRCalculatorScreen = ({ navigation }) => {
       style={styles.container}
     >
       <CalculatorInputSection
-        title="Investment Period & Values"
-        subtitle="Calculate annual return rate over multiple years"
+        title="CAGR Investment Details"
+        subtitle="Enter initial investment value, final value & tenure"
       >
         <MoneyInput
-          label="Initial Investment (Beginning Value)"
+          label="Beginning / Initial Value"
           value={beginningValue}
           onChangeText={setBeginningValue}
           error={fieldErrors.beginningValue}
         />
 
         <MoneyInput
-          label="Final Value (Ending Value)"
+          label="Ending / Target Value"
           value={endingValue}
           onChangeText={setEndingValue}
           error={fieldErrors.endingValue}
         />
 
         <DurationInput
-          label="Investment Period"
+          label="Investment Horizon"
           value={tenureValue}
           unit={tenureUnit}
           onChangeText={setTenureValue}
           onUnitChange={setTenureUnit}
-          error={fieldErrors.tenureYears}
+          error={fieldErrors.tenureInYears}
         />
 
         <CalculatorActionBar
@@ -97,6 +137,8 @@ export const CAGRCalculatorScreen = ({ navigation }) => {
           onPrimaryPress={onCalculatePress}
           secondaryTitle="Reset"
           onSecondaryPress={handleReset}
+          onSavePress={() => setSaveModalVisible(true)}
+          isSaveDisabled={!isCalculated || isResultStale}
         />
       </CalculatorInputSection>
 
@@ -106,11 +148,22 @@ export const CAGRCalculatorScreen = ({ navigation }) => {
             resultsYRef.current = e.nativeEvent.layout.y;
           }}
         >
-          <CalculatorResultSection title="Annualized Return Result">
+          <CalculatorResultSection title="Annualized Growth Result">
+            {isResultStale && <StaleResultBanner style={styles.cardMargin} />}
+
             <CAGRResultCard result={result} style={styles.cardMargin} />
           </CalculatorResultSection>
         </View>
       )}
+
+      <SaveModal
+        visible={saveModalVisible}
+        defaultTitle="CAGR Calculator"
+        isEditing={Boolean(editingSavedCalculationId)}
+        existingTitle={savedTitle}
+        onClose={() => setSaveModalVisible(false)}
+        onSave={onSaveConfirm}
+      />
 
       <View style={styles.bottomSpacer} />
     </ScreenContainer>

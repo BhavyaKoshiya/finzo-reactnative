@@ -16,7 +16,7 @@ const persistConfig = {
   key: 'finzo_root',
   version: 1,
   storage: AsyncStorage,
-  whitelist: ['settings'],
+  whitelist: ['settings', 'savedCalculations'],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

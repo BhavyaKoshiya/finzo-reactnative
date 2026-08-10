@@ -1,5 +1,6 @@
-import React, { useRef } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, StyleSheet, Alert } from 'react-native';
+import { useDispatch } from 'react-redux';
 import { ArrowLeft } from 'lucide-react-native';
 import ScreenContainer from '../../../../components/containers/ScreenContainer';
 import AppHeader from '../../../../components/navigation/AppHeader';
@@ -9,6 +10,8 @@ import SelectField from '../../../../components/forms/SelectField';
 import CalculatorInputSection from '../../../../components/calculator/CalculatorInputSection';
 import CalculatorResultSection from '../../../../components/calculator/CalculatorResultSection';
 import CalculatorActionBar from '../../../../components/calculator/CalculatorActionBar';
+import StaleResultBanner from '../../../../components/calculator/StaleResultBanner';
+import SaveModal from '../../../../components/modals/SaveModal';
 
 import {
   usePercentageCalculator,
@@ -16,9 +19,19 @@ import {
 } from './hooks/usePercentageCalculator';
 import PercentageResultCard from './components/PercentageResultCard';
 
-export const PercentageCalculatorScreen = ({ navigation }) => {
+import { createCalculationSnapshot } from '../../../saved/types/savedTypes';
+import { restoreSavedCalculationInputs } from '../../../saved/utils/calculationRestoreAdapters';
+import { addSavedCalculation, updateSavedCalculation } from '../../../../store/slices/savedCalculationsSlice';
+
+export const PercentageCalculatorScreen = ({ route, navigation }) => {
+  const dispatch = useDispatch();
   const scrollViewRef = useRef(null);
   const resultsYRef = useRef(0);
+  const [saveModalVisible, setSaveModalVisible] = useState(false);
+
+  const restoredInputs = route?.params?.savedCalculation
+    ? restoreSavedCalculationInputs(route.params.savedCalculation)
+    : {};
 
   const {
     mode,
@@ -35,12 +48,15 @@ export const PercentageCalculatorScreen = ({ navigation }) => {
     setValA,
     valB,
     setValB,
+    editingSavedCalculationId,
+    savedTitle,
     fieldErrors,
     result,
     isCalculated,
+    isResultStale,
     handleCalculate,
     handleReset,
-  } = usePercentageCalculator();
+  } = usePercentageCalculator(restoredInputs);
 
   const onCalculatePress = () => {
     const success = handleCalculate();
@@ -51,6 +67,30 @@ export const PercentageCalculatorScreen = ({ navigation }) => {
           animated: true,
         });
       }, 60);
+    }
+  };
+
+  const onSaveConfirm = ({ title, saveMode }) => {
+    setSaveModalVisible(false);
+    if (saveMode === 'update' && editingSavedCalculationId) {
+      dispatch(
+        updateSavedCalculation({
+          id: editingSavedCalculationId,
+          title,
+          inputs: { mode, percentage, totalValue, oldValue, newValue, valA, valB },
+          result,
+        }),
+      );
+      Alert.alert('Saved', 'Calculation updated successfully!');
+    } else {
+      const snapshot = createCalculationSnapshot({
+        calculatorId: 'percentage',
+        title,
+        inputs: { mode, percentage, totalValue, oldValue, newValue, valA, valB },
+        result,
+      });
+      dispatch(addSavedCalculation(snapshot));
+      Alert.alert('Saved', 'Calculation saved successfully!');
     }
   };
 
@@ -145,6 +185,8 @@ export const PercentageCalculatorScreen = ({ navigation }) => {
           onPrimaryPress={onCalculatePress}
           secondaryTitle="Reset"
           onSecondaryPress={handleReset}
+          onSavePress={() => setSaveModalVisible(true)}
+          isSaveDisabled={!isCalculated || isResultStale}
         />
       </CalculatorInputSection>
 
@@ -155,10 +197,21 @@ export const PercentageCalculatorScreen = ({ navigation }) => {
           }}
         >
           <CalculatorResultSection title="Percentage Result">
+            {isResultStale && <StaleResultBanner style={styles.cardMargin} />}
+
             <PercentageResultCard result={result} style={styles.cardMargin} />
           </CalculatorResultSection>
         </View>
       )}
+
+      <SaveModal
+        visible={saveModalVisible}
+        defaultTitle="Percentage Calculator"
+        isEditing={Boolean(editingSavedCalculationId)}
+        existingTitle={savedTitle}
+        onClose={() => setSaveModalVisible(false)}
+        onSave={onSaveConfirm}
+      />
 
       <View style={styles.bottomSpacer} />
     </ScreenContainer>

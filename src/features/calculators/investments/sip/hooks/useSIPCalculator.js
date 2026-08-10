@@ -1,90 +1,116 @@
 import { useState, useCallback, useEffect } from 'react';
 import { calculateSIP } from '../../../../../calculations/sip/calculateSIP';
-import { validateSIPInput } from '../../../../../calculations/sip/sipValidation';
-import { normalizeNumberInput } from '../../../../../calculations/core/validation';
 import logger from '../../../../../services/logger';
 
 export const DEFAULT_SIP_INPUTS = {
-  monthlyInvestment: '10000', // ₹10,000 / month
-  annualReturnRate: '12', // 12% p.a. expected return
-  tenureValue: '10', // 10 Years
+  monthlyInvestment: '10000',
+  annualReturnRate: '12',
+  tenureValue: '10',
   tenureUnit: 'years',
 };
 
-export const useSIPCalculator = () => {
-  const [monthlyInvestment, setMonthlyInvestment] = useState(DEFAULT_SIP_INPUTS.monthlyInvestment);
-  const [annualReturnRate, setAnnualReturnRate] = useState(DEFAULT_SIP_INPUTS.annualReturnRate);
-  const [tenureValue, setTenureValue] = useState(DEFAULT_SIP_INPUTS.tenureValue);
-  const [tenureUnit, setTenureUnit] = useState(DEFAULT_SIP_INPUTS.tenureUnit);
+export const useSIPCalculator = (initialInputs = {}) => {
+  const defaults = { ...DEFAULT_SIP_INPUTS, ...initialInputs };
+
+  const [monthlyInvestment, setMonthlyInvestmentState] = useState(defaults.monthlyInvestment);
+  const [annualReturnRate, setAnnualReturnRateState] = useState(defaults.annualReturnRate);
+  const [tenureValue, setTenureValueState] = useState(defaults.tenureValue);
+  const [tenureUnit, setTenureUnitState] = useState(defaults.tenureUnit);
+  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs.editingSavedCalculationId || null);
+  const [savedTitle, setSavedTitle] = useState(initialInputs.savedTitle || '');
 
   const [fieldErrors, setFieldErrors] = useState({});
   const [result, setResult] = useState(null);
   const [isCalculated, setIsCalculated] = useState(false);
+  const [isResultStale, setIsResultStale] = useState(false);
 
-  const computeTenureMonths = useCallback((val, unit) => {
-    const numVal = normalizeNumberInput(val);
-    if (numVal === null) return 0;
-    return unit === 'years' ? Math.round(numVal * 12) : Math.round(numVal);
-  }, []);
+  const setMonthlyInvestment = (val) => {
+    setMonthlyInvestmentState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
 
-  const calculate = useCallback((amount, rate, tVal, tUnit) => {
-    const tenureMonths = computeTenureMonths(tVal, tUnit);
+  const setAnnualReturnRate = (val) => {
+    setAnnualReturnRateState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
 
-    const validationRes = validateSIPInput(amount, rate, tenureMonths);
-    if (validationRes && !validationRes.success) {
-      const errorsObj = {};
-      validationRes.errors.forEach((err) => {
-        errorsObj[err.field] = err.message;
-      });
-      setFieldErrors(errorsObj);
+  const setTenureValue = (val) => {
+    setTenureValueState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setTenureUnit = (val) => {
+    setTenureUnitState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const compute = useCallback((inv, rate, tValue, tUnit) => {
+    let tenureMonths = parseFloat(tValue);
+    if (!isNaN(tenureMonths) && tUnit === 'years') {
+      tenureMonths = tenureMonths * 12;
+    }
+
+    logger.info('SIP calculation initiated', { inv, rate, tenureMonths });
+    const calculationResult = calculateSIP(inv, rate, tenureMonths);
+
+    if (calculationResult.success) {
+      setFieldErrors({});
+      setResult(calculationResult.data);
+      setIsCalculated(true);
+      setIsResultStale(false);
+      logger.info('SIP calculation completed', calculationResult.data);
+      return true;
+    } else {
+      const errorsByField = {};
+      if (Array.isArray(calculationResult.errors)) {
+        calculationResult.errors.forEach((err) => {
+          errorsByField[err.field] = err.message;
+        });
+      }
+      setFieldErrors(errorsByField);
+      setResult(null);
+      setIsCalculated(false);
+      setIsResultStale(false);
+      logger.warn('SIP calculation failed validation', errorsByField);
       return false;
     }
+  }, []);
 
-    setFieldErrors({});
-    logger.info('SIP calculation initiated');
-
-    const sipRes = calculateSIP(amount, rate, tenureMonths);
-    if (sipRes.success) {
-      setResult(sipRes.data);
-      setIsCalculated(true);
-      logger.info('SIP calculation completed');
-      return true;
-    }
-
-    return false;
-  }, [computeTenureMonths]);
-
+  // Initial calculation on mount
   useEffect(() => {
-    calculate(
-      DEFAULT_SIP_INPUTS.monthlyInvestment,
-      DEFAULT_SIP_INPUTS.annualReturnRate,
-      DEFAULT_SIP_INPUTS.tenureValue,
-      DEFAULT_SIP_INPUTS.tenureUnit
+    compute(
+      defaults.monthlyInvestment,
+      defaults.annualReturnRate,
+      defaults.tenureValue,
+      defaults.tenureUnit,
     );
-  }, [calculate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const handleCalculate = useCallback((customAmount, customRate, customTenureVal, customTenureUnit) => {
-    const amt = typeof customAmount === 'string' || typeof customAmount === 'number' ? customAmount : monthlyInvestment;
-    const rate = typeof customRate === 'string' || typeof customRate === 'number' ? customRate : annualReturnRate;
-    const tVal = typeof customTenureVal === 'string' || typeof customTenureVal === 'number' ? customTenureVal : tenureValue;
-    const tUnit = typeof customTenureUnit === 'string' ? customTenureUnit : tenureUnit;
-    return calculate(amt, rate, tVal, tUnit);
-  }, [calculate, monthlyInvestment, annualReturnRate, tenureValue, tenureUnit]);
+  const handleCalculate = (
+    overrideInv = monthlyInvestment,
+    overrideRate = annualReturnRate,
+    overrideTVal = tenureValue,
+    overrideTUnit = tenureUnit,
+  ) => {
+    return compute(overrideInv, overrideRate, overrideTVal, overrideTUnit);
+  };
 
   const handleReset = useCallback(() => {
-    setMonthlyInvestment(DEFAULT_SIP_INPUTS.monthlyInvestment);
-    setAnnualReturnRate(DEFAULT_SIP_INPUTS.annualReturnRate);
-    setTenureValue(DEFAULT_SIP_INPUTS.tenureValue);
-    setTenureUnit(DEFAULT_SIP_INPUTS.tenureUnit);
+    setMonthlyInvestmentState(DEFAULT_SIP_INPUTS.monthlyInvestment);
+    setAnnualReturnRateState(DEFAULT_SIP_INPUTS.annualReturnRate);
+    setTenureValueState(DEFAULT_SIP_INPUTS.tenureValue);
+    setTenureUnitState(DEFAULT_SIP_INPUTS.tenureUnit);
+    setEditingSavedCalculationId(null);
+    setSavedTitle('');
     setFieldErrors({});
-
-    calculate(
+    compute(
       DEFAULT_SIP_INPUTS.monthlyInvestment,
       DEFAULT_SIP_INPUTS.annualReturnRate,
       DEFAULT_SIP_INPUTS.tenureValue,
-      DEFAULT_SIP_INPUTS.tenureUnit
+      DEFAULT_SIP_INPUTS.tenureUnit,
     );
-  }, [calculate]);
+  }, [compute]);
 
   return {
     monthlyInvestment,
@@ -95,9 +121,12 @@ export const useSIPCalculator = () => {
     setTenureValue,
     tenureUnit,
     setTenureUnit,
+    editingSavedCalculationId,
+    savedTitle,
     fieldErrors,
     result,
     isCalculated,
+    isResultStale,
     handleCalculate,
     handleReset,
   };

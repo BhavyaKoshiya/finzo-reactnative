@@ -1,5 +1,6 @@
-import React, { useRef } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, StyleSheet, Alert } from 'react-native';
+import { useDispatch } from 'react-redux';
 import { ArrowLeft } from 'lucide-react-native';
 import ScreenContainer from '../../../../components/containers/ScreenContainer';
 import AppHeader from '../../../../components/navigation/AppHeader';
@@ -9,13 +10,25 @@ import DurationInput from '../../../../components/forms/DurationInput';
 import CalculatorInputSection from '../../../../components/calculator/CalculatorInputSection';
 import CalculatorResultSection from '../../../../components/calculator/CalculatorResultSection';
 import CalculatorActionBar from '../../../../components/calculator/CalculatorActionBar';
+import StaleResultBanner from '../../../../components/calculator/StaleResultBanner';
+import SaveModal from '../../../../components/modals/SaveModal';
 
 import { useSimpleInterestCalculator } from './hooks/useSimpleInterestCalculator';
 import SimpleInterestResultCard from './components/SimpleInterestResultCard';
 
-export const SimpleInterestCalculatorScreen = ({ navigation }) => {
+import { createCalculationSnapshot } from '../../../saved/types/savedTypes';
+import { restoreSavedCalculationInputs } from '../../../saved/utils/calculationRestoreAdapters';
+import { addSavedCalculation, updateSavedCalculation } from '../../../../store/slices/savedCalculationsSlice';
+
+export const SimpleInterestCalculatorScreen = ({ route, navigation }) => {
+  const dispatch = useDispatch();
   const scrollViewRef = useRef(null);
   const resultsYRef = useRef(0);
+  const [saveModalVisible, setSaveModalVisible] = useState(false);
+
+  const restoredInputs = route?.params?.savedCalculation
+    ? restoreSavedCalculationInputs(route.params.savedCalculation)
+    : {};
 
   const {
     principal,
@@ -26,12 +39,15 @@ export const SimpleInterestCalculatorScreen = ({ navigation }) => {
     setTenureValue,
     tenureUnit,
     setTenureUnit,
+    editingSavedCalculationId,
+    savedTitle,
     fieldErrors,
     result,
     isCalculated,
+    isResultStale,
     handleCalculate,
     handleReset,
-  } = useSimpleInterestCalculator();
+  } = useSimpleInterestCalculator(restoredInputs);
 
   const onCalculatePress = () => {
     const success = handleCalculate();
@@ -45,10 +61,34 @@ export const SimpleInterestCalculatorScreen = ({ navigation }) => {
     }
   };
 
+  const onSaveConfirm = ({ title, saveMode }) => {
+    setSaveModalVisible(false);
+    if (saveMode === 'update' && editingSavedCalculationId) {
+      dispatch(
+        updateSavedCalculation({
+          id: editingSavedCalculationId,
+          title,
+          inputs: { principal, annualInterestRate, tenureValue, tenureUnit },
+          result,
+        }),
+      );
+      Alert.alert('Saved', 'Calculation updated successfully!');
+    } else {
+      const snapshot = createCalculationSnapshot({
+        calculatorId: 'simple-interest',
+        title,
+        inputs: { principal, annualInterestRate, tenureValue, tenureUnit },
+        result,
+      });
+      dispatch(addSavedCalculation(snapshot));
+      Alert.alert('Saved', 'Calculation saved successfully!');
+    }
+  };
+
   const renderHeader = () => (
     <AppHeader
       title="Simple Interest Calculator"
-      subtitle="Principal & Non-Compounded Interest"
+      subtitle="Non-compounded Interest & Maturity Returns"
       leftAction={{
         icon: ArrowLeft,
         onPress: () => navigation.goBack(),
@@ -67,8 +107,8 @@ export const SimpleInterestCalculatorScreen = ({ navigation }) => {
       style={styles.container}
     >
       <CalculatorInputSection
-        title="Simple Interest Details"
-        subtitle="Enter principal amount, annual interest rate & duration"
+        title="Simple Interest Inputs"
+        subtitle="Enter principal amount, interest rate & duration"
       >
         <MoneyInput
           label="Principal Amount"
@@ -78,26 +118,28 @@ export const SimpleInterestCalculatorScreen = ({ navigation }) => {
         />
 
         <PercentageInput
-          label="Annual Interest Rate (% p.a.)"
+          label="Interest Rate (% p.a.)"
           value={annualInterestRate}
           onChangeText={setAnnualInterestRate}
           error={fieldErrors.annualInterestRate}
         />
 
         <DurationInput
-          label="Duration"
+          label="Tenure / Duration"
           value={tenureValue}
           unit={tenureUnit}
           onChangeText={setTenureValue}
           onUnitChange={setTenureUnit}
-          error={fieldErrors.tenureYears}
+          error={fieldErrors.tenureInYears}
         />
 
         <CalculatorActionBar
-          primaryTitle="Calculate SI"
+          primaryTitle="Calculate Interest"
           onPrimaryPress={onCalculatePress}
           secondaryTitle="Reset"
           onSecondaryPress={handleReset}
+          onSavePress={() => setSaveModalVisible(true)}
+          isSaveDisabled={!isCalculated || isResultStale}
         />
       </CalculatorInputSection>
 
@@ -107,11 +149,22 @@ export const SimpleInterestCalculatorScreen = ({ navigation }) => {
             resultsYRef.current = e.nativeEvent.layout.y;
           }}
         >
-          <CalculatorResultSection title="Simple Interest Summary">
+          <CalculatorResultSection title="Interest Output">
+            {isResultStale && <StaleResultBanner style={styles.cardMargin} />}
+
             <SimpleInterestResultCard result={result} style={styles.cardMargin} />
           </CalculatorResultSection>
         </View>
       )}
+
+      <SaveModal
+        visible={saveModalVisible}
+        defaultTitle="Simple Interest Calculator"
+        isEditing={Boolean(editingSavedCalculationId)}
+        existingTitle={savedTitle}
+        onClose={() => setSaveModalVisible(false)}
+        onSave={onSaveConfirm}
+      />
 
       <View style={styles.bottomSpacer} />
     </ScreenContainer>

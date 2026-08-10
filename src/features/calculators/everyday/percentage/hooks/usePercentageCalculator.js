@@ -25,17 +25,50 @@ export const DEFAULT_PERCENTAGE_INPUTS = {
 export const usePercentageCalculator = (initialInputs = {}) => {
   const defaults = { ...DEFAULT_PERCENTAGE_INPUTS, ...initialInputs };
 
-  const [mode, setMode] = useState(defaults.mode);
-  const [percentage, setPercentage] = useState(defaults.percentage);
-  const [totalValue, setTotalValue] = useState(defaults.totalValue);
-  const [oldValue, setOldValue] = useState(defaults.oldValue);
-  const [newValue, setNewValue] = useState(defaults.newValue);
-  const [valA, setValA] = useState(defaults.valA);
-  const [valB, setValB] = useState(defaults.valB);
+  const [mode, setModeState] = useState(defaults.mode);
+  const [percentage, setPercentageState] = useState(defaults.percentage);
+  const [totalValue, setTotalValueState] = useState(defaults.totalValue);
+  const [oldValue, setOldValueState] = useState(defaults.oldValue);
+  const [newValue, setNewValueState] = useState(defaults.newValue);
+  const [valA, setValAState] = useState(defaults.valA);
+  const [valB, setValBState] = useState(defaults.valB);
+  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs.editingSavedCalculationId || null);
+  const [savedTitle, setSavedTitle] = useState(initialInputs.savedTitle || '');
 
   const [fieldErrors, setFieldErrors] = useState({});
   const [result, setResult] = useState(null);
   const [isCalculated, setIsCalculated] = useState(false);
+  const [isResultStale, setIsResultStale] = useState(false);
+
+  const setPercentage = (val) => {
+    setPercentageState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setTotalValue = (val) => {
+    setTotalValueState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setOldValue = (val) => {
+    setOldValueState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setNewValue = (val) => {
+    setNewValueState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setValA = (val) => {
+    setValAState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const setValB = (val) => {
+    setValBState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
 
   const compute = useCallback(
     (currentMode, p, total, oldV, newV, vA, vB) => {
@@ -54,6 +87,7 @@ export const usePercentageCalculator = (initialInputs = {}) => {
         setFieldErrors({});
         setResult({ mode: currentMode, ...calculationResult.data });
         setIsCalculated(true);
+        setIsResultStale(false);
         logger.info('Percentage calculation completed', calculationResult.data);
         return true;
       } else {
@@ -66,6 +100,7 @@ export const usePercentageCalculator = (initialInputs = {}) => {
         setFieldErrors(errorsByField);
         setResult(null);
         setIsCalculated(false);
+        setIsResultStale(false);
         logger.warn('Percentage calculation failed validation', errorsByField);
         return false;
       }
@@ -88,8 +123,8 @@ export const usePercentageCalculator = (initialInputs = {}) => {
   }, []);
 
   const handleModeChange = (newMode) => {
-    setMode(newMode);
-    setIsCalculated(false);
+    setModeState(newMode);
+    if (isCalculated) setIsResultStale(true);
   };
 
   const handleCalculate = (
@@ -113,28 +148,30 @@ export const usePercentageCalculator = (initialInputs = {}) => {
   };
 
   const handleReset = useCallback(() => {
-    setMode(defaults.mode);
-    setPercentage(defaults.percentage);
-    setTotalValue(defaults.totalValue);
-    setOldValue(defaults.oldValue);
-    setNewValue(defaults.newValue);
-    setValA(defaults.valA);
-    setValB(defaults.valB);
+    setModeState(DEFAULT_PERCENTAGE_INPUTS.mode);
+    setPercentageState(DEFAULT_PERCENTAGE_INPUTS.percentage);
+    setTotalValueState(DEFAULT_PERCENTAGE_INPUTS.totalValue);
+    setOldValueState(DEFAULT_PERCENTAGE_INPUTS.oldValue);
+    setNewValueState(DEFAULT_PERCENTAGE_INPUTS.newValue);
+    setValAState(DEFAULT_PERCENTAGE_INPUTS.valA);
+    setValBState(DEFAULT_PERCENTAGE_INPUTS.valB);
+    setEditingSavedCalculationId(null);
+    setSavedTitle('');
     setFieldErrors({});
     compute(
-      defaults.mode,
-      defaults.percentage,
-      defaults.totalValue,
-      defaults.oldValue,
-      defaults.newValue,
-      defaults.valA,
-      defaults.valB,
+      DEFAULT_PERCENTAGE_INPUTS.mode,
+      DEFAULT_PERCENTAGE_INPUTS.percentage,
+      DEFAULT_PERCENTAGE_INPUTS.totalValue,
+      DEFAULT_PERCENTAGE_INPUTS.oldValue,
+      DEFAULT_PERCENTAGE_INPUTS.newValue,
+      DEFAULT_PERCENTAGE_INPUTS.valA,
+      DEFAULT_PERCENTAGE_INPUTS.valB,
     );
-  }, [defaults.mode, defaults.percentage, defaults.totalValue, defaults.oldValue, defaults.newValue, defaults.valA, defaults.valB, compute]);
+  }, [compute]);
 
   return {
     mode,
-    setMode,
+    setMode: setModeState,
     percentage,
     setPercentage,
     totalValue,
@@ -148,9 +185,12 @@ export const usePercentageCalculator = (initialInputs = {}) => {
     valB,
     setValB,
     handleModeChange,
+    editingSavedCalculationId,
+    savedTitle,
     fieldErrors,
     result,
     isCalculated,
+    isResultStale,
     handleCalculate,
     handleReset,
   };

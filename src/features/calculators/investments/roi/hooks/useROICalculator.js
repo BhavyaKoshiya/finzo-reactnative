@@ -3,72 +3,96 @@ import { calculateROI } from '../../../../../calculations/investment/calculateRO
 import logger from '../../../../../services/logger';
 
 export const DEFAULT_ROI_INPUTS = {
-  initialInvestment: '100000', // ₹1,00,000 cost
-  finalValue: '125000', // ₹1,25,000 return
+  initialInvestment: '100000',
+  finalValue: '125000',
 };
 
-export const useROICalculator = () => {
-  const [initialInvestment, setInitialInvestment] = useState(DEFAULT_ROI_INPUTS.initialInvestment);
-  const [finalValue, setFinalValue] = useState(DEFAULT_ROI_INPUTS.finalValue);
+export const useROICalculator = (initialInputs = {}) => {
+  const defaults = {
+    initialInvestment: initialInputs?.initialInvestment || DEFAULT_ROI_INPUTS.initialInvestment,
+    finalValue: initialInputs?.finalValue || DEFAULT_ROI_INPUTS.finalValue,
+  };
+
+  const [initialInvestment, setInitialInvestmentState] = useState(defaults.initialInvestment);
+  const [finalValue, setFinalValueState] = useState(defaults.finalValue);
+  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs?.editingSavedCalculationId || null);
+  const [savedTitle, setSavedTitle] = useState(initialInputs?.savedTitle || '');
 
   const [fieldErrors, setFieldErrors] = useState({});
   const [result, setResult] = useState(null);
   const [isCalculated, setIsCalculated] = useState(false);
+  const [isResultStale, setIsResultStale] = useState(false);
 
-  const calculate = useCallback((inv, val) => {
-    logger.info('ROI calculation initiated');
+  const setInitialInvestment = (val) => {
+    setInitialInvestmentState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
 
-    const roiRes = calculateROI(inv, val);
-    if (roiRes.success) {
+  const setFinalValue = (val) => {
+    setFinalValueState(val);
+    if (isCalculated) setIsResultStale(true);
+  };
+
+  const compute = useCallback((inv, fVal) => {
+    logger.info('ROI calculation initiated', { inv, fVal });
+    const calculationResult = calculateROI(inv, fVal);
+
+    if (calculationResult.success) {
       setFieldErrors({});
-      setResult(roiRes.data);
+      setResult(calculationResult.data);
       setIsCalculated(true);
-      logger.info('ROI calculation completed');
+      setIsResultStale(false);
+      logger.info('ROI calculation completed', calculationResult.data);
       return true;
+    } else {
+      const errorsByField = {};
+      if (Array.isArray(calculationResult.errors)) {
+        calculationResult.errors.forEach((err) => {
+          errorsByField[err.field] = err.message;
+        });
+      }
+      setFieldErrors(errorsByField);
+      setResult(null);
+      setIsCalculated(false);
+      setIsResultStale(false);
+      logger.warn('ROI calculation failed validation', errorsByField);
+      return false;
     }
-
-    const errorsObj = {};
-    if (roiRes.errors) {
-      roiRes.errors.forEach((err) => {
-        errorsObj[err.field] = err.message;
-      });
-    }
-    setFieldErrors(errorsObj);
-    return false;
   }, []);
 
+  // Initial calculation on mount
   useEffect(() => {
-    calculate(
-      DEFAULT_ROI_INPUTS.initialInvestment,
-      DEFAULT_ROI_INPUTS.finalValue
-    );
-  }, [calculate]);
+    compute(defaults.initialInvestment, defaults.finalValue);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const handleCalculate = useCallback((customInv, customVal) => {
-    const inv = typeof customInv === 'string' || typeof customInv === 'number' ? customInv : initialInvestment;
-    const val = typeof customVal === 'string' || typeof customVal === 'number' ? customVal : finalValue;
-    return calculate(inv, val);
-  }, [calculate, initialInvestment, finalValue]);
+  const handleCalculate = (
+    overrideInv = initialInvestment,
+    overrideFVal = finalValue,
+  ) => {
+    return compute(overrideInv, overrideFVal);
+  };
 
   const handleReset = useCallback(() => {
-    setInitialInvestment(DEFAULT_ROI_INPUTS.initialInvestment);
-    setFinalValue(DEFAULT_ROI_INPUTS.finalValue);
+    setInitialInvestmentState(DEFAULT_ROI_INPUTS.initialInvestment);
+    setFinalValueState(DEFAULT_ROI_INPUTS.finalValue);
+    setEditingSavedCalculationId(null);
+    setSavedTitle('');
     setFieldErrors({});
-
-    calculate(
-      DEFAULT_ROI_INPUTS.initialInvestment,
-      DEFAULT_ROI_INPUTS.finalValue
-    );
-  }, [calculate]);
+    compute(DEFAULT_ROI_INPUTS.initialInvestment, DEFAULT_ROI_INPUTS.finalValue);
+  }, [compute]);
 
   return {
     initialInvestment,
     setInitialInvestment,
     finalValue,
     setFinalValue,
+    editingSavedCalculationId,
+    savedTitle,
     fieldErrors,
     result,
     isCalculated,
+    isResultStale,
     handleCalculate,
     handleReset,
   };

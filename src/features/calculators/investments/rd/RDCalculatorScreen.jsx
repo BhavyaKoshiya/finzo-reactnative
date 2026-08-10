@@ -1,5 +1,6 @@
-import React, { useRef } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, StyleSheet, Alert } from 'react-native';
+import { useDispatch } from 'react-redux';
 import { ArrowLeft } from 'lucide-react-native';
 import ScreenContainer from '../../../../components/containers/ScreenContainer';
 import AppHeader from '../../../../components/navigation/AppHeader';
@@ -9,14 +10,26 @@ import DurationInput from '../../../../components/forms/DurationInput';
 import CalculatorInputSection from '../../../../components/calculator/CalculatorInputSection';
 import CalculatorResultSection from '../../../../components/calculator/CalculatorResultSection';
 import CalculatorActionBar from '../../../../components/calculator/CalculatorActionBar';
+import StaleResultBanner from '../../../../components/calculator/StaleResultBanner';
+import SaveModal from '../../../../components/modals/SaveModal';
 
 import { useRDCalculator } from './hooks/useRDCalculator';
 import RDResultCard from './components/RDResultCard';
 import RDBreakdownChart from './components/RDBreakdownChart';
 
-export const RDCalculatorScreen = ({ navigation }) => {
+import { createCalculationSnapshot } from '../../../saved/types/savedTypes';
+import { restoreSavedCalculationInputs } from '../../../saved/utils/calculationRestoreAdapters';
+import { addSavedCalculation, updateSavedCalculation } from '../../../../store/slices/savedCalculationsSlice';
+
+export const RDCalculatorScreen = ({ route, navigation }) => {
+  const dispatch = useDispatch();
   const scrollViewRef = useRef(null);
   const resultsYRef = useRef(0);
+  const [saveModalVisible, setSaveModalVisible] = useState(false);
+
+  const restoredInputs = route?.params?.savedCalculation
+    ? restoreSavedCalculationInputs(route.params.savedCalculation)
+    : {};
 
   const {
     monthlyDeposit,
@@ -27,12 +40,15 @@ export const RDCalculatorScreen = ({ navigation }) => {
     setTenureValue,
     tenureUnit,
     setTenureUnit,
+    editingSavedCalculationId,
+    savedTitle,
     fieldErrors,
     result,
     isCalculated,
+    isResultStale,
     handleCalculate,
     handleReset,
-  } = useRDCalculator();
+  } = useRDCalculator(restoredInputs);
 
   const onCalculatePress = () => {
     const success = handleCalculate();
@@ -46,10 +62,34 @@ export const RDCalculatorScreen = ({ navigation }) => {
     }
   };
 
+  const onSaveConfirm = ({ title, saveMode }) => {
+    setSaveModalVisible(false);
+    if (saveMode === 'update' && editingSavedCalculationId) {
+      dispatch(
+        updateSavedCalculation({
+          id: editingSavedCalculationId,
+          title,
+          inputs: { monthlyDeposit, annualInterestRate, tenureValue, tenureUnit },
+          result,
+        }),
+      );
+      Alert.alert('Saved', 'Calculation updated successfully!');
+    } else {
+      const snapshot = createCalculationSnapshot({
+        calculatorId: 'rd',
+        title,
+        inputs: { monthlyDeposit, annualInterestRate, tenureValue, tenureUnit },
+        result,
+      });
+      dispatch(addSavedCalculation(snapshot));
+      Alert.alert('Saved', 'Calculation saved successfully!');
+    }
+  };
+
   const renderHeader = () => (
     <AppHeader
       title="RD Calculator"
-      subtitle="Recurring Deposit Payout"
+      subtitle="Recurring Deposit Quarterly Compounding Savings"
       leftAction={{
         icon: ArrowLeft,
         onPress: () => navigation.goBack(),
@@ -68,11 +108,11 @@ export const RDCalculatorScreen = ({ navigation }) => {
       style={styles.container}
     >
       <CalculatorInputSection
-        title="RD Details"
-        subtitle="Calculated using standard quarterly compounding model"
+        title="Recurring Deposit Inputs"
+        subtitle="Specify monthly installment, interest rate & deposit duration"
       >
         <MoneyInput
-          label="Monthly Deposit"
+          label="Monthly Installment Amount"
           value={monthlyDeposit}
           onChangeText={setMonthlyDeposit}
           error={fieldErrors.monthlyDeposit}
@@ -86,7 +126,7 @@ export const RDCalculatorScreen = ({ navigation }) => {
         />
 
         <DurationInput
-          label="Deposit Tenure"
+          label="Deposit Duration"
           value={tenureValue}
           unit={tenureUnit}
           onChangeText={setTenureValue}
@@ -99,6 +139,8 @@ export const RDCalculatorScreen = ({ navigation }) => {
           onPrimaryPress={onCalculatePress}
           secondaryTitle="Reset"
           onSecondaryPress={handleReset}
+          onSavePress={() => setSaveModalVisible(true)}
+          isSaveDisabled={!isCalculated || isResultStale}
         />
       </CalculatorInputSection>
 
@@ -108,12 +150,24 @@ export const RDCalculatorScreen = ({ navigation }) => {
             resultsYRef.current = e.nativeEvent.layout.y;
           }}
         >
-          <CalculatorResultSection title="RD Maturity Summary">
+          <CalculatorResultSection title="RD Maturity Breakdown">
+            {isResultStale && <StaleResultBanner style={styles.cardMargin} />}
+
             <RDResultCard result={result} style={styles.cardMargin} />
+
             <RDBreakdownChart result={result} style={styles.cardMargin} />
           </CalculatorResultSection>
         </View>
       )}
+
+      <SaveModal
+        visible={saveModalVisible}
+        defaultTitle="RD Calculator"
+        isEditing={Boolean(editingSavedCalculationId)}
+        existingTitle={savedTitle}
+        onClose={() => setSaveModalVisible(false)}
+        onSave={onSaveConfirm}
+      />
 
       <View style={styles.bottomSpacer} />
     </ScreenContainer>
