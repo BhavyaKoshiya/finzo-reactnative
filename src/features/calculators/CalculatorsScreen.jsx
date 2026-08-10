@@ -1,12 +1,15 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Search } from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
+import AppIcon from '../../components/common/AppIcon';
 import CalculatorCard from '../../components/cards/CalculatorCard';
 import InfoCard from '../../components/cards/InfoCard';
 import { useAppTheme } from '../../hooks/useAppTheme';
 import { getCalculatorCategories } from '../../calculators';
+import { ROUTES } from '../../navigation/routes';
 
 export const CalculatorsScreen = ({ navigation }) => {
   const { currentTheme } = useAppTheme();
@@ -30,6 +33,23 @@ export const CalculatorsScreen = ({ navigation }) => {
       useSafeAreaBottom={false}
       style={styles.container}
     >
+      {/* Search Bar Entry */}
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate(ROUTES.CALCULATOR_SEARCH)}
+        accessibilityRole="search"
+        accessibilityLabel="Search calculators"
+        style={[
+          styles.searchBar,
+          { backgroundColor: currentTheme.surface, borderColor: currentTheme.border },
+        ]}
+      >
+        <AppIcon icon={Search} size={20} color={currentTheme.textMuted} style={styles.searchIcon} />
+        <AppText variant="bodySmall" color={currentTheme.textMuted}>
+          Search calculators (EMI, SIP, GST, FD...)
+        </AppText>
+      </TouchableOpacity>
+
       {/* Category Groups & Calculators */}
       {categories.map((cat) => (
         <View key={cat.id} style={styles.categorySection}>
@@ -75,6 +95,19 @@ const styles = StyleSheet.create({
   headerGroup: {
     paddingHorizontal: 16,
     paddingBottom: 16,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    height: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  searchIcon: {
+    marginRight: 10,
   },
   categorySection: {
     marginTop: 8,

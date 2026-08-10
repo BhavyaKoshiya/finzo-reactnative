@@ -1,22 +1,65 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Search } from 'lucide-react-native';
+import { Search, ChevronRight } from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
 import AppIcon from '../../components/common/AppIcon';
 import CalculatorCard from '../../components/cards/CalculatorCard';
 import CategoryCard from '../../components/cards/CategoryCard';
+import SavedCalculationCard from '../saved/components/SavedCalculationCard';
 import { useAppTheme } from '../../hooks/useAppTheme';
 import { ROUTES } from '../../navigation/routes';
-import { getPopularCalculators, getCalculatorCategories } from '../../calculators';
+import { getPopularCalculators, getCalculatorCategories, getCalculatorById } from '../../calculators';
+import {
+  selectSavedCalculations,
+  toggleFavorite,
+  deleteSavedCalculation,
+} from '../../store/slices/savedCalculationsSlice';
 
 export const HomeScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
   const { currentTheme } = useAppTheme();
   const insets = useSafeAreaInsets();
 
   const popularCalculators = getPopularCalculators();
   const categories = getCalculatorCategories();
+  const savedCalculations = useSelector(selectSavedCalculations);
+  const recentSavedCalculations = savedCalculations.slice(0, 3);
+
+  const handleOpenSavedItem = (item) => {
+    const calcMetadata = getCalculatorById(item.calculatorId);
+    if (!calcMetadata || !calcMetadata.route) {
+      Alert.alert(
+        'Calculator Unavailable',
+        'This calculator is no longer available in the app catalog.',
+      );
+      return;
+    }
+    navigation.navigate(calcMetadata.route, {
+      savedCalculation: item,
+    });
+  };
+
+  const handleToggleFavorite = (id) => {
+    dispatch(toggleFavorite(id));
+  };
+
+  const handleDeleteSavedItem = (item) => {
+    Alert.alert(
+      'Delete Calculation?',
+      `"${item.title || 'Calculation'}" will be permanently removed.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => dispatch(deleteSavedCalculation(item.id)),
+        },
+      ],
+    );
+  };
 
   const renderHeader = () => (
     <View style={[styles.heroSection, { paddingTop: Math.max(insets.top, 8), backgroundColor: currentTheme.background }]}>
@@ -40,10 +83,10 @@ export const HomeScreen = ({ navigation }) => {
       useSafeAreaBottom={false}
       style={styles.container}
     >
-      {/* Search Placeholder */}
+      {/* Prominent Search Bar */}
       <TouchableOpacity
         activeOpacity={0.8}
-        onPress={() => navigation.navigate(ROUTES.CALCULATORS)}
+        onPress={() => navigation.navigate(ROUTES.CALCULATOR_SEARCH)}
         accessibilityRole="search"
         accessibilityLabel="Search calculators"
         style={[
@@ -56,6 +99,35 @@ export const HomeScreen = ({ navigation }) => {
           Search calculators (EMI, SIP, GST, FD...)
         </AppText>
       </TouchableOpacity>
+
+      {/* Recently Saved Section (Shown only if saved calculations exist) */}
+      {recentSavedCalculations.length > 0 && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeaderRow}>
+            <AppText variant="sectionTitle">Recently Saved</AppText>
+            <TouchableOpacity
+              onPress={() => navigation.navigate(ROUTES.SAVED)}
+              activeOpacity={0.7}
+              style={styles.viewAllRow}
+            >
+              <AppText variant="caption" color={currentTheme.primary} style={styles.viewAllText}>
+                View All ({savedCalculations.length})
+              </AppText>
+              <AppIcon icon={ChevronRight} size={16} color={currentTheme.primary} />
+            </TouchableOpacity>
+          </View>
+
+          {recentSavedCalculations.map((item) => (
+            <SavedCalculationCard
+              key={item.id}
+              item={item}
+              onPress={() => handleOpenSavedItem(item)}
+              onToggleFavorite={handleToggleFavorite}
+              onDelete={handleDeleteSavedItem}
+            />
+          ))}
+        </View>
+      )}
 
       {/* Popular Calculators Section */}
       <View style={styles.section}>
@@ -107,8 +179,6 @@ const styles = StyleSheet.create({
   heroSection: {
     paddingHorizontal: 16,
     paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'transparent',
   },
   brandTitle: {
     fontWeight: '700',
@@ -117,12 +187,6 @@ const styles = StyleSheet.create({
   },
   greetingTitle: {
     marginBottom: 2,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    marginBottom: 12,
   },
   searchBar: {
     flexDirection: 'row',
@@ -136,6 +200,26 @@ const styles = StyleSheet.create({
   },
   searchIcon: {
     marginRight: 10,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    marginBottom: 12,
+  },
+  viewAllRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  viewAllText: {
+    fontWeight: '600',
+    marginRight: 2,
   },
   cardMargin: {
     marginBottom: 12,

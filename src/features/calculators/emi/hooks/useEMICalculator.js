@@ -80,11 +80,29 @@ export const useEMICalculator = (initialInputs = {}) => {
     }
   }, []);
 
-  // Initial calculation on mount
+  // Initial calculation on mount or when restored inputs change
   useEffect(() => {
-    compute(defaults.loanAmount, defaults.interestRate, defaults.tenureValue, defaults.tenureUnit);
+    const currentAmt = initialInputs?.loanAmount || defaults.loanAmount;
+    const currentRate = initialInputs?.interestRate || defaults.interestRate;
+    const currentTVal = initialInputs?.tenureValue || defaults.tenureValue;
+    const currentTUnit = initialInputs?.tenureUnit || defaults.tenureUnit;
+
+    setLoanAmountState(currentAmt);
+    setInterestRateState(currentRate);
+    setTenureValueState(currentTVal);
+    setTenureUnitState(currentTUnit);
+    setEditingSavedCalculationId(initialInputs?.editingSavedCalculationId || null);
+    setSavedTitle(initialInputs?.savedTitle || '');
+
+    compute(currentAmt, currentRate, currentTVal, currentTUnit);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [
+    initialInputs?.editingSavedCalculationId,
+    initialInputs?.loanAmount,
+    initialInputs?.interestRate,
+    initialInputs?.tenureValue,
+    initialInputs?.tenureUnit,
+  ]);
 
   const handleCalculate = (
     overrideAmt = loanAmount,

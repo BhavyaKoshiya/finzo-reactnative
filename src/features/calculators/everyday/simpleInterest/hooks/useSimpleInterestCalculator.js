@@ -4,7 +4,7 @@ import logger from '../../../../../services/logger';
 
 export const DEFAULT_SIMPLE_INTEREST_INPUTS = {
   principal: '100000',
-  annualInterestRate: '8',
+  annualInterestRate: '8.0',
   tenureValue: '5',
   tenureUnit: 'years',
 };
@@ -16,8 +16,8 @@ export const useSimpleInterestCalculator = (initialInputs = {}) => {
   const [annualInterestRate, setAnnualInterestRateState] = useState(defaults.annualInterestRate);
   const [tenureValue, setTenureValueState] = useState(defaults.tenureValue);
   const [tenureUnit, setTenureUnitState] = useState(defaults.tenureUnit);
-  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs.editingSavedCalculationId || null);
-  const [savedTitle, setSavedTitle] = useState(initialInputs.savedTitle || '');
+  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs?.editingSavedCalculationId || null);
+  const [savedTitle, setSavedTitle] = useState(initialInputs?.savedTitle || '');
 
   const [fieldErrors, setFieldErrors] = useState({});
   const [result, setResult] = useState(null);
@@ -44,46 +44,61 @@ export const useSimpleInterestCalculator = (initialInputs = {}) => {
     if (isCalculated) setIsResultStale(true);
   };
 
-  const compute = useCallback(
-    (p, r, tValue, tUnit) => {
-      let tenureInYears = parseFloat(tValue);
-      if (!isNaN(tenureInYears) && tUnit === 'months') {
-        tenureInYears = tenureInYears / 12;
+  const compute = useCallback((p, r, tValue, tUnit) => {
+    let tenureYears = parseFloat(tValue);
+    if (!isNaN(tenureYears) && tUnit === 'months') {
+      tenureYears = tenureYears / 12;
+    }
+
+    logger.info('Simple Interest calculation initiated', { p, r, tenureYears });
+    const calculationResult = calculateSimpleInterest(p, r, tenureYears);
+
+    if (calculationResult.success) {
+      setFieldErrors({});
+      setResult(calculationResult.data);
+      setIsCalculated(true);
+      setIsResultStale(false);
+      logger.info('Simple Interest calculation completed', calculationResult.data);
+      return true;
+    } else {
+      const errorsByField = {};
+      if (Array.isArray(calculationResult.errors)) {
+        calculationResult.errors.forEach((err) => {
+          errorsByField[err.field] = err.message;
+        });
       }
-
-      logger.info('Simple Interest calculation initiated', { p, r, tenureInYears });
-      const calculationResult = calculateSimpleInterest(p, r, tenureInYears);
-
-      if (calculationResult.success) {
-        setFieldErrors({});
-        setResult(calculationResult.data);
-        setIsCalculated(true);
-        setIsResultStale(false);
-        logger.info('Simple Interest calculation completed', calculationResult.data);
-        return true;
-      } else {
-        const errorsByField = {};
-        if (Array.isArray(calculationResult.errors)) {
-          calculationResult.errors.forEach((err) => {
-            errorsByField[err.field] = err.message;
-          });
-        }
-        setFieldErrors(errorsByField);
-        setResult(null);
-        setIsCalculated(false);
-        setIsResultStale(false);
-        logger.warn('Simple Interest calculation failed validation', errorsByField);
-        return false;
-      }
-    },
-    [],
-  );
-
-  // Initial calculation on mount
-  useEffect(() => {
-    compute(defaults.principal, defaults.annualInterestRate, defaults.tenureValue, defaults.tenureUnit);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      setFieldErrors(errorsByField);
+      setResult(null);
+      setIsCalculated(false);
+      setIsResultStale(false);
+      logger.warn('Simple Interest calculation failed validation', errorsByField);
+      return false;
+    }
   }, []);
+
+  // Initial calculation on mount or when restored inputs change
+  useEffect(() => {
+    const currentP = initialInputs?.principal || defaults.principal;
+    const currentR = initialInputs?.annualInterestRate || defaults.annualInterestRate;
+    const currentTVal = initialInputs?.tenureValue || defaults.tenureValue;
+    const currentTUnit = initialInputs?.tenureUnit || defaults.tenureUnit;
+
+    setPrincipalState(currentP);
+    setAnnualInterestRateState(currentR);
+    setTenureValueState(currentTVal);
+    setTenureUnitState(currentTUnit);
+    setEditingSavedCalculationId(initialInputs?.editingSavedCalculationId || null);
+    setSavedTitle(initialInputs?.savedTitle || '');
+
+    compute(currentP, currentR, currentTVal, currentTUnit);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    initialInputs?.editingSavedCalculationId,
+    initialInputs?.principal,
+    initialInputs?.annualInterestRate,
+    initialInputs?.tenureValue,
+    initialInputs?.tenureUnit,
+  ]);
 
   const handleCalculate = (
     overrideP = principal,

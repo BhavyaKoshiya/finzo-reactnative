@@ -6,20 +6,26 @@ import {
 } from '../../../../../calculations/percentage';
 import logger from '../../../../../services/logger';
 
+export const PERCENTAGE_MODES = {
+  PERCENTAGE_OF: 'percentage-of',
+  PERCENTAGE_CHANGE: 'percentage-change',
+  PERCENTAGE_DIFFERENCE: 'percentage-difference',
+};
+
 export const PERCENTAGE_MODE_OPTIONS = [
-  { label: 'Percentage Of (X% of Y)', value: 'percentage-of' },
-  { label: 'Percentage Change (Old → New)', value: 'percentage-change' },
-  { label: 'Percentage Difference (A vs B)', value: 'percentage-difference' },
+  { label: 'Percentage Of (What is X% of Y?)', value: PERCENTAGE_MODES.PERCENTAGE_OF },
+  { label: 'Percentage Change (% Increase/Decrease)', value: PERCENTAGE_MODES.PERCENTAGE_CHANGE },
+  { label: 'Percentage Difference (|A - B| / Avg)', value: PERCENTAGE_MODES.PERCENTAGE_DIFFERENCE },
 ];
 
 export const DEFAULT_PERCENTAGE_INPUTS = {
-  mode: 'percentage-of',
+  mode: PERCENTAGE_MODES.PERCENTAGE_OF,
   percentage: '20',
   totalValue: '500',
-  oldValue: '100',
-  newValue: '125',
-  valA: '100',
-  valB: '125',
+  oldValue: '1000',
+  newValue: '1250',
+  valA: '500',
+  valB: '600',
 };
 
 export const usePercentageCalculator = (initialInputs = {}) => {
@@ -32,13 +38,19 @@ export const usePercentageCalculator = (initialInputs = {}) => {
   const [newValue, setNewValueState] = useState(defaults.newValue);
   const [valA, setValAState] = useState(defaults.valA);
   const [valB, setValBState] = useState(defaults.valB);
-  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs.editingSavedCalculationId || null);
-  const [savedTitle, setSavedTitle] = useState(initialInputs.savedTitle || '');
+  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs?.editingSavedCalculationId || null);
+  const [savedTitle, setSavedTitle] = useState(initialInputs?.savedTitle || '');
 
   const [fieldErrors, setFieldErrors] = useState({});
   const [result, setResult] = useState(null);
   const [isCalculated, setIsCalculated] = useState(false);
   const [isResultStale, setIsResultStale] = useState(false);
+
+  const setMode = (m) => {
+    setModeState(m);
+    setFieldErrors({});
+    if (isCalculated) setIsResultStale(true);
+  };
 
   const setPercentage = (val) => {
     setPercentageState(val);
@@ -70,81 +82,84 @@ export const usePercentageCalculator = (initialInputs = {}) => {
     if (isCalculated) setIsResultStale(true);
   };
 
-  const compute = useCallback(
-    (currentMode, p, total, oldV, newV, vA, vB) => {
-      logger.info('Percentage calculation initiated', { currentMode, p, total, oldV, newV, vA, vB });
-      let calculationResult;
+  const compute = useCallback((currentMode, p, total, oldV, newV, vA, vB) => {
+    logger.info('Percentage calculation initiated', { currentMode, p, total, oldV, newV, vA, vB });
 
-      if (currentMode === 'percentage-of') {
-        calculationResult = percentageOf(total, p);
-      } else if (currentMode === 'percentage-change') {
-        calculationResult = percentageChange(oldV, newV);
-      } else if (currentMode === 'percentage-difference') {
-        calculationResult = percentageDifference(vA, vB);
+    let calculationResult;
+    if (currentMode === PERCENTAGE_MODES.PERCENTAGE_OF) {
+      calculationResult = percentageOf(p, total);
+    } else if (currentMode === PERCENTAGE_MODES.PERCENTAGE_CHANGE) {
+      calculationResult = percentageChange(oldV, newV);
+    } else if (currentMode === PERCENTAGE_MODES.PERCENTAGE_DIFFERENCE) {
+      calculationResult = percentageDifference(vA, vB);
+    }
+
+    if (calculationResult && calculationResult.success) {
+      setFieldErrors({});
+      setResult({ mode: currentMode, ...calculationResult.data });
+      setIsCalculated(true);
+      setIsResultStale(false);
+      logger.info('Percentage calculation completed', calculationResult.data);
+      return true;
+    } else {
+      const errorsByField = {};
+      if (calculationResult && Array.isArray(calculationResult.errors)) {
+        calculationResult.errors.forEach((err) => {
+          errorsByField[err.field] = err.message;
+        });
       }
-
-      if (calculationResult && calculationResult.success) {
-        setFieldErrors({});
-        setResult({ mode: currentMode, ...calculationResult.data });
-        setIsCalculated(true);
-        setIsResultStale(false);
-        logger.info('Percentage calculation completed', calculationResult.data);
-        return true;
-      } else {
-        const errorsByField = {};
-        if (calculationResult && Array.isArray(calculationResult.errors)) {
-          calculationResult.errors.forEach((err) => {
-            errorsByField[err.field] = err.message;
-          });
-        }
-        setFieldErrors(errorsByField);
-        setResult(null);
-        setIsCalculated(false);
-        setIsResultStale(false);
-        logger.warn('Percentage calculation failed validation', errorsByField);
-        return false;
-      }
-    },
-    [],
-  );
-
-  // Initial calculation on mount
-  useEffect(() => {
-    compute(
-      defaults.mode,
-      defaults.percentage,
-      defaults.totalValue,
-      defaults.oldValue,
-      defaults.newValue,
-      defaults.valA,
-      defaults.valB,
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      setFieldErrors(errorsByField);
+      setResult(null);
+      setIsCalculated(false);
+      setIsResultStale(false);
+      logger.warn('Percentage calculation failed validation', errorsByField);
+      return false;
+    }
   }, []);
 
-  const handleModeChange = (newMode) => {
-    setModeState(newMode);
-    if (isCalculated) setIsResultStale(true);
-  };
+  // Initial calculation on mount or when restored inputs change
+  useEffect(() => {
+    const currentMode = initialInputs?.mode || defaults.mode;
+    const currentP = initialInputs?.percentage || defaults.percentage;
+    const currentTotal = initialInputs?.totalValue || defaults.totalValue;
+    const currentOldV = initialInputs?.oldValue || defaults.oldValue;
+    const currentNewV = initialInputs?.newValue || defaults.newValue;
+    const currentVA = initialInputs?.valA || defaults.valA;
+    const currentVB = initialInputs?.valB || defaults.valB;
+
+    setModeState(currentMode);
+    setPercentageState(currentP);
+    setTotalValueState(currentTotal);
+    setOldValueState(currentOldV);
+    setNewValueState(currentNewV);
+    setValAState(currentVA);
+    setValBState(currentVB);
+    setEditingSavedCalculationId(initialInputs?.editingSavedCalculationId || null);
+    setSavedTitle(initialInputs?.savedTitle || '');
+
+    compute(currentMode, currentP, currentTotal, currentOldV, currentNewV, currentVA, currentVB);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    initialInputs?.editingSavedCalculationId,
+    initialInputs?.mode,
+    initialInputs?.percentage,
+    initialInputs?.totalValue,
+    initialInputs?.oldValue,
+    initialInputs?.newValue,
+    initialInputs?.valA,
+    initialInputs?.valB,
+  ]);
 
   const handleCalculate = (
     overrideMode = mode,
     overrideP = percentage,
     overrideTotal = totalValue,
-    overrideOld = oldValue,
-    overrideNew = newValue,
+    overrideOldV = oldValue,
+    overrideNewV = newValue,
     overrideVA = valA,
     overrideVB = valB,
   ) => {
-    return compute(
-      overrideMode,
-      overrideP,
-      overrideTotal,
-      overrideOld,
-      overrideNew,
-      overrideVA,
-      overrideVB,
-    );
+    return compute(overrideMode, overrideP, overrideTotal, overrideOldV, overrideNewV, overrideVA, overrideVB);
   };
 
   const handleReset = useCallback(() => {
@@ -171,7 +186,8 @@ export const usePercentageCalculator = (initialInputs = {}) => {
 
   return {
     mode,
-    setMode: setModeState,
+    setMode,
+    handleModeChange: setMode,
     percentage,
     setPercentage,
     totalValue,
@@ -184,7 +200,6 @@ export const usePercentageCalculator = (initialInputs = {}) => {
     setValA,
     valB,
     setValB,
-    handleModeChange,
     editingSavedCalculationId,
     savedTitle,
     fieldErrors,

@@ -5,6 +5,7 @@ export const ROUTES = {
   SAVED: 'Saved',
   SETTINGS: 'Settings',
   SHOWCASE: 'Showcase',
+  CALCULATOR_SEARCH: 'CalculatorSearch',
   CALCULATOR_DETAIL: 'CalculatorDetail',
   CALCULATOR_RESULT: 'CalculatorResult',
   EMI_CALCULATOR: 'EMICalculator', // Backward-compatible route for Home Loan EMI

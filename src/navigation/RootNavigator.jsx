@@ -22,6 +22,7 @@ import {
   CompoundInterestCalculatorScreen,
   PercentageCalculatorScreen,
 } from '../features/calculators/everyday';
+import CalculatorSearchScreen from '../features/search/CalculatorSearchScreen';
 import ComponentShowcaseScreen from '../features/showcase/ComponentShowcaseScreen';
 import { ROUTES } from './routes';
 
@@ -50,6 +51,9 @@ export const RootNavigator = () => {
       <Stack.Screen name={ROUTES.SIMPLE_INTEREST_CALCULATOR} component={SimpleInterestCalculatorScreen} />
       <Stack.Screen name={ROUTES.COMPOUND_INTEREST_CALCULATOR} component={CompoundInterestCalculatorScreen} />
       <Stack.Screen name={ROUTES.PERCENTAGE_CALCULATOR} component={PercentageCalculatorScreen} />
+
+      {/* Global Calculator Search Screen */}
+      <Stack.Screen name={ROUTES.CALCULATOR_SEARCH} component={CalculatorSearchScreen} />
 
       {__DEV__ && (
         <Stack.Screen

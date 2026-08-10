@@ -60,11 +60,23 @@ export const useROICalculator = (initialInputs = {}) => {
     }
   }, []);
 
-  // Initial calculation on mount
+  // Initial calculation on mount or when restored inputs change
   useEffect(() => {
-    compute(defaults.initialInvestment, defaults.finalValue);
+    const currentInv = initialInputs?.initialInvestment || defaults.initialInvestment;
+    const currentFVal = initialInputs?.finalValue || defaults.finalValue;
+
+    setInitialInvestmentState(currentInv);
+    setFinalValueState(currentFVal);
+    setEditingSavedCalculationId(initialInputs?.editingSavedCalculationId || null);
+    setSavedTitle(initialInputs?.savedTitle || '');
+
+    compute(currentInv, currentFVal);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [
+    initialInputs?.editingSavedCalculationId,
+    initialInputs?.initialInvestment,
+    initialInputs?.finalValue,
+  ]);
 
   const handleCalculate = (
     overrideInv = initialInvestment,

@@ -28,73 +28,80 @@ export const SavedCalculationCard = ({
     : '';
 
   return (
-    <AppCard style={[styles.card, style]} onPress={onPress}>
-      <View style={styles.topRow}>
-        <View style={styles.iconTitleGroup}>
-          <View style={[styles.iconBox, { backgroundColor: `${currentTheme.primary}12` }]}>
-            <AppIcon icon={IconComponent} size={20} color={currentTheme.primary} />
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={`Open saved calculation ${item.title || calcName}`}
+    >
+      <AppCard style={[styles.card, style]}>
+        <View style={styles.topRow}>
+          <View style={styles.iconTitleGroup}>
+            <View style={[styles.iconBox, { backgroundColor: `${currentTheme.primary}12` }]}>
+              <AppIcon icon={IconComponent} size={20} color={currentTheme.primary} />
+            </View>
+            <View style={styles.titleTextGroup}>
+              <AppText variant="cardTitle" numberOfLines={1}>
+                {item.title || calcName}
+              </AppText>
+              <AppText variant="caption" color={currentTheme.textSecondary} numberOfLines={1}>
+                {calcName}
+              </AppText>
+            </View>
           </View>
-          <View style={styles.titleTextGroup}>
-            <AppText variant="cardTitle" numberOfLines={1}>
-              {item.title || calcName}
-            </AppText>
-            <AppText variant="caption" color={currentTheme.textSecondary} numberOfLines={1}>
-              {calcName}
-            </AppText>
+
+          <View style={styles.actionsGroup}>
+            <TouchableOpacity
+              onPress={(e) => {
+                e.stopPropagation();
+                onToggleFavorite(item.id);
+              }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityLabel={item.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+              style={styles.actionBtn}
+            >
+              <AppIcon
+                icon={Star}
+                size={18}
+                color={item.isFavorite ? '#F59E0B' : currentTheme.textMuted}
+                fill={item.isFavorite ? '#F59E0B' : 'transparent'}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={(e) => {
+                e.stopPropagation();
+                onDelete(item);
+              }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityLabel="Delete saved calculation"
+              style={styles.actionBtn}
+            >
+              <AppIcon icon={Trash2} size={18} color={currentTheme.error} />
+            </TouchableOpacity>
           </View>
         </View>
 
-        <View style={styles.actionsGroup}>
-          <TouchableOpacity
-            onPress={(e) => {
-              e.stopPropagation();
-              onToggleFavorite(item.id);
-            }}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            accessibilityLabel={item.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-            style={styles.actionBtn}
-          >
-            <AppIcon
-              icon={Star}
-              size={18}
-              color={item.isFavorite ? '#F59E0B' : currentTheme.textMuted}
-              fill={item.isFavorite ? '#F59E0B' : 'transparent'}
-            />
-          </TouchableOpacity>
+        <View style={[styles.divider, { backgroundColor: currentTheme.border }]} />
 
-          <TouchableOpacity
-            onPress={(e) => {
-              e.stopPropagation();
-              onDelete(item);
-            }}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            accessibilityLabel="Delete saved calculation"
-            style={styles.actionBtn}
-          >
-            <AppIcon icon={Trash2} size={18} color={currentTheme.error} />
-          </TouchableOpacity>
+        <View style={styles.bottomRow}>
+          <View style={styles.resultGroup}>
+            <AppText variant="caption" color={currentTheme.textSecondary}>
+              {primaryLabel}
+            </AppText>
+            <AppText variant="currencyMedium" color={currentTheme.primary} style={styles.primaryValueText}>
+              {primaryValue}
+            </AppText>
+          </View>
+
+          {formattedDate !== '' && (
+            <AppText variant="caption" color={currentTheme.textMuted}>
+              Saved {formattedDate}
+            </AppText>
+          )}
         </View>
-      </View>
-
-      <View style={[styles.divider, { backgroundColor: currentTheme.border }]} />
-
-      <View style={styles.bottomRow}>
-        <View style={styles.resultGroup}>
-          <AppText variant="caption" color={currentTheme.textSecondary}>
-            {primaryLabel}
-          </AppText>
-          <AppText variant="currencyMedium" color={currentTheme.primary} style={styles.primaryValueText}>
-            {primaryValue}
-          </AppText>
-        </View>
-
-        {formattedDate !== '' && (
-          <AppText variant="caption" color={currentTheme.textMuted}>
-            Saved {formattedDate}
-          </AppText>
-        )}
-      </View>
-    </AppCard>
+      </AppCard>
+    </TouchableOpacity>
   );
 };
 

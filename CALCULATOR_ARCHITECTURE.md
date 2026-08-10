@@ -123,11 +123,30 @@ Redux Persist (@react-native-async-storage/async-storage)
 - **Pre-Calculated Defaults**: Valid default inputs auto-calculate on mount (`isCalculated = true`, `isResultStale = false`).
 - **Stale Result UX**: Editing inputs after calculation sets `isResultStale = true` and displays `StaleResultBanner`. The Save action is disabled while `isResultStale === true`.
 - **Primary Result Presenter**: `getSavedCalculationPrimaryResult(savedItem)` extracts domain-specific primary metrics (EMI, Maturity Amount, CAGR %, GST total) for list card rendering.
-- **Input Restoration**: Opening a saved item from `SavedScreen` navigates to its calculator route passing `savedCalculation: item` in params to populate initial hook inputs.
+- **Input Restoration**: Opening a saved item from `SavedScreen` or `HomeScreen` navigates to its calculator route passing `savedCalculation: item` in params to populate initial hook inputs and perform a fresh calculation.
 
 ---
 
-## 9. Step-by-Step Guide: Adding a New Calculator
+## 9. Calculator Search Architecture
+Location: `src/calculators/search/calculatorSearch.js` & `src/features/search/CalculatorSearchScreen.jsx`
+
+- **Registry-Driven Engine**: Pure JS function `searchCalculators(query, calculators, categoryFilter)` operating on `CALCULATOR_REGISTRY` metadata. Zero third-party search dependencies.
+- **Ranking Priority**: Exact Name Match > Prefix Match > Substring Match > Keyword Match > Description Match > Category Match.
+- **Search UI**: `CalculatorSearchScreen.jsx` with auto-focusing search bar, clear button, category filter chips (`All`, `Loans`, `Investments`, `Business`, `Everyday`), results count, and empty state.
+
+---
+
+## 10. Home Dashboard Architecture
+Location: `src/features/home/HomeScreen.jsx`
+
+- **Search Bar Entry**: Prominent search bar navigating directly to `ROUTES.CALCULATOR_SEARCH`.
+- **Popular Calculators**: Dynamically rendered via `getPopularCalculators()`.
+- **Categories Grid**: Dynamically rendered via `getCalculatorCategories()`.
+- **Recently Saved Section**: Displays top 3 saved items from Redux `selectSavedCalculations`; automatically hidden when zero saved items exist.
+
+---
+
+## 11. Step-by-Step Guide: Adding a New Calculator
 
 To add a new calculator in future phases:
 

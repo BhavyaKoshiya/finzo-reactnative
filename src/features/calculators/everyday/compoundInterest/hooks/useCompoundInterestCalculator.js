@@ -2,16 +2,9 @@ import { useState, useCallback, useEffect } from 'react';
 import { calculateCompoundInterest } from '../../../../../calculations/interest/compoundInterest';
 import logger from '../../../../../services/logger';
 
-export const COMPOUNDING_FREQUENCY_OPTIONS = [
-  { label: 'Yearly', value: 'yearly' },
-  { label: 'Half-Yearly', value: 'half-yearly' },
-  { label: 'Quarterly', value: 'quarterly' },
-  { label: 'Monthly', value: 'monthly' },
-];
-
 export const DEFAULT_COMPOUND_INTEREST_INPUTS = {
   principal: '100000',
-  annualInterestRate: '8',
+  annualInterestRate: '8.0',
   tenureValue: '5',
   tenureUnit: 'years',
   compoundingFrequency: 'yearly',
@@ -25,8 +18,8 @@ export const useCompoundInterestCalculator = (initialInputs = {}) => {
   const [tenureValue, setTenureValueState] = useState(defaults.tenureValue);
   const [tenureUnit, setTenureUnitState] = useState(defaults.tenureUnit);
   const [compoundingFrequency, setCompoundingFrequencyState] = useState(defaults.compoundingFrequency);
-  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs.editingSavedCalculationId || null);
-  const [savedTitle, setSavedTitle] = useState(initialInputs.savedTitle || '');
+  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs?.editingSavedCalculationId || null);
+  const [savedTitle, setSavedTitle] = useState(initialInputs?.savedTitle || '');
 
   const [fieldErrors, setFieldErrors] = useState({});
   const [result, setResult] = useState(null);
@@ -58,52 +51,64 @@ export const useCompoundInterestCalculator = (initialInputs = {}) => {
     if (isCalculated) setIsResultStale(true);
   };
 
-  const compute = useCallback(
-    (p, r, tValue, tUnit, freq) => {
-      let tenureInYears = parseFloat(tValue);
-      if (!isNaN(tenureInYears) && tUnit === 'months') {
-        tenureInYears = tenureInYears / 12;
+  const compute = useCallback((p, r, tValue, tUnit, freq) => {
+    let tenureYears = parseFloat(tValue);
+    if (!isNaN(tenureYears) && tUnit === 'months') {
+      tenureYears = tenureYears / 12;
+    }
+
+    logger.info('Compound Interest calculation initiated', { p, r, tenureYears, freq });
+    const calculationResult = calculateCompoundInterest(p, r, tenureYears, freq);
+
+    if (calculationResult.success) {
+      setFieldErrors({});
+      setResult(calculationResult.data);
+      setIsCalculated(true);
+      setIsResultStale(false);
+      logger.info('Compound Interest calculation completed', calculationResult.data);
+      return true;
+    } else {
+      const errorsByField = {};
+      if (Array.isArray(calculationResult.errors)) {
+        calculationResult.errors.forEach((err) => {
+          errorsByField[err.field] = err.message;
+        });
       }
-
-      logger.info('Compound Interest calculation initiated', { p, r, tenureInYears, freq });
-      const calculationResult = calculateCompoundInterest(p, r, tenureInYears, freq);
-
-      if (calculationResult.success) {
-        setFieldErrors({});
-        setResult(calculationResult.data);
-        setIsCalculated(true);
-        setIsResultStale(false);
-        logger.info('Compound Interest calculation completed', calculationResult.data);
-        return true;
-      } else {
-        const errorsByField = {};
-        if (Array.isArray(calculationResult.errors)) {
-          calculationResult.errors.forEach((err) => {
-            errorsByField[err.field] = err.message;
-          });
-        }
-        setFieldErrors(errorsByField);
-        setResult(null);
-        setIsCalculated(false);
-        setIsResultStale(false);
-        logger.warn('Compound Interest calculation failed validation', errorsByField);
-        return false;
-      }
-    },
-    [],
-  );
-
-  // Initial calculation on mount
-  useEffect(() => {
-    compute(
-      defaults.principal,
-      defaults.annualInterestRate,
-      defaults.tenureValue,
-      defaults.tenureUnit,
-      defaults.compoundingFrequency,
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      setFieldErrors(errorsByField);
+      setResult(null);
+      setIsCalculated(false);
+      setIsResultStale(false);
+      logger.warn('Compound Interest calculation failed validation', errorsByField);
+      return false;
+    }
   }, []);
+
+  // Initial calculation on mount or when restored inputs change
+  useEffect(() => {
+    const currentP = initialInputs?.principal || defaults.principal;
+    const currentR = initialInputs?.annualInterestRate || defaults.annualInterestRate;
+    const currentTVal = initialInputs?.tenureValue || defaults.tenureValue;
+    const currentTUnit = initialInputs?.tenureUnit || defaults.tenureUnit;
+    const currentFreq = initialInputs?.compoundingFrequency || defaults.compoundingFrequency;
+
+    setPrincipalState(currentP);
+    setAnnualInterestRateState(currentR);
+    setTenureValueState(currentTVal);
+    setTenureUnitState(currentTUnit);
+    setCompoundingFrequencyState(currentFreq);
+    setEditingSavedCalculationId(initialInputs?.editingSavedCalculationId || null);
+    setSavedTitle(initialInputs?.savedTitle || '');
+
+    compute(currentP, currentR, currentTVal, currentTUnit, currentFreq);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    initialInputs?.editingSavedCalculationId,
+    initialInputs?.principal,
+    initialInputs?.annualInterestRate,
+    initialInputs?.tenureValue,
+    initialInputs?.tenureUnit,
+    initialInputs?.compoundingFrequency,
+  ]);
 
   const handleCalculate = (
     overrideP = principal,

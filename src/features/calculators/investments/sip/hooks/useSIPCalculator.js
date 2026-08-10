@@ -76,16 +76,29 @@ export const useSIPCalculator = (initialInputs = {}) => {
     }
   }, []);
 
-  // Initial calculation on mount
+  // Initial calculation on mount or when restored inputs change
   useEffect(() => {
-    compute(
-      defaults.monthlyInvestment,
-      defaults.annualReturnRate,
-      defaults.tenureValue,
-      defaults.tenureUnit,
-    );
+    const currentInv = initialInputs?.monthlyInvestment || defaults.monthlyInvestment;
+    const currentRate = initialInputs?.annualReturnRate || defaults.annualReturnRate;
+    const currentTVal = initialInputs?.tenureValue || defaults.tenureValue;
+    const currentTUnit = initialInputs?.tenureUnit || defaults.tenureUnit;
+
+    setMonthlyInvestmentState(currentInv);
+    setAnnualReturnRateState(currentRate);
+    setTenureValueState(currentTVal);
+    setTenureUnitState(currentTUnit);
+    setEditingSavedCalculationId(initialInputs?.editingSavedCalculationId || null);
+    setSavedTitle(initialInputs?.savedTitle || '');
+
+    compute(currentInv, currentRate, currentTVal, currentTUnit);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [
+    initialInputs?.editingSavedCalculationId,
+    initialInputs?.monthlyInvestment,
+    initialInputs?.annualReturnRate,
+    initialInputs?.tenureValue,
+    initialInputs?.tenureUnit,
+  ]);
 
   const handleCalculate = (
     overrideInv = monthlyInvestment,

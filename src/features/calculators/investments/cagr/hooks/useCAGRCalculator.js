@@ -81,16 +81,29 @@ export const useCAGRCalculator = (initialInputs = {}) => {
     }
   }, []);
 
-  // Initial calculation on mount
+  // Initial calculation on mount or when restored inputs change
   useEffect(() => {
-    compute(
-      defaults.beginningValue,
-      defaults.endingValue,
-      defaults.tenureValue,
-      defaults.tenureUnit,
-    );
+    const currentBV = initialInputs?.beginningValue || defaults.beginningValue;
+    const currentEV = initialInputs?.endingValue || defaults.endingValue;
+    const currentTVal = initialInputs?.tenureValue || defaults.tenureValue;
+    const currentTUnit = initialInputs?.tenureUnit || defaults.tenureUnit;
+
+    setBeginningValueState(currentBV);
+    setEndingValueState(currentEV);
+    setTenureValueState(currentTVal);
+    setTenureUnitState(currentTUnit);
+    setEditingSavedCalculationId(initialInputs?.editingSavedCalculationId || null);
+    setSavedTitle(initialInputs?.savedTitle || '');
+
+    compute(currentBV, currentEV, currentTVal, currentTUnit);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [
+    initialInputs?.editingSavedCalculationId,
+    initialInputs?.beginningValue,
+    initialInputs?.endingValue,
+    initialInputs?.tenureValue,
+    initialInputs?.tenureUnit,
+  ]);
 
   const handleCalculate = (
     overrideBV = beginningValue,

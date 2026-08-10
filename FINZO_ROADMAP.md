@@ -10,7 +10,7 @@
 - [x] Phase 7 — Investment Calculator Family
 - [x] Phase 8 — Tax & General Financial Calculators
 - [x] Phase 9 — Saved Calculations
-- [ ] Phase 10 — Home Dashboard + Search
+- [x] Phase 10 — Home Dashboard + Search
 - [ ] Phase 11 — Share / Export
 - [ ] Phase 12 — Monetization
 - [ ] Phase 13 — Final QA + Store Preparation

@@ -2,16 +2,9 @@ import { useState, useCallback, useEffect } from 'react';
 import { calculateFD } from '../../../../../calculations/fd/calculateFD';
 import logger from '../../../../../services/logger';
 
-export const COMPOUNDING_OPTIONS = [
-  { label: 'Monthly', value: 'monthly' },
-  { label: 'Quarterly', value: 'quarterly' },
-  { label: 'Half-Yearly', value: 'half-yearly' },
-  { label: 'Yearly', value: 'yearly' },
-];
-
 export const DEFAULT_FD_INPUTS = {
   principal: '100000',
-  annualInterestRate: '7',
+  annualInterestRate: '7.5',
   tenureValue: '5',
   tenureUnit: 'years',
   compoundingFrequency: 'quarterly',
@@ -59,13 +52,13 @@ export const useFDCalculator = (initialInputs = {}) => {
   };
 
   const compute = useCallback((p, r, tValue, tUnit, freq) => {
-    let tenureInYears = parseFloat(tValue);
-    if (!isNaN(tenureInYears) && tUnit === 'months') {
-      tenureInYears = tenureInYears / 12;
+    let tenureYears = parseFloat(tValue);
+    if (!isNaN(tenureYears) && tUnit === 'months') {
+      tenureYears = tenureYears / 12;
     }
 
-    logger.info('FD calculation initiated', { p, r, tenureInYears, freq });
-    const calculationResult = calculateFD(p, r, tenureInYears, freq);
+    logger.info('FD calculation initiated', { p, r, tenureYears, freq });
+    const calculationResult = calculateFD(p, r, tenureYears, freq);
 
     if (calculationResult.success) {
       setFieldErrors({});
@@ -90,17 +83,32 @@ export const useFDCalculator = (initialInputs = {}) => {
     }
   }, []);
 
-  // Initial calculation on mount
+  // Initial calculation on mount or when restored inputs change
   useEffect(() => {
-    compute(
-      defaults.principal,
-      defaults.annualInterestRate,
-      defaults.tenureValue,
-      defaults.tenureUnit,
-      defaults.compoundingFrequency,
-    );
+    const currentP = initialInputs?.principal || defaults.principal;
+    const currentR = initialInputs?.annualInterestRate || defaults.annualInterestRate;
+    const currentTVal = initialInputs?.tenureValue || defaults.tenureValue;
+    const currentTUnit = initialInputs?.tenureUnit || defaults.tenureUnit;
+    const currentFreq = initialInputs?.compoundingFrequency || defaults.compoundingFrequency;
+
+    setPrincipalState(currentP);
+    setAnnualInterestRateState(currentR);
+    setTenureValueState(currentTVal);
+    setTenureUnitState(currentTUnit);
+    setCompoundingFrequencyState(currentFreq);
+    setEditingSavedCalculationId(initialInputs?.editingSavedCalculationId || null);
+    setSavedTitle(initialInputs?.savedTitle || '');
+
+    compute(currentP, currentR, currentTVal, currentTUnit, currentFreq);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [
+    initialInputs?.editingSavedCalculationId,
+    initialInputs?.principal,
+    initialInputs?.annualInterestRate,
+    initialInputs?.tenureValue,
+    initialInputs?.tenureUnit,
+    initialInputs?.compoundingFrequency,
+  ]);
 
   const handleCalculate = (
     overrideP = principal,

@@ -3,17 +3,11 @@ import { calculateGST } from '../../../../../calculations/gst/calculateGST';
 import logger from '../../../../../services/logger';
 
 export const GST_MODE_OPTIONS = [
-  { label: 'GST Exclusive (Add GST to Base)', value: 'exclusive' },
-  { label: 'GST Inclusive (Extract GST from Total)', value: 'inclusive' },
+  { label: 'Exclusive (Add GST to Amount)', value: 'exclusive' },
+  { label: 'Inclusive (Extract GST from Amount)', value: 'inclusive' },
 ];
 
-export const GST_RATE_PRESETS = [
-  { label: '5%', value: '5' },
-  { label: '12%', value: '12' },
-  { label: '18%', value: '18' },
-  { label: '28%', value: '28' },
-  { label: 'Custom', value: 'custom' },
-];
+export const GST_RATE_PRESETS = ['5', '12', '18', '28'];
 
 export const DEFAULT_GST_INPUTS = {
   amount: '100000',
@@ -27,9 +21,8 @@ export const useGSTCalculator = (initialInputs = {}) => {
   const [amount, setAmountState] = useState(defaults.amount);
   const [gstRate, setGstRateState] = useState(defaults.gstRate);
   const [mode, setModeState] = useState(defaults.mode);
-  const [selectedRatePreset, setSelectedRatePreset] = useState('18');
-  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs.editingSavedCalculationId || null);
-  const [savedTitle, setSavedTitle] = useState(initialInputs.savedTitle || '');
+  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs?.editingSavedCalculationId || null);
+  const [savedTitle, setSavedTitle] = useState(initialInputs?.savedTitle || '');
 
   const [fieldErrors, setFieldErrors] = useState({});
   const [result, setResult] = useState(null);
@@ -51,52 +44,53 @@ export const useGSTCalculator = (initialInputs = {}) => {
     if (isCalculated) setIsResultStale(true);
   };
 
-  const compute = useCallback(
-    (amt, rate, m) => {
-      logger.info('GST calculation initiated', { amt, rate, m });
-      const calculationResult = calculateGST(amt, rate, m);
+  const compute = useCallback((amt, rate, m) => {
+    logger.info('GST calculation initiated', { amt, rate, m });
+    const calculationResult = calculateGST(amt, rate, m);
 
-      if (calculationResult.success) {
-        setFieldErrors({});
-        setResult(calculationResult.data);
-        setIsCalculated(true);
-        setIsResultStale(false);
-        logger.info('GST calculation completed', calculationResult.data);
-        return true;
-      } else {
-        const errorsByField = {};
-        if (Array.isArray(calculationResult.errors)) {
-          calculationResult.errors.forEach((err) => {
-            errorsByField[err.field] = err.message;
-          });
-        }
-        setFieldErrors(errorsByField);
-        setResult(null);
-        setIsCalculated(false);
-        setIsResultStale(false);
-        logger.warn('GST calculation failed validation', errorsByField);
-        return false;
+    if (calculationResult.success) {
+      setFieldErrors({});
+      setResult(calculationResult.data);
+      setIsCalculated(true);
+      setIsResultStale(false);
+      logger.info('GST calculation completed', calculationResult.data);
+      return true;
+    } else {
+      const errorsByField = {};
+      if (Array.isArray(calculationResult.errors)) {
+        calculationResult.errors.forEach((err) => {
+          errorsByField[err.field] = err.message;
+        });
       }
-    },
-    [],
-  );
-
-  // Initial calculation on mount
-  useEffect(() => {
-    compute(defaults.amount, defaults.gstRate, defaults.mode);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      setFieldErrors(errorsByField);
+      setResult(null);
+      setIsCalculated(false);
+      setIsResultStale(false);
+      logger.warn('GST calculation failed validation', errorsByField);
+      return false;
+    }
   }, []);
 
-  const handleRatePresetChange = (presetValue) => {
-    setSelectedRatePreset(presetValue);
-    if (presetValue !== 'custom') {
-      setGstRate(presetValue);
-    }
-  };
+  // Initial calculation on mount or when restored inputs change
+  useEffect(() => {
+    const currentAmt = initialInputs?.amount || defaults.amount;
+    const currentRate = initialInputs?.gstRate || defaults.gstRate;
+    const currentMode = initialInputs?.mode || defaults.mode;
 
-  const handleModeChange = (newMode) => {
-    setMode(newMode);
-  };
+    setAmountState(currentAmt);
+    setGstRateState(currentRate);
+    setModeState(currentMode);
+    setEditingSavedCalculationId(initialInputs?.editingSavedCalculationId || null);
+    setSavedTitle(initialInputs?.savedTitle || '');
+
+    compute(currentAmt, currentRate, currentMode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    initialInputs?.editingSavedCalculationId,
+    initialInputs?.amount,
+    initialInputs?.gstRate,
+    initialInputs?.mode,
+  ]);
 
   const handleCalculate = (
     overrideAmt = amount,
@@ -110,11 +104,14 @@ export const useGSTCalculator = (initialInputs = {}) => {
     setAmountState(DEFAULT_GST_INPUTS.amount);
     setGstRateState(DEFAULT_GST_INPUTS.gstRate);
     setModeState(DEFAULT_GST_INPUTS.mode);
-    setSelectedRatePreset('18');
     setEditingSavedCalculationId(null);
     setSavedTitle('');
     setFieldErrors({});
-    compute(DEFAULT_GST_INPUTS.amount, DEFAULT_GST_INPUTS.gstRate, DEFAULT_GST_INPUTS.mode);
+    compute(
+      DEFAULT_GST_INPUTS.amount,
+      DEFAULT_GST_INPUTS.gstRate,
+      DEFAULT_GST_INPUTS.mode,
+    );
   }, [compute]);
 
   return {
@@ -124,9 +121,6 @@ export const useGSTCalculator = (initialInputs = {}) => {
     setGstRate,
     mode,
     setMode,
-    selectedRatePreset,
-    handleRatePresetChange,
-    handleModeChange,
     editingSavedCalculationId,
     savedTitle,
     fieldErrors,

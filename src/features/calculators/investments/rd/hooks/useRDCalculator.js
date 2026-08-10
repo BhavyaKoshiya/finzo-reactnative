@@ -3,9 +3,9 @@ import { calculateRD } from '../../../../../calculations/rd/calculateRD';
 import logger from '../../../../../services/logger';
 
 export const DEFAULT_RD_INPUTS = {
-  monthlyDeposit: '5000',
-  annualInterestRate: '7',
-  tenureValue: '3',
+  monthlyDeposit: '3000',
+  annualInterestRate: '7.0',
+  tenureValue: '5',
   tenureUnit: 'years',
 };
 
@@ -16,8 +16,8 @@ export const useRDCalculator = (initialInputs = {}) => {
   const [annualInterestRate, setAnnualInterestRateState] = useState(defaults.annualInterestRate);
   const [tenureValue, setTenureValueState] = useState(defaults.tenureValue);
   const [tenureUnit, setTenureUnitState] = useState(defaults.tenureUnit);
-  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs.editingSavedCalculationId || null);
-  const [savedTitle, setSavedTitle] = useState(initialInputs.savedTitle || '');
+  const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs?.editingSavedCalculationId || null);
+  const [savedTitle, setSavedTitle] = useState(initialInputs?.savedTitle || '');
 
   const [fieldErrors, setFieldErrors] = useState({});
   const [result, setResult] = useState(null);
@@ -76,16 +76,29 @@ export const useRDCalculator = (initialInputs = {}) => {
     }
   }, []);
 
-  // Initial calculation on mount
+  // Initial calculation on mount or when restored inputs change
   useEffect(() => {
-    compute(
-      defaults.monthlyDeposit,
-      defaults.annualInterestRate,
-      defaults.tenureValue,
-      defaults.tenureUnit,
-    );
+    const currentDep = initialInputs?.monthlyDeposit || defaults.monthlyDeposit;
+    const currentRate = initialInputs?.annualInterestRate || defaults.annualInterestRate;
+    const currentTVal = initialInputs?.tenureValue || defaults.tenureValue;
+    const currentTUnit = initialInputs?.tenureUnit || defaults.tenureUnit;
+
+    setMonthlyDepositState(currentDep);
+    setAnnualInterestRateState(currentRate);
+    setTenureValueState(currentTVal);
+    setTenureUnitState(currentTUnit);
+    setEditingSavedCalculationId(initialInputs?.editingSavedCalculationId || null);
+    setSavedTitle(initialInputs?.savedTitle || '');
+
+    compute(currentDep, currentRate, currentTVal, currentTUnit);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [
+    initialInputs?.editingSavedCalculationId,
+    initialInputs?.monthlyDeposit,
+    initialInputs?.annualInterestRate,
+    initialInputs?.tenureValue,
+    initialInputs?.tenureUnit,
+  ]);
 
   const handleCalculate = (
     overrideDep = monthlyDeposit,
