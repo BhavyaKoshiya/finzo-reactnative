@@ -1,4 +1,4 @@
-package com.finzo
+package com.finzo.financecalculator
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

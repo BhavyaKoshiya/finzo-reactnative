@@ -10,10 +10,19 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^3.1.1",
+    "@react-native/new-app-screen": "0.83.10",
+    "@reduxjs/toolkit": "^2.12.0",
+    "lucide-react-native": "^1.31.0",
     "react": "19.2.0",
     "react-native": "0.83.10",
-    "@react-native/new-app-screen": "0.83.10",
-    "react-native-safe-area-context": "^5.5.2"
+    "react-native-reanimated": "^4.5.3",
+    "react-native-safe-area-context": "^5.5.2",
+    "react-native-svg": "^15.15.5",
+    "react-native-worklets": "^0.11.3",
+    "react-native-worklets-core": "^1.6.3",
+    "react-redux": "^9.3.0",
+    "redux-persist": "^6.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

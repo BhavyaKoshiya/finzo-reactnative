@@ -1,4 +1,4 @@
-package com.finzo
+package com.finzo.financecalculator
 
 import android.app.Application
 import com.facebook.react.PackageList
