@@ -33,6 +33,8 @@ export const MainTabNavigator = () => {
   const { currentTheme } = useAppTheme();
   const insets = useSafeAreaInsets();
 
+  const safeBottom = Math.max(insets.bottom, 0);
+
   return (
     <Tab.Navigator
       initialRouteName={ROUTES.HOME}
@@ -46,10 +48,12 @@ export const MainTabNavigator = () => {
           {
             backgroundColor: currentTheme.surface,
             borderTopColor: currentTheme.border,
-            height: 56 + insets.bottom,
-            paddingBottom: Math.max(insets.bottom, 8),
+            height: 56 + safeBottom,
+            paddingBottom: safeBottom,
+            paddingTop: 0,
           },
         ],
+        tabBarItemStyle: styles.tabBarItem,
         tabBarLabelStyle: styles.tabBarLabel,
       }}
     >
@@ -91,14 +95,21 @@ export const MainTabNavigator = () => {
 
 const styles = StyleSheet.create({
   tabBar: {
-    paddingTop: 6,
     borderTopWidth: 1,
     elevation: 0,
     shadowOpacity: 0,
   },
+  tabBarItem: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 0,
+  },
   tabBarLabel: {
-    fontSize: 12,
-    fontWeight: '500',
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: 2,
+    marginBottom: 0,
+    padding: 0,
   },
 });
 

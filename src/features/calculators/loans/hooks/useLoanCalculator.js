@@ -24,6 +24,9 @@ export const useLoanCalculator = (loanConfig = {}, initialInputs = {}) => {
   const [isCalculated, setIsCalculated] = useState(false);
   const [isResultStale, setIsResultStale] = useState(false);
 
+  const [isAmortizationExpanded, setIsAmortizationExpanded] = useState(false);
+  const [scheduleViewMode, setScheduleViewMode] = useState('yearly');
+
   const setLoanAmount = (val) => {
     setLoanAmountState(val);
     if (isCalculated) setIsResultStale(true);
@@ -129,6 +132,8 @@ export const useLoanCalculator = (loanConfig = {}, initialInputs = {}) => {
     setEditingSavedCalculationId(null);
     setSavedTitle('');
     setFieldErrors({});
+    setIsAmortizationExpanded(false);
+    setScheduleViewMode('yearly');
     compute(freshDefaults.loanAmount, freshDefaults.interestRate, freshDefaults.tenureValue, freshDefaults.tenureUnit || 'years');
   }, [loanConfig, compute]);
 
@@ -148,6 +153,10 @@ export const useLoanCalculator = (loanConfig = {}, initialInputs = {}) => {
     amortizationSchedule,
     isCalculated,
     isResultStale,
+    isAmortizationExpanded,
+    setIsAmortizationExpanded,
+    scheduleViewMode,
+    setScheduleViewMode,
     handleCalculate,
     handleReset,
   };

@@ -53,4 +53,31 @@ export const calculateRD = (monthlyDeposit, annualInterestRate, tenureMonths) =>
   });
 };
 
+/**
+ * Generates a month-by-month deposit and interest accumulation schedule for Recurring Deposit.
+ * @param {number|string} monthlyDeposit
+ * @param {number|string} annualInterestRate
+ * @param {number|string} tenureMonths
+ * @returns {Array<Object>} List of monthly RD snapshots
+ */
+export const calculateRDGrowthSchedule = (monthlyDeposit, annualInterestRate, tenureMonths) => {
+  const totalMonths = normalizeNumberInput(tenureMonths);
+  if (isNaN(totalMonths) || totalMonths <= 0) return [];
+
+  const schedule = [];
+  for (let month = 1; month <= totalMonths; month++) {
+    const result = calculateRD(monthlyDeposit, annualInterestRate, month);
+    if (result.success) {
+      schedule.push({
+        month,
+        totalDeposited: result.data.totalDeposited,
+        interestEarned: result.data.interestEarned,
+        maturityAmount: result.data.maturityAmount,
+      });
+    }
+  }
+
+  return schedule;
+};
+
 export default calculateRD;

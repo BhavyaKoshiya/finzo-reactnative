@@ -1,102 +1,165 @@
-# Finzo — Calculator Architecture Guide
+# FINZO — CALCULATOR ARCHITECTURE & EXTENSION GUIDE
 
-This document outlines the system architecture for financial calculators in the Finzo codebase. It defines the contracts, boundaries, registry patterns, and step-by-step instructions for adding new calculators.
+This document serves as the developer guide and architectural reference for the Finzo calculator platform.
 
 ---
 
-## 1. High-Level Architectural Flow
+## 1. Architectural Philosophy
+
+Finzo enforces strict separation between calculation math, metadata, state management, and UI rendering:
 
 ```text
-Calculator Registry (Discovery & Metadata)
+Pure Math & Logic (`src/calculations/`)
         ↓
-Navigation Routes & Stacks
+Calculator Registry & Metadata (`src/calculators/`)
         ↓
-Calculator Feature Screen (UI Layout)
+Feature Hooks & Local Form State (`src/features/calculators/<category>/<calc>/hooks/`)
         ↓
-Calculator Feature Hook (Local Form State & Validation)
-        ↓
-Phase 3 Calculation Engine (Pure Math Functions)
+Reusable UI Primitives & Result Cards (`src/components/`, `src/features/calculators/`)
+```
+
+### Core Separation Laws
+1. **Calculation Engine Purity**: Files inside `src/calculations/` must NEVER import React, React Native, Redux, AsyncStorage, or UI components. All calculation math is executed using high-precision Decimal math (`decimal.js`) and formatted cleanly for display.
+2. **Metadata Registry Authority**: `CALCULATOR_REGISTRY` in `src/calculators/registry/calculatorRegistry.js` is the single source of truth for calculator catalog info, icons, status, routes, popular flags, and search keywords.
+3. **Local Form State vs Durable Redux**: Live form inputs (principal, interest rate, tenure, modes) remain strictly in local React state (`useState`). Redux (`savedCalculationsSlice`) only receives immutable calculation snapshots when the user explicitly saves a calculation.
+
+---
+
+## 2. Directory Layout & Layer Responsibilities
+
+```text
+src/
+  calculators/
+    registry/
+      calculatorIds.js         # Standardized string IDs for all calculators
+      calculatorCategories.js  # Category definitions (Loans, Investments, Business, Everyday)
+      calculatorRegistry.js    # Single source of truth array of all 14 calculators
+    search/
+      calculatorSearch.js      # Pure JS search engine (Exact > Substring > Keyword > Description)
+    index.js                   # Public metadata API methods
+
+  calculations/
+    core/                      # Math helpers (decimal.js wrapper, rounding, currency, validation)
+    emi/                       # EMI loan calculation & amortization math
+    sip/                       # SIP investment compounding & yearly projection math
+    fd/                        # Fixed Deposit compounding schedule math
+    rd/                        # Recurring Deposit monthly accumulation math
+    gst/                       # GST inclusive & exclusive tax math
+    interest/                  # Simple & Compound Interest compounding math
+    investment/                # CAGR & ROI growth math
+    percentage/                # Percentage of, change, and difference math
+
+  features/
+    home/                      # HomeScreen with greeting, search entry, popular cards, recently saved
+    search/                    # CalculatorSearchScreen with search bar & category filters
+    calculators/               # Category screens & 14 production calculator screens
+    saved/                     # SavedScreen, SavedCalculationCard, restore adapters, Redux persistence
+    share/                     # Phase 11 Share & PDF Export (Adapters, Export Model, PDF HTML Builder, Services)
+
+  store/
+    slices/
+      savedCalculationsSlice.js # Durable saved calculations state (whitelisted in redux-persist)
 ```
 
 ---
 
-## 2. Calculation Engine Boundary Laws
-- **Pure Math**: Financial formulas reside under `src/calculations/`. They are pure JavaScript functions that NEVER import React, React Native, Redux, or UI elements.
-- **Local Hook State**: Calculator form state (live input values, interest rates, tenures) lives strictly inside feature hooks (e.g. `useGSTCalculator.js`). Zero transient form state is placed into Redux or `redux-persist`.
-- **No Direct Formula Calls from UI**: Screen components interact exclusively with their feature hook; they do not call math formulas directly.
+## 3. Financial Calculation Engine API (`src/calculations/`)
 
----
+All calculation functions return a standardized result object:
 
-## 3. Calculator Registry System
-Location: `src/calculators/`
+### Success Contract
+```js
+{
+  success: true,
+  data: {
+    // Domain specific rounded display numbers
+  }
+}
+```
 
-- **Single Source of Truth**: `CALCULATOR_REGISTRY` contains all discovery metadata for cataloging, search, navigation, and category grouping across `HomeScreen` and `CalculatorsScreen`.
-- **Metadata Contract**:
-  - `id`: Stable string identifier (from `CALCULATOR_IDS`)
-  - `name`: Display title (e.g., `'Goods & Services Tax'`)
-  - `shortName`: Abbreviated title (e.g., `'GST Calculator'`)
-  - `description`: Subtitle explanation of functionality
-  - `category`: Domain category ID (from `CATEGORY_IDS`)
-  - `icon`: Lucide icon component
-  - `route`: Navigation route constant (from `ROUTES`) or `null` for coming soon
-  - `status`: `'available'` | `'comingSoon'`
-  - `popular`: Boolean flag for home screen featuring
-  - `keywords`: Array of search terms
-
----
-
-## 4. Reusable Calculator Primitives
-Location: `src/components/calculator/`
-
-- **`CalculatorInputSection`**: Card container for grouping input fields with title & subtitle.
-- **`CalculatorResultSection`**: Container for output metrics, breakdown charts, and summary rows.
-- **`CalculatorSummaryRow`**: Key-value metric row supporting bolding and highlight states.
-- **`CalculatorActionBar`**: Standard primary/secondary/save button row (e.g., Calculate, Reset & Save).
-- **`StaleResultBanner`**: Subtle notification banner displayed above results when inputs are edited post-calculation.
-
----
-
-## 5. Loan Calculator Family Architecture
-Location: `src/features/calculators/loans/`
-
-All 5 loan calculators (**Home Loan**, **Personal Loan**, **Car Loan**, **Education Loan**, **Business Loan**) share a unified architecture:
-
-```text
-Loan Calculator Screen (LoanCalculatorScreen.jsx)
-        ↓
-Loan Preset Config (loanConfigs.js)
-        ↓
-Generic Loan Hook (useLoanCalculator.js)
-        ↓
-Phase 3 Math Engine (calculateEMI & calculateAmortization)
+### Validation Failure Contract
+```js
+{
+  success: false,
+  errors: [
+    { field: 'loanAmount', message: 'Loan amount must be greater than zero' }
+  ]
+}
 ```
 
 ---
 
-## 6. Investment Calculator Family Architecture
-Location: `src/features/calculators/investments/`
+## 4. Calculator Registry Metadata (`src/calculators/`)
 
-The 5 investment calculators (**SIP**, **FD**, **RD**, **CAGR**, and **ROI**) have materially distinct mathematical models. Each calculator uses a dedicated hook while reusing shared UI primitives:
+The calculator registry provides public helper methods:
 
-```text
-src/features/calculators/investments/
-├── sip/   → useSIPCalculator()   → calculateSIP()   → SIPResultCard & SIPBreakdownChart
-├── fd/    → useFDCalculator()    → calculateFD()    → FDResultCard & FDBreakdownChart
-├── rd/    → useRDCalculator()    → calculateRD()    → RDResultCard & RDBreakdownChart
-├── cagr/  → useCAGRCalculator()  → calculateCAGR()  → CAGRResultCard
-└── roi/   → useROICalculator()   → calculateROI()   → ROIResultCard
+```js
+import {
+  getAllCalculators,
+  getCalculatorById,
+  getCalculatorsByCategory,
+  getPopularCalculators,
+  getCalculatorCategories,
+} from './src/calculators';
 ```
 
 ---
 
-## 7. Tax & General Financial Calculator Architecture
-Location: `src/features/calculators/business/` & `src/features/calculators/everyday/`
+## 5. Production Calculator List (14 Calculators)
 
-The 4 tax and general financial calculators (**GST**, **Simple Interest**, **Compound Interest**, and **Percentage**) support domain-specific modes and frequencies:
+### Loans Category
+1. **Home Loan EMI** (`home-loan-emi`)
+2. **Personal Loan EMI** (`personal-loan-emi`)
+3. **Car Loan EMI** (`car-loan-emi`)
+4. **Education Loan EMI** (`education-loan-emi`)
+5. **Business Loan EMI** (`business-loan-emi`)
+
+### Investments Category
+6. **SIP Calculator** (`sip`)
+7. **Fixed Deposit (FD)** (`fd`)
+8. **Recurring Deposit (RD)** (`rd`)
+9. **CAGR Calculator** (`cagr`)
+10. **ROI Calculator** (`roi`)
+
+### Business Category
+11. **GST Calculator** (`gst`)
+
+### Everyday Category
+12. **Simple Interest** (`simple-interest`)
+13. **Compound Interest** (`compound-interest`)
+14. **Percentage Calculator** (`percentage`)
+
+---
+
+## 6. Shared Loan Family Architecture
+Location: `src/features/calculators/loans/LoanCalculatorScreen.jsx`
+
+All 5 loan calculators share a unified, configurable screen wrapper and feature hook `useLoanCalculator(config, initialInputs)`:
+
+```text
+[Home Loan / Personal Loan / Car Loan / Education Loan / Business Loan] Config
+        ↓
+LoanCalculatorScreen.jsx
+        ↓
+useLoanCalculator()
+        ↓
+calculateEMI() & calculateAmortization()
+```
+
+---
+
+## 7. Category Feature Organization
 
 ```text
 src/features/calculators/
-├── business/gst/               → useGSTCalculator()               → calculateGST()               → GSTResultCard
+├── loans/                      → LoanCalculatorScreen.jsx (Config-driven for all 5 loan types)
+├── emi/                        → EMICalculatorScreen.jsx & AmortizationSection.jsx
+├── investments/sip/            → useSIPCalculator()             → calculateSIP()               → SIPResultCard & Chart
+├── investments/fd/             → useFDCalculator()              → calculateFD()                → FDResultCard & Chart
+├── investments/rd/             → useRDCalculator()              → calculateRD()                → RDResultCard & Chart
+├── investments/cagr/           → useCAGRCalculator()            → calculateCAGR()              → CAGRResultCard
+├── investments/roi/            → useROICalculator()             → calculateROI()               → ROIResultCard
+├── business/gst/               → useGSTCalculator()             → calculateGST()               → GSTResultCard
 ├── everyday/simpleInterest/    → useSimpleInterestCalculator()    → calculateSimpleInterest()    → SimpleInterestResultCard
 ├── everyday/compoundInterest/  → useCompoundInterestCalculator()  → calculateCompoundInterest()  → CompoundInterestResultCard & Chart
 └── everyday/percentage/        → usePercentageCalculator()        → percentageOf/Change/Diff     → PercentageResultCard
@@ -159,3 +222,31 @@ To add a new calculator in future phases:
 7. **Add Unit Tests**: Create `use<CalculatorName>.test.js` under `__tests__/`.
 8. **Update Registry Metadata**: In `src/calculators/registry/calculatorRegistry.js`, set `route: ROUTES.<ROUTE_KEY>` and `status: CALCULATOR_STATUS.AVAILABLE`.
 9. **Verify**: Run `npm run lint` and `npm test`.
+
+---
+
+## 12. Share & PDF Export Architecture
+Location: `src/features/share/`
+
+```text
+Existing Calculation Engine / Snapshot
+        ↓
+Export Adapter (getExportModelForCalculator)
+        ↓
+Normalized Export Model (createCalculationExportModel)
+        ↓
+┌─────────────────────────────────┬─────────────────────────────────┐
+│ Share Text Builder              │ PDF HTML Builder                │
+│ (buildShareText)                │ (buildCalculationPdfHtml)       │
+│        ↓                        │        ↓                        │
+│ React Native Share API          │ RNHTMLtoPDF (convert)           │
+│ (shareCalculationText)          │ (generateCalculationPdf)        │
+└─────────────────────────────────┴─────────────────────────────────┘
+```
+
+- **Export Model Abstraction**: Standardized serializable contract (`calculationExportModel.js`) containing inputs, primary hero result, secondary summary metrics, and optional detailed data tables.
+- **Quick PDF vs Detailed PDF**:
+  - **Quick PDF**: Concise 1-page A4 report featuring Finzo branding, header, custom snapshot title, key inputs, hero result card, secondary metrics, and print footer.
+  - **Detailed PDF**: Multi-page report containing full calculator-specific schedules (360-month loan amortization tables, yearly SIP growth projections, compounding FD schedules, RD deposit schedules, CAGR trajectories, GST tax breakdowns).
+- **Offline HTML-to-PDF Engine**: Utilizes `react-native-html-to-pdf@1.3.0` converting print-friendly CSS/HTML templates into local PDF documents.
+- **Built-in Share Integration**: Employs React Native's native `Share.share` API for text summaries (WhatsApp, SMS, Email) and PDF document file sharing.

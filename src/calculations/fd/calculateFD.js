@@ -64,4 +64,42 @@ export const calculateFD = (
   });
 };
 
+/**
+ * Generates a period-by-period compounding growth schedule for Fixed Deposit.
+ * @param {number|string} principal
+ * @param {number|string} annualInterestRate
+ * @param {number|string} tenureYears
+ * @param {string} compoundingFrequency
+ * @returns {Array<Object>} List of compounding period snapshots
+ */
+export const calculateFDGrowthSchedule = (
+  principal,
+  annualInterestRate,
+  tenureYears,
+  compoundingFrequency = 'quarterly'
+) => {
+  const nTimesPerYear = FREQUENCY_COMPOUND_MAP[compoundingFrequency] || 4;
+  const years = normalizeNumberInput(tenureYears);
+  if (isNaN(years) || years <= 0) return [];
+
+  const totalPeriods = Math.max(1, Math.round(years * nTimesPerYear));
+  const schedule = [];
+
+  for (let period = 1; period <= totalPeriods; period++) {
+    const periodYears = period / nTimesPerYear;
+    const result = calculateFD(principal, annualInterestRate, periodYears, compoundingFrequency);
+    if (result.success) {
+      schedule.push({
+        period,
+        tenureYears: Number(periodYears.toFixed(2)),
+        principal: result.data.principal,
+        interestEarned: result.data.interestEarned,
+        maturityAmount: result.data.maturityAmount,
+      });
+    }
+  }
+
+  return schedule;
+};
+
 export default calculateFD;

@@ -22,11 +22,21 @@ import { createCalculationSnapshot } from '../../saved/types/savedTypes';
 import { restoreSavedCalculationInputs } from '../../saved/utils/calculationRestoreAdapters';
 import { addSavedCalculation, updateSavedCalculation } from '../../../store/slices/savedCalculationsSlice';
 
+import {
+  getExportModelForCalculator,
+  shareCalculationText,
+  generateCalculationPdf,
+  shareCalculationPdfFile,
+  ExportPdfModal,
+} from '../../share';
+
 export const LoanCalculatorScreen = ({ config, route, navigation }) => {
   const dispatch = useDispatch();
   const scrollViewRef = useRef(null);
   const resultsYRef = useRef(0);
   const [saveModalVisible, setSaveModalVisible] = useState(false);
+  const [pdfModalVisible, setPdfModalVisible] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const restoredInputs = route?.params?.savedCalculation
     ? restoreSavedCalculationInputs(route.params.savedCalculation)
@@ -92,10 +102,52 @@ export const LoanCalculatorScreen = ({ config, route, navigation }) => {
     }
   };
 
+  const handleSharePress = async () => {
+    if (!isCalculated || isResultStale || !result) return;
+    const exportModel = getExportModelForCalculator(
+      config.id,
+      { loanAmount, interestRate, tenureValue, tenureUnit, savedTitle },
+      result,
+      { customTitle: savedTitle }
+    );
+    try {
+      await shareCalculationText(exportModel);
+    } catch (err) {
+      Alert.alert('Share Failed', err.message);
+    }
+  };
+
+  const handlePdfExportConfirm = async (mode) => {
+    if (!isCalculated || isResultStale || !result) return;
+    setIsGeneratingPdf(true);
+    try {
+      const exportModel = getExportModelForCalculator(
+        config.id,
+        { loanAmount, interestRate, tenureValue, tenureUnit, savedTitle },
+        result,
+        { customTitle: savedTitle, mode }
+      );
+      const pdfPath = await generateCalculationPdf({ exportModel, mode });
+      setPdfModalVisible(false);
+      setIsGeneratingPdf(false);
+
+      setTimeout(async () => {
+        try {
+          await shareCalculationPdfFile(pdfPath, exportModel.title);
+        } catch (err) {
+          Alert.alert('Share PDF Failed', err.message);
+        }
+      }, 350);
+    } catch (err) {
+      setIsGeneratingPdf(false);
+      Alert.alert('PDF Export Failed', err.message);
+    }
+  };
+
   const renderHeader = () => (
     <AppHeader
-      title={config.title}
-      subtitle={config.subtitle}
+      title={config.title || 'Loan Calculator'}
+      subtitle={config.description || 'Calculate EMI and repayment details'}
       leftAction={{
         icon: ArrowLeft,
         onPress: () => navigation.goBack(),
@@ -113,10 +165,9 @@ export const LoanCalculatorScreen = ({ config, route, navigation }) => {
       useSafeAreaBottom={false}
       style={styles.container}
     >
-      {/* Loan Input Section */}
       <CalculatorInputSection
-        title={`${config.title} Inputs`}
-        subtitle="Adjust loan details to estimate your monthly EMI"
+        title="Loan Parameters"
+        subtitle="Enter loan details to calculate your monthly EMI"
       >
         <MoneyInput
           label={config.amountLabel || 'Loan Amount'}
@@ -148,6 +199,10 @@ export const LoanCalculatorScreen = ({ config, route, navigation }) => {
           onSecondaryPress={handleReset}
           onSavePress={() => setSaveModalVisible(true)}
           isSaveDisabled={!isCalculated || isResultStale}
+          onSharePress={handleSharePress}
+          isShareDisabled={!isCalculated || isResultStale}
+          onPdfPress={() => setPdfModalVisible(true)}
+          isPdfDisabled={!isCalculated || isResultStale}
         />
       </CalculatorInputSection>
 
@@ -187,20 +242,22 @@ export const LoanCalculatorScreen = ({ config, route, navigation }) => {
         onSave={onSaveConfirm}
       />
 
-      <View style={styles.bottomSpacer} />
+      <ExportPdfModal
+        visible={pdfModalVisible}
+        isGenerating={isGeneratingPdf}
+        onClose={() => setPdfModalVisible(false)}
+        onExport={handlePdfExportConfirm}
+      />
     </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 24,
+    paddingBottom: 16,
   },
   cardMargin: {
     marginBottom: 16,
-  },
-  bottomSpacer: {
-    height: 32,
   },
 });
 

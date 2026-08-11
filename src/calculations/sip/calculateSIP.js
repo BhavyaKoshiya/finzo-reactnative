@@ -49,4 +49,35 @@ export const calculateSIP = (monthlyInvestment, annualReturnRate, tenureMonths) 
   });
 };
 
+/**
+ * Generates a year-by-year investment & returns projection for SIP.
+ * @param {number|string} monthlyInvestment
+ * @param {number|string} annualReturnRate
+ * @param {number|string} tenureMonths
+ * @returns {Array<Object>} List of yearly projection snapshots
+ */
+export const calculateSIPYearlyProjection = (monthlyInvestment, annualReturnRate, tenureMonths) => {
+  const totalMonths = normalizeNumberInput(tenureMonths);
+  if (isNaN(totalMonths) || totalMonths <= 0) return [];
+
+  const yearsCount = Math.max(1, Math.ceil(totalMonths / 12));
+  const projection = [];
+
+  for (let year = 1; year <= yearsCount; year++) {
+    const monthsForYear = Math.min(year * 12, totalMonths);
+    const result = calculateSIP(monthlyInvestment, annualReturnRate, monthsForYear);
+    if (result.success) {
+      projection.push({
+        year,
+        months: monthsForYear,
+        totalInvested: result.data.totalInvested,
+        estimatedReturns: result.data.estimatedReturns,
+        maturityAmount: result.data.maturityAmount,
+      });
+    }
+  }
+
+  return projection;
+};
+
 export default calculateSIP;

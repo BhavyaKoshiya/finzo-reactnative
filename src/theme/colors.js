@@ -24,7 +24,7 @@ export const lightColors = {
 export const darkColors = {
   primary: '#3B82F6',
   primaryDark: '#2563EB',
-  primaryLight: '#1E3A8A',
+  primaryLight: 'rgba(59, 130, 246, 0.22)',
   background: '#0F172A',
   surface: '#1E293B',
   card: '#1E293B',

@@ -21,7 +21,7 @@ export const SettingsScreen = ({ navigation }) => {
   ];
 
   const renderHeader = () => (
-    <View style={[styles.headerGroup, { paddingTop: Math.max(insets.top, 8) }]}>
+    <View style={[styles.headerGroup, { paddingTop: Math.max(insets.top + 12, 24) }]}>
       <AppText variant="screenTitle">Settings</AppText>
       <AppText variant="bodySmall" color={currentTheme.textSecondary}>
         Preferences & app details.
@@ -59,24 +59,19 @@ export const SettingsScreen = ({ navigation }) => {
                   style={[
                     styles.themeOptionButton,
                     {
-                      backgroundColor: isSelected
-                        ? currentTheme.primary
-                        : currentTheme.surface,
-                      borderColor: isSelected
-                        ? currentTheme.primary
-                        : currentTheme.border,
+                      backgroundColor: isSelected ? `${currentTheme.primary}1A` : currentTheme.surface,
+                      borderColor: isSelected ? currentTheme.primary : currentTheme.border,
                     },
                   ]}
                 >
                   <AppIcon
                     icon={opt.icon}
                     size={20}
-                    color={isSelected ? '#FFFFFF' : currentTheme.textSecondary}
+                    color={isSelected ? currentTheme.primary : currentTheme.textSecondary}
                   />
                   <AppText
                     variant="caption"
-                    align="center"
-                    color={isSelected ? '#FFFFFF' : currentTheme.textPrimary}
+                    color={isSelected ? currentTheme.primary : currentTheme.textSecondary}
                     style={styles.optionText}
                   >
                     {opt.label}
@@ -88,66 +83,74 @@ export const SettingsScreen = ({ navigation }) => {
         </AppCard>
       </View>
 
-      {/* Privacy & App Info Section */}
+      {/* Component Showcase Entry */}
       <View style={styles.section}>
         <AppText variant="sectionTitle" style={styles.sectionTitle}>
-          About Finzo
+          Design System & Developer Tools
         </AppText>
         <AppCard style={styles.cardPadding}>
           <View style={styles.infoRow}>
-            <AppIcon icon={ShieldCheck} size={20} color={currentTheme.success} />
+            <AppIcon icon={Code} size={22} color={currentTheme.primary} />
             <View style={styles.infoTextGroup}>
-              <AppText variant="bodyMedium">100% Privacy Preserved</AppText>
+              <AppText variant="bodyMedium">Component Showcase</AppText>
               <AppText variant="caption" color={currentTheme.textSecondary}>
-                Finzo operates completely offline with zero tracking or data collection.
+                Preview all core UI tokens, buttons, inputs, cards, and modal dialogs.
               </AppText>
             </View>
           </View>
+          <PrimaryButton
+            title="Open Component Showcase"
+            onPress={() => navigation.navigate(ROUTES.COMPONENT_SHOWCASE)}
+            style={{ marginTop: 12 }}
+          />
+        </AppCard>
+      </View>
+
+      {/* Privacy & App Info Section */}
+      <View style={styles.lastSection}>
+        <AppText variant="sectionTitle" style={styles.sectionTitle}>
+          Privacy & App Info
+        </AppText>
+        <AppCard style={styles.cardPadding}>
+          <View style={styles.infoRow}>
+            <AppIcon icon={ShieldCheck} size={22} color={currentTheme.success} />
+            <View style={styles.infoTextGroup}>
+              <AppText variant="bodyMedium">100% Offline & Private</AppText>
+              <AppText variant="caption" color={currentTheme.textSecondary}>
+                Finzo stores all financial snapshots locally on your device. No cloud sync, no tracking.
+              </AppText>
+            </View>
+          </View>
+
           <View style={[styles.divider, { backgroundColor: currentTheme.border }]} />
+
           <View style={styles.versionRow}>
-            <AppText variant="bodySmall" color={currentTheme.textSecondary}>
-              App Version
+            <AppText variant="caption" color={currentTheme.textSecondary}>
+              Finzo App Version
             </AppText>
-            <AppText variant="bodySmall" color={currentTheme.textPrimary}>
-              0.0.1 (Phase 3 Engine)
+            <AppText variant="caption" color={currentTheme.textPrimary} style={{ fontWeight: '600' }}>
+              v1.0.0 (Offline MVP)
             </AppText>
           </View>
         </AppCard>
       </View>
-
-      {/* Dev Component Showcase (Development only) */}
-      {__DEV__ && (
-        <View style={styles.section}>
-          <AppText variant="sectionTitle" style={styles.sectionTitle}>
-            Developer Tools
-          </AppText>
-          <AppCard style={styles.cardPadding}>
-            <AppText variant="bodySmall" color={currentTheme.textSecondary} style={styles.labelMargin}>
-              Phase 1 Component Library Showcase
-            </AppText>
-            <PrimaryButton
-              title="Launch Component Showcase"
-              icon={Code}
-              onPress={() => navigation.navigate(ROUTES.SHOWCASE)}
-            />
-          </AppCard>
-        </View>
-      )}
     </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 24,
+    paddingBottom: 8,
   },
   headerGroup: {
     paddingHorizontal: 16,
     paddingBottom: 16,
   },
   section: {
-    marginTop: 8,
-    marginBottom: 24,
+    marginBottom: 20,
+  },
+  lastSection: {
+    marginBottom: 8,
   },
   sectionTitle: {
     marginBottom: 12,

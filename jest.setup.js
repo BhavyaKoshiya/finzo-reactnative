@@ -2,6 +2,15 @@
 jest.mock('react-native-worklets', () => ({}));
 jest.mock('react-native-worklets-core', () => ({}));
 
+jest.mock('react-native-html-to-pdf', () => ({
+  convert: jest.fn().mockResolvedValue({
+    filePath: '/mock/path/to/Finzo_Report.pdf',
+  }),
+  generatePDF: jest.fn().mockResolvedValue({
+    filePath: '/mock/path/to/Finzo_Report.pdf',
+  }),
+}));
+
 jest.mock('react-native-reanimated', () => {
   const { View } = require('react-native');
   return {
@@ -31,6 +40,6 @@ jest.mock('react-native-gifted-charts', () => {
       const children = props.centerLabelComponent ? props.centerLabelComponent() : null;
       return React.createElement(View, { testID: 'mocked-pie-chart' }, children);
     },
-    BarChart: (props) => React.createElement(View, { testID: 'mocked-bar-chart' }),
+    BarChart: () => React.createElement(View, { testID: 'mocked-bar-chart' }),
   };
 });

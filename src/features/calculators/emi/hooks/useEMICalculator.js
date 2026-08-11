@@ -25,6 +25,9 @@ export const useEMICalculator = (initialInputs = {}) => {
   const [isCalculated, setIsCalculated] = useState(false);
   const [isResultStale, setIsResultStale] = useState(false);
 
+  const [isAmortizationExpanded, setIsAmortizationExpanded] = useState(false);
+  const [scheduleViewMode, setScheduleViewMode] = useState('yearly');
+
   const setLoanAmount = (val) => {
     setLoanAmountState(val);
     if (isCalculated) setIsResultStale(true);
@@ -121,6 +124,8 @@ export const useEMICalculator = (initialInputs = {}) => {
     setEditingSavedCalculationId(null);
     setSavedTitle('');
     setFieldErrors({});
+    setIsAmortizationExpanded(false);
+    setScheduleViewMode('yearly');
     compute(
       DEFAULT_EMI_INPUTS.loanAmount,
       DEFAULT_EMI_INPUTS.interestRate,
@@ -145,6 +150,10 @@ export const useEMICalculator = (initialInputs = {}) => {
     amortizationSchedule,
     isCalculated,
     isResultStale,
+    isAmortizationExpanded,
+    setIsAmortizationExpanded,
+    scheduleViewMode,
+    setScheduleViewMode,
     handleCalculate,
     handleReset,
   };

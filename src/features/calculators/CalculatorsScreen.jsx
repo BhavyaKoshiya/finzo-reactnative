@@ -17,7 +17,7 @@ export const CalculatorsScreen = ({ navigation }) => {
   const categories = getCalculatorCategories();
 
   const renderHeader = () => (
-    <View style={[styles.headerGroup, { paddingTop: Math.max(insets.top, 8), backgroundColor: currentTheme.background }]}>
+    <View style={[styles.headerGroup, { paddingTop: Math.max(insets.top + 12, 24), backgroundColor: currentTheme.background }]}>
       <AppText variant="screenTitle">Calculators</AppText>
       <AppText variant="bodySmall" color={currentTheme.textSecondary}>
         Select a category to explore available financial tools.
@@ -51,37 +51,42 @@ export const CalculatorsScreen = ({ navigation }) => {
       </TouchableOpacity>
 
       {/* Category Groups & Calculators */}
-      {categories.map((cat) => (
-        <View key={cat.id} style={styles.categorySection}>
-          <AppText variant="sectionTitle" style={styles.categoryTitle}>
-            {cat.name}
-          </AppText>
-          <AppText variant="caption" color={currentTheme.textSecondary} style={styles.categoryDesc}>
-            {cat.description}
-          </AppText>
+      {categories.map((cat, idx) => {
+        const isLast = idx === categories.length - 1;
+        return (
+          <View key={cat.id} style={[styles.categorySection, isLast && styles.lastCategorySection]}>
+            <AppText variant="sectionTitle" style={styles.categoryTitle}>
+              {cat.name}
+            </AppText>
+            <AppText variant="caption" color={currentTheme.textSecondary} style={styles.categoryDesc}>
+              {cat.description}
+            </AppText>
 
-          <View style={styles.calculatorList}>
-            {cat.calculators.map((calc) => (
-              <CalculatorCard
-                key={calc.id}
-                title={calc.name}
-                description={calc.description}
-                icon={calc.icon}
-                status={calc.status}
-                onPress={
-                  calc.route ? () => navigation.navigate(calc.route) : null
-                }
-                style={styles.calcCardMargin}
-              />
-            ))}
+            <View style={styles.calculatorList}>
+              {cat.calculators.map((calc) => (
+                <CalculatorCard
+                  key={calc.id}
+                  title={calc.name}
+                  description={calc.description}
+                  icon={calc.icon}
+                  status={calc.status}
+                  badgeText={calc.badgeText}
+                  onPress={
+                    calc.route ? () => navigation.navigate(calc.route) : null
+                  }
+                  style={styles.calcCardMargin}
+                />
+              ))}
+            </View>
           </View>
-        </View>
-      ))}
+        );
+      })}
 
+      {/* Info Card Banner */}
       <InfoCard
-        title="100% Offline Calculations"
-        message="All calculation formulas execute locally on your device with complete privacy."
         type="info"
+        title="More Calculators Coming Soon"
+        message="We are working on adding RD, CAGR, Tax, and Goal planners in upcoming updates."
         style={styles.infoCard}
       />
     </ScreenContainer>
@@ -90,7 +95,7 @@ export const CalculatorsScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 24,
+    paddingBottom: 8,
   },
   headerGroup: {
     paddingHorizontal: 16,
@@ -111,7 +116,10 @@ const styles = StyleSheet.create({
   },
   categorySection: {
     marginTop: 8,
-    marginBottom: 20,
+    marginBottom: 16,
+  },
+  lastCategorySection: {
+    marginBottom: 8,
   },
   categoryTitle: {
     marginBottom: 2,
@@ -127,6 +135,7 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     marginTop: 8,
+    marginBottom: 8,
   },
 });
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Star, Trash2, Calculator } from 'lucide-react-native';
+import { Star, Trash2, Calculator, Share2, FileText } from 'lucide-react-native';
 import { format } from 'date-fns';
 import AppCard from '../../../components/cards/AppCard';
 import AppText from '../../../components/common/AppText';
@@ -14,9 +14,11 @@ export const SavedCalculationCard = ({
   onPress,
   onToggleFavorite,
   onDelete,
+  onShare,
+  onPdf,
   style,
 }) => {
-  const { currentTheme } = useAppTheme();
+  const { currentTheme, isDark } = useAppTheme();
   const calcMetadata = getCalculatorById(item.calculatorId);
   const IconComponent = calcMetadata?.icon || Calculator;
   const calcName = calcMetadata?.name || 'Calculator';
@@ -26,6 +28,9 @@ export const SavedCalculationCard = ({
   const formattedDate = item.updatedAt || item.savedAt
     ? format(new Date(item.updatedAt || item.savedAt), 'MMM d, yyyy')
     : '';
+
+  const iconBgColor = isDark ? 'rgba(59, 130, 246, 0.22)' : `${currentTheme.primary}12`;
+  const iconColor = isDark ? '#60A5FA' : currentTheme.primary;
 
   return (
     <TouchableOpacity
@@ -38,8 +43,8 @@ export const SavedCalculationCard = ({
       <AppCard style={styles.card}>
         <View style={styles.topRow}>
           <View style={styles.iconTitleGroup}>
-            <View style={[styles.iconBox, { backgroundColor: `${currentTheme.primary}12` }]}>
-              <AppIcon icon={IconComponent} size={20} color={currentTheme.primary} />
+            <View style={[styles.iconBox, { backgroundColor: iconBgColor }]}>
+              <AppIcon icon={IconComponent} size={20} color={iconColor} />
             </View>
             <View style={styles.titleTextGroup}>
               <AppText variant="cardTitle" numberOfLines={1}>
@@ -52,6 +57,34 @@ export const SavedCalculationCard = ({
           </View>
 
           <View style={styles.actionsGroup}>
+            {onShare && (
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onShare(item);
+                }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                accessibilityLabel="Share saved calculation"
+                style={styles.actionBtn}
+              >
+                <AppIcon icon={Share2} size={18} color={iconColor} />
+              </TouchableOpacity>
+            )}
+
+            {onPdf && (
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onPdf(item);
+                }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                accessibilityLabel="Export saved calculation as PDF"
+                style={styles.actionBtn}
+              >
+                <AppIcon icon={FileText} size={18} color={iconColor} />
+              </TouchableOpacity>
+            )}
+
             <TouchableOpacity
               onPress={(e) => {
                 e.stopPropagation();

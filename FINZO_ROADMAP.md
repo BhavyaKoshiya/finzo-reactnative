@@ -11,6 +11,6 @@
 - [x] Phase 8 — Tax & General Financial Calculators
 - [x] Phase 9 — Saved Calculations
 - [x] Phase 10 — Home Dashboard + Search
-- [ ] Phase 11 — Share / Export
+- [x] Phase 11 — Share + Premium Detailed PDF Export
 - [ ] Phase 12 — Monetization
 - [ ] Phase 13 — Final QA + Store Preparation

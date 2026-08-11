@@ -5,6 +5,7 @@ import {
   FlatList,
   TextInput,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowLeft, Search, X } from 'lucide-react-native';
@@ -44,7 +45,7 @@ export const CalculatorSearchScreen = ({ navigation }) => {
       style={[
         styles.headerWrapper,
         {
-          paddingTop: Math.max(insets.top, 8),
+          paddingTop: Math.max(insets.top + 12, 24),
           backgroundColor: currentTheme.surface,
           borderBottomColor: currentTheme.border,
         },
@@ -74,17 +75,18 @@ export const CalculatorSearchScreen = ({ navigation }) => {
             ref={inputRef}
             value={query}
             onChangeText={setQuery}
-            placeholder="Search calculators (EMI, SIP, GST...)"
+            placeholder="Search calculators (EMI, SIP, GST, FD...)"
             placeholderTextColor={currentTheme.textMuted}
-            style={[styles.textInput, { color: currentTheme.textPrimary }]}
+            style={[styles.input, { color: currentTheme.textPrimary }]}
             returnKeyType="search"
-            clearButtonMode="never"
+            autoCorrect={false}
+            accessibilityLabel="Calculator search input"
           />
           {query.length > 0 && (
             <TouchableOpacity
               onPress={handleClearQuery}
               activeOpacity={0.7}
-              accessibilityLabel="Clear search"
+              accessibilityLabel="Clear search input"
               style={styles.clearButton}
             >
               <AppIcon icon={X} size={16} color={currentTheme.textMuted} />
@@ -93,22 +95,27 @@ export const CalculatorSearchScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Category Filter Chips Row */}
-      <View style={styles.categoryRow}>
+      {/* Filter Category Chips */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.categoryScrollContent}
+        style={styles.categoryScrollView}
+      >
         <TouchableOpacity
           onPress={() => setSelectedCategory('all')}
           activeOpacity={0.7}
           style={[
-            styles.categoryChip,
+            styles.chip,
             {
-              backgroundColor: selectedCategory === 'all' ? currentTheme.primary : currentTheme.surface,
+              backgroundColor: selectedCategory === 'all' ? currentTheme.primary : currentTheme.background,
               borderColor: selectedCategory === 'all' ? currentTheme.primary : currentTheme.border,
             },
           ]}
         >
           <AppText
             variant="caption"
-            color={selectedCategory === 'all' ? '#FFFFFF' : currentTheme.textPrimary}
+            color={selectedCategory === 'all' ? '#FFFFFF' : currentTheme.textSecondary}
             style={styles.chipText}
           >
             All
@@ -123,16 +130,16 @@ export const CalculatorSearchScreen = ({ navigation }) => {
               onPress={() => setSelectedCategory(cat.id)}
               activeOpacity={0.7}
               style={[
-                styles.categoryChip,
+                styles.chip,
                 {
-                  backgroundColor: isSelected ? currentTheme.primary : currentTheme.surface,
+                  backgroundColor: isSelected ? currentTheme.primary : currentTheme.background,
                   borderColor: isSelected ? currentTheme.primary : currentTheme.border,
                 },
               ]}
             >
               <AppText
                 variant="caption"
-                color={isSelected ? '#FFFFFF' : currentTheme.textPrimary}
+                color={isSelected ? '#FFFFFF' : currentTheme.textSecondary}
                 style={styles.chipText}
               >
                 {cat.name}
@@ -140,28 +147,23 @@ export const CalculatorSearchScreen = ({ navigation }) => {
             </TouchableOpacity>
           );
         })}
-      </View>
+      </ScrollView>
     </View>
   );
 
   return (
     <ScreenContainer
       header={renderHeader()}
+      paddingHorizontal={0}
       useSafeAreaTop={false}
       useSafeAreaBottom={false}
       style={styles.container}
     >
-      <View style={styles.resultsCountHeader}>
-        <AppText variant="caption" color={currentTheme.textSecondary}>
-          {results.length} {results.length === 1 ? 'calculator' : 'calculators'} found
-        </AppText>
-      </View>
-
       {results.length === 0 ? (
         <View style={styles.emptyContainer}>
           <EmptyState
             title="No calculators found"
-            description="Try searching for EMI, SIP, GST, interest, or percentage."
+            description={`No results matching "${query}". Try searching for EMI, SIP, Loan, GST, or FD.`}
             icon={Search}
           />
         </View>
@@ -177,6 +179,7 @@ export const CalculatorSearchScreen = ({ navigation }) => {
               description={item.description}
               icon={item.icon}
               status={item.status}
+              badgeText={item.badgeText}
               onPress={
                 item.route ? () => navigation.navigate(item.route) : null
               }
@@ -191,23 +194,19 @@ export const CalculatorSearchScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 16,
+    flex: 1,
   },
   headerWrapper: {
+    paddingHorizontal: 16,
+    paddingBottom: 12,
     borderBottomWidth: 1,
-    paddingBottom: 8,
   },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 4,
   },
   backButton: {
-    width: 36,
-    height: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 6,
     marginRight: 8,
   },
   inputContainer: {
@@ -222,43 +221,35 @@ const styles = StyleSheet.create({
   searchIcon: {
     marginRight: 8,
   },
-  textInput: {
+  input: {
     flex: 1,
-    height: '100%',
-    fontSize: 15,
-    fontWeight: '500',
+    fontSize: 14,
+    paddingVertical: 0,
   },
   clearButton: {
-    padding: 6,
+    padding: 4,
   },
-  categoryRow: {
+  categoryScrollView: {
+    marginTop: 12,
+  },
+  categoryScrollContent: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 4,
+    paddingRight: 16,
   },
-  categoryChip: {
+  chip: {
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 16,
     borderWidth: 1,
-    marginRight: 6,
+    marginRight: 8,
   },
   chipText: {
     fontWeight: '600',
   },
-  resultsCountHeader: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 4,
-  },
   listContent: {
     paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 32,
-  },
-  cardMargin: {
-    marginBottom: 12,
+    paddingTop: 16,
+    paddingBottom: 24,
   },
   emptyContainer: {
     flex: 1,

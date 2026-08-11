@@ -16,11 +16,23 @@ export const CalculatorCard = ({
   style,
   ...props
 }) => {
-  const { currentTheme } = useAppTheme();
+  const { currentTheme, isDark } = useAppTheme();
 
   const isComingSoon = status === 'comingSoon';
   const isDisabled = disabled !== undefined ? disabled : isComingSoon || !onPress;
   const badgeLabel = badgeText || (isComingSoon ? 'Coming Soon' : null);
+
+  const iconBgColor = isDisabled
+    ? currentTheme.border
+    : isDark
+    ? 'rgba(59, 130, 246, 0.22)'
+    : currentTheme.primaryLight;
+
+  const iconColor = isDisabled
+    ? currentTheme.textMuted
+    : isDark
+    ? '#60A5FA'
+    : currentTheme.primary;
 
   return (
     <TouchableOpacity
@@ -37,16 +49,14 @@ export const CalculatorCard = ({
               style={[
                 styles.iconContainer,
                 {
-                  backgroundColor: isDisabled
-                    ? currentTheme.border
-                    : currentTheme.primaryLight,
+                  backgroundColor: iconBgColor,
                 },
               ]}
             >
               <AppIcon
                 icon={icon}
                 size={22}
-                color={isDisabled ? currentTheme.textMuted : currentTheme.primary}
+                color={iconColor}
               />
             </View>
           )}
@@ -65,7 +75,7 @@ export const CalculatorCard = ({
                   style={[
                     styles.badgeContainer,
                     {
-                      backgroundColor: currentTheme.surfaceHighlight || '#F3F4F6',
+                      backgroundColor: currentTheme.surfaceHighlight || (isDark ? '#334155' : '#F3F4F6'),
                       borderColor: currentTheme.border,
                     },
                   ]}

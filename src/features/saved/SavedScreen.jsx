@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Bookmark, Star } from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
-import AppHeader from '../../components/navigation/AppHeader';
 import AppText from '../../components/common/AppText';
 import EmptyState from '../../components/feedback/EmptyState';
 import SavedCalculationCard from './components/SavedCalculationCard';
@@ -16,10 +16,23 @@ import {
   deleteSavedCalculation,
 } from '../../store/slices/savedCalculationsSlice';
 
+import {
+  getExportModelForCalculator,
+  shareCalculationText,
+  generateCalculationPdf,
+  shareCalculationPdfFile,
+  ExportPdfModal,
+} from '../share';
+
 export const SavedScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const { currentTheme } = useAppTheme();
+  const insets = useSafeAreaInsets();
   const [filterMode, setFilterMode] = useState('all'); // 'all' | 'favorites'
+
+  const [selectedSavedItemForPdf, setSelectedSavedItemForPdf] = useState(null);
+  const [pdfModalVisible, setPdfModalVisible] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const savedCalculations = useSelector(selectSavedCalculations);
 
@@ -60,21 +73,65 @@ export const SavedScreen = ({ navigation }) => {
     );
   };
 
-  const renderHeader = () => (
-    <View
-      style={[
-        styles.headerWrapper,
+  const handleShareSavedItem = async (item) => {
+    try {
+      const exportModel = getExportModelForCalculator(
+        item.calculatorId,
+        item.inputs,
+        item.result,
+        { customTitle: item.title, date: item.savedAt || item.updatedAt }
+      );
+      await shareCalculationText(exportModel);
+    } catch (err) {
+      Alert.alert('Share Failed', err.message);
+    }
+  };
+
+  const handlePdfSavedItem = (item) => {
+    setSelectedSavedItemForPdf(item);
+    setPdfModalVisible(true);
+  };
+
+  const handlePdfExportConfirm = async (mode) => {
+    if (!selectedSavedItemForPdf) return;
+    setIsGeneratingPdf(true);
+    const targetItem = selectedSavedItemForPdf;
+    try {
+      const exportModel = getExportModelForCalculator(
+        targetItem.calculatorId,
+        targetItem.inputs,
+        targetItem.result,
         {
-          backgroundColor: currentTheme.surface,
-          borderBottomColor: currentTheme.border,
-        },
-      ]}
-    >
-      <AppHeader
-        title="Saved Calculations"
-        subtitle="Bookmarked snapshots & quick restore"
-        style={styles.headerNoBorder}
-      />
+          customTitle: targetItem.title,
+          date: targetItem.savedAt || targetItem.updatedAt,
+          mode,
+        }
+      );
+      const pdfPath = await generateCalculationPdf({ exportModel, mode });
+      setPdfModalVisible(false);
+      setIsGeneratingPdf(false);
+      setSelectedSavedItemForPdf(null);
+
+      setTimeout(async () => {
+        try {
+          await shareCalculationPdfFile(pdfPath, exportModel.title);
+        } catch (err) {
+          Alert.alert('Share PDF Failed', err.message);
+        }
+      }, 350);
+    } catch (err) {
+      setIsGeneratingPdf(false);
+      Alert.alert('PDF Export Failed', err.message);
+    }
+  };
+
+  const renderHeader = () => (
+    <View style={[styles.headerGroup, { paddingTop: Math.max(insets.top + 12, 24) }]}>
+      <AppText variant="screenTitle">Saved Calculations</AppText>
+      <AppText variant="bodySmall" color={currentTheme.textSecondary} style={styles.subtitleMargin}>
+        Bookmarked snapshots & quick restore
+      </AppText>
+
       {savedCalculations.length > 0 && (
         <View style={styles.segmentRow}>
           <TouchableOpacity
@@ -153,29 +210,42 @@ export const SavedScreen = ({ navigation }) => {
               onPress={() => handleOpenSavedItem(item)}
               onToggleFavorite={handleToggleFavorite}
               onDelete={handleDeleteItem}
+              onShare={handleShareSavedItem}
+              onPdf={handlePdfSavedItem}
             />
           )}
         />
       )}
+
+      <ExportPdfModal
+        visible={pdfModalVisible}
+        isGenerating={isGeneratingPdf}
+        onClose={() => {
+          setPdfModalVisible(false);
+          setSelectedSavedItemForPdf(null);
+        }}
+        onExport={handlePdfExportConfirm}
+      />
     </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 16,
+    paddingBottom: 8,
   },
-  headerWrapper: {
-    borderBottomWidth: 1,
+  headerGroup: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
   },
-  headerNoBorder: {
-    borderBottomWidth: 0,
+  subtitleMargin: {
+    marginTop: 2,
+    marginBottom: 8,
   },
   segmentRow: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
     paddingTop: 8,
-    paddingBottom: 12,
+    paddingBottom: 4,
   },
   segmentChip: {
     paddingHorizontal: 16,
@@ -190,13 +260,13 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 16,
     paddingTop: 16,
-    paddingBottom: 32,
+    paddingBottom: 12,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: 40,
+    paddingBottom: 20,
   },
 });
 

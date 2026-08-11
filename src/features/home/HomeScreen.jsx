@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,29 +18,35 @@ import {
   deleteSavedCalculation,
 } from '../../store/slices/savedCalculationsSlice';
 
+import {
+  getExportModelForCalculator,
+  shareCalculationText,
+  generateCalculationPdf,
+  shareCalculationPdfFile,
+  ExportPdfModal,
+} from '../share';
+
+const getTimeBasedGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return 'Good Morning';
+  if (hour >= 12 && hour < 17) return 'Good Afternoon';
+  if (hour >= 17 && hour < 22) return 'Good Evening';
+  return 'Good Night';
+};
+
 export const HomeScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const { currentTheme } = useAppTheme();
   const insets = useSafeAreaInsets();
 
+  const [selectedSavedItemForPdf, setSelectedSavedItemForPdf] = useState(null);
+  const [pdfModalVisible, setPdfModalVisible] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
   const popularCalculators = getPopularCalculators();
   const categories = getCalculatorCategories();
   const savedCalculations = useSelector(selectSavedCalculations);
   const recentSavedCalculations = savedCalculations.slice(0, 3);
-
-  const handleOpenSavedItem = (item) => {
-    const calcMetadata = getCalculatorById(item.calculatorId);
-    if (!calcMetadata || !calcMetadata.route) {
-      Alert.alert(
-        'Calculator Unavailable',
-        'This calculator is no longer available in the app catalog.',
-      );
-      return;
-    }
-    navigation.navigate(calcMetadata.route, {
-      savedCalculation: item,
-    });
-  };
 
   const handleToggleFavorite = (id) => {
     dispatch(toggleFavorite(id));
@@ -61,13 +67,79 @@ export const HomeScreen = ({ navigation }) => {
     );
   };
 
+  const handleOpenSavedItem = (item) => {
+    const calcMetadata = getCalculatorById(item.calculatorId);
+    if (!calcMetadata || !calcMetadata.route) {
+      Alert.alert(
+        'Calculator Unavailable',
+        'This calculator is no longer available in the app catalog.',
+      );
+      return;
+    }
+    navigation.navigate(calcMetadata.route, {
+      savedCalculation: item,
+    });
+  };
+
+  const handleShareSavedItem = async (item) => {
+    try {
+      const exportModel = getExportModelForCalculator(
+        item.calculatorId,
+        item.inputs,
+        item.result,
+        { customTitle: item.title, date: item.savedAt || item.updatedAt }
+      );
+      await shareCalculationText(exportModel);
+    } catch (err) {
+      Alert.alert('Share Failed', err.message);
+    }
+  };
+
+  const handlePdfSavedItem = (item) => {
+    setSelectedSavedItemForPdf(item);
+    setPdfModalVisible(true);
+  };
+
+  const handlePdfExportConfirm = async (mode) => {
+    if (!selectedSavedItemForPdf) return;
+    setIsGeneratingPdf(true);
+    const targetItem = selectedSavedItemForPdf;
+    try {
+      const exportModel = getExportModelForCalculator(
+        targetItem.calculatorId,
+        targetItem.inputs,
+        targetItem.result,
+        {
+          customTitle: targetItem.title,
+          date: targetItem.savedAt || targetItem.updatedAt,
+          mode,
+        }
+      );
+      const pdfPath = await generateCalculationPdf({ exportModel, mode });
+      setPdfModalVisible(false);
+      setIsGeneratingPdf(false);
+      setSelectedSavedItemForPdf(null);
+
+      setTimeout(async () => {
+        try {
+          await shareCalculationPdfFile(pdfPath, exportModel.title);
+        } catch (err) {
+          Alert.alert('Share PDF Failed', err.message);
+        }
+      }, 350);
+    } catch (err) {
+      setIsGeneratingPdf(false);
+      Alert.alert('PDF Export Failed', err.message);
+    }
+  };
+
   const renderHeader = () => (
-    <View style={[styles.heroSection, { paddingTop: Math.max(insets.top, 8), backgroundColor: currentTheme.background }]}>
+    <View style={[styles.heroSection, { paddingTop: Math.max(insets.top + 12, 24), backgroundColor: currentTheme.background }]}>
       <AppText variant="caption" color={currentTheme.primary} style={styles.brandTitle}>
         FINZO
       </AppText>
       <AppText variant="screenTitle" style={styles.greetingTitle}>
-        Good day
+        {getTimeBasedGreeting()}
       </AppText>
       <AppText variant="bodySmall" color={currentTheme.textSecondary}>
         What would you like to calculate today?
@@ -83,7 +155,7 @@ export const HomeScreen = ({ navigation }) => {
       useSafeAreaBottom={false}
       style={styles.container}
     >
-      {/* Prominent Search Bar */}
+      {/* Quick Search Entry */}
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={() => navigation.navigate(ROUTES.CALCULATOR_SEARCH)}
@@ -100,23 +172,24 @@ export const HomeScreen = ({ navigation }) => {
         </AppText>
       </TouchableOpacity>
 
-      {/* Recently Saved Section (Shown only if saved calculations exist) */}
+      {/* Saved Calculations Section */}
       {recentSavedCalculations.length > 0 && (
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <AppText variant="sectionTitle">Recently Saved</AppText>
+            <AppText variant="sectionTitle">Recent Calculations</AppText>
             <TouchableOpacity
               onPress={() => navigation.navigate(ROUTES.SAVED)}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="View all saved calculations"
               style={styles.viewAllRow}
             >
               <AppText variant="caption" color={currentTheme.primary} style={styles.viewAllText}>
-                View All ({savedCalculations.length})
+                View All
               </AppText>
-              <AppIcon icon={ChevronRight} size={16} color={currentTheme.primary} />
+              <AppIcon icon={ChevronRight} size={14} color={currentTheme.primary} />
             </TouchableOpacity>
           </View>
-
           {recentSavedCalculations.map((item) => (
             <SavedCalculationCard
               key={item.id}
@@ -124,6 +197,8 @@ export const HomeScreen = ({ navigation }) => {
               onPress={() => handleOpenSavedItem(item)}
               onToggleFavorite={handleToggleFavorite}
               onDelete={handleDeleteSavedItem}
+              onShare={handleShareSavedItem}
+              onPdf={handlePdfSavedItem}
             />
           ))}
         </View>
@@ -150,7 +225,7 @@ export const HomeScreen = ({ navigation }) => {
       </View>
 
       {/* Categories Section */}
-      <View style={styles.section}>
+      <View style={styles.lastSection}>
         <AppText variant="sectionTitle" style={styles.sectionTitle}>
           Explore Categories
         </AppText>
@@ -168,13 +243,23 @@ export const HomeScreen = ({ navigation }) => {
           ))}
         </View>
       </View>
+
+      <ExportPdfModal
+        visible={pdfModalVisible}
+        isGenerating={isGeneratingPdf}
+        onClose={() => {
+          setPdfModalVisible(false);
+          setSelectedSavedItemForPdf(null);
+        }}
+        onExport={handlePdfExportConfirm}
+      />
     </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 24,
+    paddingBottom: 8,
   },
   heroSection: {
     paddingHorizontal: 16,
@@ -196,13 +281,16 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     marginTop: 8,
-    marginBottom: 24,
+    marginBottom: 20,
   },
   searchIcon: {
     marginRight: 10,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 20,
+  },
+  lastSection: {
+    marginBottom: 8,
   },
   sectionHeaderRow: {
     flexDirection: 'row',

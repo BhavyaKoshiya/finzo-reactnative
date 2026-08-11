@@ -17,7 +17,7 @@ export const AppHeader = ({
   const { currentTheme } = useAppTheme();
   const insets = useSafeAreaInsets();
 
-  const topPadding = useSafeAreaTop ? Math.max(insets.top, 6) : 6;
+  const topPadding = useSafeAreaTop ? Math.max(insets.top + 12, 24) : 12;
 
   return (
     <View
@@ -98,7 +98,7 @@ export const AppHeader = ({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingBottom: 8,
+    paddingBottom: 10,
     borderBottomWidth: 1,
   },
   contentRow: {
