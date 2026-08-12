@@ -76,8 +76,10 @@ const styles = StyleSheet.create({
   },
   totalAmount: {
     fontSize: 26,
+    lineHeight: 34,
     fontWeight: '800',
-    marginTop: 2,
+    marginTop: 4,
+    paddingVertical: 2,
   },
   subCaption: {
     marginTop: 2,

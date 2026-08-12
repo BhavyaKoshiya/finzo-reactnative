@@ -34,8 +34,8 @@ export const EditLoanScreen = ({ route, navigation }) => {
       scrollable
       header={renderHeader()}
       useSafeAreaTop={false}
-      useSafeAreaBottom={false}
-      style={styles.container}
+      useSafeAreaBottom={true}
+      contentContainerStyle={styles.contentContainer}
     >
       <LoanProfileForm
         form={form}
@@ -47,9 +47,9 @@ export const EditLoanScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
+  contentContainer: {
+    paddingTop: 12,
+    paddingBottom: 40,
   },
 });
 

@@ -12,6 +12,7 @@ import CategoryCard from '../../components/cards/CategoryCard';
 import SavedCalculationCard from '../saved/components/SavedCalculationCard';
 import { useAppTheme } from '../../hooks/useAppTheme';
 import { ROUTES } from '../../navigation/routes';
+import { navigateToMyLoans } from '../../navigation/navigationHelpers';
 import { getPopularCalculators, getCalculatorCategories, getCalculatorById } from '../../calculators';
 import {
   selectSavedCalculations,
@@ -178,7 +179,7 @@ export const HomeScreen = ({ navigation }) => {
         </AppText>
       </TouchableOpacity>
 
-      {/* Primary Loan Widget (Requirement 28) */}
+      {/* Primary Loan Widget */}
       <View style={styles.loanWidgetSection}>
         {primaryLoan ? (
           <TouchableOpacity
@@ -193,12 +194,16 @@ export const HomeScreen = ({ navigation }) => {
                     {primaryLoan.name}
                   </AppText>
                 </View>
-                <View style={styles.viewLoanBtn}>
+                <TouchableOpacity
+                  onPress={() => navigateToMyLoans(navigation, { initialSegment: 'loans' })}
+                  activeOpacity={0.7}
+                  style={styles.viewLoanBtn}
+                >
                   <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700', marginRight: 2 }}>
-                    View Loan
+                    View All
                   </AppText>
                   <AppIcon icon={ChevronRight} size={14} color={currentTheme.primary} />
-                </View>
+                </TouchableOpacity>
               </View>
 
               <View style={styles.loanWidgetBody}>
@@ -225,7 +230,7 @@ export const HomeScreen = ({ navigation }) => {
         ) : (
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => navigation.navigate(ROUTES.LOAN_DASHBOARD)}
+            onPress={() => navigateToMyLoans(navigation, { initialSegment: 'loans' })}
           >
             <AppCard style={styles.trackLoanBanner}>
               <View style={styles.trackLoanLeft}>
@@ -251,7 +256,7 @@ export const HomeScreen = ({ navigation }) => {
           <View style={styles.sectionHeaderRow}>
             <AppText variant="sectionTitle">Recent Calculations</AppText>
             <TouchableOpacity
-              onPress={() => navigation.navigate(ROUTES.SAVED)}
+              onPress={() => navigateToMyLoans(navigation, { initialSegment: 'saved' })}
               activeOpacity={0.7}
               accessibilityRole="button"
               accessibilityLabel="View all saved calculations"

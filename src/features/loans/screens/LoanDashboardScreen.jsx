@@ -5,7 +5,6 @@ import { ArrowLeft, Plus, Archive, ShieldAlert } from 'lucide-react-native';
 import ScreenContainer from '../../../components/containers/ScreenContainer';
 import AppHeader from '../../../components/navigation/AppHeader';
 import AppText from '../../../components/common/AppText';
-import AppIcon from '../../../components/common/AppIcon';
 import PrimaryButton from '../../../components/buttons/PrimaryButton';
 import EmptyState from '../../../components/feedback/EmptyState';
 import { useAppTheme } from '../../../hooks/useAppTheme';
@@ -53,7 +52,7 @@ export const LoanDashboardScreen = ({ navigation }) => {
     <ScreenContainer
       header={renderHeader()}
       useSafeAreaTop={false}
-      useSafeAreaBottom={false}
+      useSafeAreaBottom={true}
       style={styles.container}
     >
       {/* Top Segment Control */}
@@ -174,7 +173,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: 16,
-    paddingBottom: 32,
+    paddingBottom: 40,
   },
   emptyContainer: {
     marginTop: 24,

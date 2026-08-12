@@ -11,6 +11,16 @@ export const typography = {
     fontWeight: fontWeights.bold,
     lineHeight: 40,
   },
+  h1: {
+    fontSize: 32,
+    fontWeight: fontWeights.bold,
+    lineHeight: 40,
+  },
+  h2: {
+    fontSize: 28,
+    fontWeight: fontWeights.bold,
+    lineHeight: 36,
+  },
   screenTitle: {
     fontSize: 26,
     fontWeight: fontWeights.bold,

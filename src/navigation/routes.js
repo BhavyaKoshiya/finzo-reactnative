@@ -2,10 +2,11 @@ export const ROUTES = {
   MAIN_TABS: 'MainTabs',
   HOME: 'Home',
   CALCULATORS: 'Calculators',
-  SAVED: 'Saved',
+  MY_LOANS: 'MyLoans',
+  SAVED: 'MyLoans', // Maintained for backward compatibility
   PROFILE: 'Profile',
   REWARDS: 'Rewards',
-  SETTINGS: 'Profile', // Maintained for backwards-compatibility alias
+  SETTINGS: 'Profile', // Maintained for backward compatibility alias
   SHOWCASE: 'Showcase',
   CALCULATOR_SEARCH: 'CalculatorSearch',
   CALCULATOR_DETAIL: 'CalculatorDetail',
@@ -30,6 +31,10 @@ export const ROUTES = {
   ADD_LOAN: 'AddLoan',
   EDIT_LOAN: 'EditLoan',
   LOAN_DETAILS: 'LoanDetails',
+  // Real Loan Payment History Routes (Phase 17)
+  ADD_PAYMENT: 'AddPayment',
+  EDIT_PAYMENT: 'EditPayment',
+  LOAN_PAYMENT_HISTORY: 'LoanPaymentHistory',
 };
 
 export default ROUTES;

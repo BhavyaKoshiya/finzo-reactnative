@@ -9,6 +9,17 @@ export const DEFAULT_REALTIME_CONFIG = {
     dailyCheckIn: {
       enabled: true,
 
+      schedule: {
+        day1: 5,
+        day2: 7,
+        day3: 9,
+        day4: 12,
+        day5: 15,
+        day6: 17,
+        day7: 20,
+        day8Plus: 20,
+      },
+
       rewardSchedule: {
         1: 5,
         2: 7,
@@ -22,6 +33,7 @@ export const DEFAULT_REALTIME_CONFIG = {
       maxReward: 20,
       repeatLastReward: true,
       cycleLength: 7,
+      missedDayResetsStreak: true,
 
       ui: {
         enabled: true,
@@ -104,8 +116,43 @@ export const DEFAULT_REALTIME_CONFIG = {
     },
   },
 
+  redemption: {
+    enabled: true,
+    packages: {
+      ad_free_1h: {
+        enabled: true,
+        durationMinutes: 60,
+        pointsCost: 100,
+        title: '1 Hour Ad-Free',
+        description: 'Enjoy Finzo without ads for 1 hour.',
+      },
+      ad_free_6h: {
+        enabled: true,
+        durationMinutes: 360,
+        pointsCost: 300,
+        title: '6 Hours Ad-Free',
+        description: 'Enjoy Finzo without ads for 6 hours.',
+      },
+      ad_free_24h: {
+        enabled: true,
+        durationMinutes: 1440,
+        pointsCost: 750,
+        title: '24 Hours Ad-Free',
+        description: 'Enjoy Finzo without ads for 24 hours.',
+      },
+    },
+  },
+
+  discounts: {
+    enabled: true,
+    packages: {},
+  },
+
   ads: {
     enabled: false,
+    rewardedAdsEnabled: false,
+    bannerAdsEnabled: false,
+    interstitialAdsEnabled: false,
     rewardedEnabled: false,
     rewardedPoints: 0,
     dailyRewardedLimit: 0,

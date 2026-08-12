@@ -1,31 +1,3 @@
-# FINZO REALTIME CONFIGURATION ARCHITECTURE
-
-This document details the design, fallback hierarchy, versioning schema, security boundaries, discount engine, administrative provisioning process, and subscriber pattern for the **Finzo Realtime Configuration System** powered by Firebase Realtime Database (RTDB).
-
----
-
-## 1. Overview & Fallback Hierarchy
-
-The configuration system enforces a strict 3-tier fallback hierarchy to guarantee **offline-first reliability** and crash protection:
-
-```
-1. Active Valid Firebase RTDB (/config)
-             ↓ (Validation Error / Empty / Outage)
-2. Last-Known-Good Configuration (AsyncStorage: @finzo_last_known_config)
-             ↓ (First Launch / Cleared Storage)
-3. Local Fallback Defaults (src/config/realtimeConfigDefaults.js)
-```
-
-- **Single Active Source**: Finzo UI components and services access configuration exclusively via `realtimeConfigService` and pure selectors (`realtimeConfigSelectors.js`).
-- **Zero User Data in RTDB**: RTDB `/config` contains public-read application configuration only (reward schedules, redemption package pricing, discount rules, feature flags). User points, check-in history, streak counters, loan profiles, payment history, and saved calculations remain strictly on local storage (`AsyncStorage`).
-
----
-
-## 2. RTDB Data Schema (`version: 1`)
-
-Target path: `/config`
-
-```json
 {
   "version": 1,
   "rewards": {
@@ -174,36 +146,3 @@ Target path: `/config`
     "rewardsEnabled": true
   }
 }
-```
-
----
-
-## 3. Schema Validation & Versioning (`realtimeConfigSchema.js`)
-
-Before activating any payload received from RTDB, `validateRealtimeConfig(payload)` enforces strict integrity checks:
-1. `payload.version === 1`: If an unsupported version is received, the remote payload is **rejected** and the app retains its last-known-good configuration.
-2. **Reward Ladder Validation**: All daily check-in schedule points must be positive integers ($> 0$). Zero or negative points cause schema rejection.
-3. **Package Pricing & Duration**: `durationMinutes >= 1` and `pointsCost >= 1`.
-4. **UI Copy Limits**: String values bounded (title $\le 80$, description $\le 200$ chars).
-5. **Discount Validation**: Percentage discounts bounded ($0 < \text{value} \le 100\%$), fixed discounts bounded ($0 < \text{value} < \text{pointsCost}$), and price floor enforced ($\text{finalPointsCost} \ge 1$).
-
----
-
-## 4. Administrative Provisioning
-
-Administrative payload file and script:
-- Payload file: [rtdb_config_payload.json](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/scripts/rtdb_config_payload.json)
-- Validation script: [provision_rtdb_config.js](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/scripts/provision_rtdb_config.js)
-- Firebase CLI provisioning command:
-  ```bash
-  npx -y firebase-tools@latest database:set /config scripts/rtdb_config_payload.json --force
-  ```
-
----
-
-## 5. Security & Privacy Boundary
-
-- **RTDB Access Rules**:
-  - `.read`: `true` for `/config`
-  - `.write`: `false` (Deny all client writes)
-- **Privacy Guarantee**: Finzo **NEVER** uploads user points, streaks, loan profiles, payment history, saved calculations, or PDFs to Firebase. RTDB is purely read-only remote configuration.

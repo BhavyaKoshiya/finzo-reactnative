@@ -2,10 +2,10 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Home, Calculator, Bookmark, UserRound } from 'lucide-react-native';
+import { Home, Calculator, WalletCards, UserRound } from 'lucide-react-native';
 import HomeScreen from '../features/home/HomeScreen';
 import CalculatorsScreen from '../features/calculators/CalculatorsScreen';
-import SavedScreen from '../features/saved/SavedScreen';
+import MyLoansScreen from '../features/myLoans/MyLoansScreen';
 import ProfileScreen from '../features/profile/ProfileScreen';
 import AppIcon from '../components/common/AppIcon';
 import { useAppTheme } from '../hooks/useAppTheme';
@@ -21,8 +21,8 @@ const renderCalculatorsIcon = ({ color, size }) => (
   <AppIcon icon={Calculator} size={size || 22} color={color} />
 );
 
-const renderSavedIcon = ({ color, size }) => (
-  <AppIcon icon={Bookmark} size={size || 22} color={color} />
+const renderMyLoansIcon = ({ color, size }) => (
+  <AppIcon icon={WalletCards} size={size || 22} color={color} />
 );
 
 const renderProfileIcon = ({ color, size }) => (
@@ -74,11 +74,11 @@ export const MainTabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name={ROUTES.SAVED}
-        component={SavedScreen}
+        name={ROUTES.MY_LOANS}
+        component={MyLoansScreen}
         options={{
-          tabBarLabel: 'Saved',
-          tabBarIcon: renderSavedIcon,
+          tabBarLabel: 'My Loans',
+          tabBarIcon: renderMyLoansIcon,
         }}
       />
       <Tab.Screen

@@ -25,11 +25,15 @@ import {
 import CalculatorSearchScreen from '../features/search/CalculatorSearchScreen';
 import ComponentShowcaseScreen from '../features/showcase/ComponentShowcaseScreen';
 import { RewardsScreen } from '../features/rewards';
+import MyLoansScreen from '../features/myLoans/MyLoansScreen';
 import {
   LoanDashboardScreen,
   AddLoanScreen,
   EditLoanScreen,
   LoanDetailsScreen,
+  AddPaymentScreen,
+  EditPaymentScreen,
+  LoanPaymentHistoryScreen,
 } from '../features/loans';
 import { ROUTES } from './routes';
 
@@ -65,11 +69,19 @@ export const RootNavigator = () => {
       {/* Rewards System Screen */}
       <Stack.Screen name={ROUTES.REWARDS} component={RewardsScreen} />
 
+      {/* My Loans Workspace Fallback */}
+      <Stack.Screen name={ROUTES.MY_LOANS} component={MyLoansScreen} />
+
       {/* Real Loan Profiles & Dashboard Screens (Phase 16) */}
       <Stack.Screen name={ROUTES.LOAN_DASHBOARD} component={LoanDashboardScreen} />
       <Stack.Screen name={ROUTES.ADD_LOAN} component={AddLoanScreen} />
       <Stack.Screen name={ROUTES.EDIT_LOAN} component={EditLoanScreen} />
       <Stack.Screen name={ROUTES.LOAN_DETAILS} component={LoanDetailsScreen} />
+
+      {/* Real Loan Payment History & Balance Tracking Screens (Phase 17) */}
+      <Stack.Screen name={ROUTES.ADD_PAYMENT} component={AddPaymentScreen} />
+      <Stack.Screen name={ROUTES.EDIT_PAYMENT} component={EditPaymentScreen} />
+      <Stack.Screen name={ROUTES.LOAN_PAYMENT_HISTORY} component={LoanPaymentHistoryScreen} />
 
       {__DEV__ && (
         <Stack.Screen

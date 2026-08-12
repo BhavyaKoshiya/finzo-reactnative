@@ -26,6 +26,10 @@ const loanProfilesSlice = createSlice({
       state.profiles.push({
         ...newProfile,
         isPrimary: shouldBePrimary,
+        ledgerVersion: Number(newProfile.ledgerVersion) || 1,
+        balanceSource: newProfile.balanceSource || 'bank_confirmed',
+        userConfirmedBalance: newProfile.currentOutstandingPrincipal,
+        lastBalanceConfirmationDate: newProfile.lastBalanceConfirmationDate || new Date().toISOString(),
       });
     },
 
@@ -36,7 +40,8 @@ const loanProfilesSlice = createSlice({
       const index = state.profiles.findIndex((p) => p.id === updated.id);
       if (index === -1) return;
 
-      const wasPrimary = state.profiles[index].isPrimary;
+      const current = state.profiles[index];
+      const wasPrimary = current.isPrimary;
       const isNowPrimary = Boolean(updated.isPrimary);
 
       if (isNowPrimary && !wasPrimary) {
@@ -46,11 +51,28 @@ const loanProfilesSlice = createSlice({
       }
 
       state.profiles[index] = {
-        ...state.profiles[index],
+        ...current,
         ...updated,
         isPrimary: isNowPrimary || (wasPrimary && !state.profiles.some((p) => p.id !== updated.id && p.isPrimary)),
+        ledgerVersion: (current.ledgerVersion || 1) + 1,
         updatedAt: new Date().toISOString(),
       };
+    },
+
+    correctLoanBalance: (state, action) => {
+      const { id, actualBankBalance } = typeof action.payload === 'object' ? action.payload : {};
+      if (!id || actualBankBalance === undefined || actualBankBalance === null) return;
+
+      const target = state.profiles.find((p) => p.id === id);
+      if (!target) return;
+
+      const numBank = Math.max(0, Number(actualBankBalance) || 0);
+      target.currentOutstandingPrincipal = numBank;
+      target.userConfirmedBalance = numBank;
+      target.balanceSource = 'bank_confirmed';
+      target.lastBalanceConfirmationDate = new Date().toISOString();
+      target.ledgerVersion = (target.ledgerVersion || 1) + 1;
+      target.updatedAt = new Date().toISOString();
     },
 
     deleteLoanProfile: (state, action) => {
@@ -93,15 +115,26 @@ const loanProfilesSlice = createSlice({
         p.isPrimary = p.id === targetId && p.status === 'active';
       });
     },
+
+    incrementLedgerVersion: (state, action) => {
+      const loanId = action.payload;
+      const target = state.profiles.find((p) => p.id === loanId);
+      if (target) {
+        target.ledgerVersion = (target.ledgerVersion || 1) + 1;
+        target.updatedAt = new Date().toISOString();
+      }
+    },
   },
 });
 
 export const {
   addLoanProfile,
   updateLoanProfile,
+  correctLoanBalance,
   deleteLoanProfile,
   archiveLoanProfile,
   setPrimaryLoan,
+  incrementLedgerVersion,
 } = loanProfilesSlice.actions;
 
 // Base Input Selectors

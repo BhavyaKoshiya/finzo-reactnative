@@ -6,7 +6,8 @@ describe('Navigation Architecture', () => {
   it('should define valid route constants', () => {
     expect(ROUTES.HOME).toBe('Home');
     expect(ROUTES.CALCULATORS).toBe('Calculators');
-    expect(ROUTES.SAVED).toBe('Saved');
+    expect(ROUTES.MY_LOANS).toBe('MyLoans');
+    expect(ROUTES.SAVED).toBe('MyLoans');
     expect(ROUTES.PROFILE).toBe('Profile');
     expect(ROUTES.MAIN_TABS).toBe('MainTabs');
     expect(ROUTES.SHOWCASE).toBe('Showcase');

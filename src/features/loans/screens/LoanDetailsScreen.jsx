@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { ArrowLeft, Edit3, Archive, Trash2, Calendar, Landmark, Star, StarOff } from 'lucide-react-native';
+import { ArrowLeft, Edit3, Archive, Trash2, Calendar, Landmark, Star, StarOff, Plus, ReceiptText, ChevronRight, ChevronDown, Scale, ShieldCheck, Calculator } from 'lucide-react-native';
 import ScreenContainer from '../../../components/containers/ScreenContainer';
 import AppHeader from '../../../components/navigation/AppHeader';
 import AppText from '../../../components/common/AppText';
@@ -16,16 +16,32 @@ import {
   archiveLoanProfile,
   setPrimaryLoan,
 } from '../../../store/slices/loanProfilesSlice';
+import {
+  selectPaymentsForLoan,
+  deletePaymentsForLoan,
+} from '../../../store/slices/loanPaymentsSlice';
 import { adaptLoanProfileForDisplay } from '../utils/loanPresentationAdapters';
+import { getPaymentStats } from '../utils/loanBalanceUtils';
+import { getCurrentLoanBalance } from '../utils/paymentBalanceUtils';
+import LoanPaymentCard from '../components/LoanPaymentCard';
+import ManualBalanceUpdateModal from './ManualBalanceUpdateModal';
+import { formatCurrency } from '../../../utils/financeFormatters';
 import { ROUTES } from '../../../navigation/routes';
 
 export const LoanDetailsScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const { currentTheme } = useAppTheme();
+  const [balanceModalVisible, setBalanceModalVisible] = useState(false);
+  const [showAssumptions, setShowAssumptions] = useState(false);
 
   const loanId = route?.params?.loanId;
   const rawProfile = useSelector((state) => selectLoanProfileById(state, loanId));
+  const payments = useSelector((state) => selectPaymentsForLoan(state, loanId));
+
   const profile = adaptLoanProfileForDisplay(rawProfile);
+  const paymentStats = getPaymentStats(payments, loanId);
+  const balanceState = getCurrentLoanBalance(rawProfile, payments);
+  const recentPayments = payments.slice(0, 3);
 
   if (!profile) {
     return (
@@ -44,16 +60,19 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
     );
   }
 
+  const isBankConfirmed = balanceState.isBankConfirmed;
+
   const handleDeletePress = () => {
     Alert.alert(
       `Delete ${profile.name}?`,
-      'Are you sure you want to delete this loan profile? This action will remove it permanently from your app.',
+      'Are you sure you want to delete this loan profile? All associated payment history will also be removed.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete Loan',
           style: 'destructive',
           onPress: () => {
+            dispatch(deletePaymentsForLoan(profile.id));
             dispatch(deleteLoanProfile(profile.id));
             Alert.alert('Loan Deleted', `${profile.name} has been removed.`);
             navigation.goBack();
@@ -102,7 +121,7 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
       scrollable
       header={renderHeader()}
       useSafeAreaTop={false}
-      useSafeAreaBottom={false}
+      useSafeAreaBottom={true}
       style={styles.container}
     >
       {/* Overview Card */}
@@ -142,11 +161,20 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
           )}
         </View>
 
-        <AppText variant="caption" color="rgba(255, 255, 255, 0.8)" style={styles.labelMargin}>
-          Current Outstanding Balance
-        </AppText>
+        <View style={styles.outstandingHeaderRow}>
+          <AppText variant="caption" color="rgba(255, 255, 255, 0.85)">
+            Outstanding Balance
+          </AppText>
+          <View style={styles.sourceBadgeChip}>
+            <AppIcon icon={isBankConfirmed ? ShieldCheck : Calculator} size={11} color="#FFFFFF" style={{ marginRight: 3 }} />
+            <AppText variant="caption" color="#FFFFFF" style={{ fontWeight: '700', fontSize: 11 }}>
+              {isBankConfirmed ? 'Bank Confirmed' : 'Finzo Estimate'}
+            </AppText>
+          </View>
+        </View>
+
         <AppText variant="h2" color="#FFFFFF" style={styles.outstandingAmount}>
-          {profile.formattedCurrentOutstanding}
+          {formatCurrency(balanceState.currentBalance)}
         </AppText>
 
         {/* Progress Bar */}
@@ -168,7 +196,7 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
 
         <View style={styles.overviewBottomGrid}>
           <View style={styles.gridCol}>
-            <AppText variant="caption" color="rgba(255, 255, 255, 0.8)">
+            <AppText variant="caption" color="rgba(255, 255, 255, 0.85)">
               Monthly EMI
             </AppText>
             <AppText variant="titleMedium" color="#FFFFFF" style={styles.boldVal}>
@@ -177,7 +205,7 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
           </View>
 
           <View style={styles.gridCol}>
-            <AppText variant="caption" color="rgba(255, 255, 255, 0.8)">
+            <AppText variant="caption" color="rgba(255, 255, 255, 0.85)">
               Interest Rate
             </AppText>
             <AppText variant="titleMedium" color="#FFFFFF" style={styles.boldVal}>
@@ -186,6 +214,164 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
           </View>
         </View>
       </AppCard>
+
+      {/* Payment Summary Section */}
+      <AppCard style={styles.paymentSummaryCard}>
+        <View style={styles.sectionHeaderRow}>
+          <View style={styles.titleWithIcon}>
+            <AppIcon icon={ReceiptText} size={18} color={currentTheme.primary} style={{ marginRight: 8 }} />
+            <AppText variant="cardTitle" style={{ fontWeight: '700' }}>
+              Payment Summary
+            </AppText>
+          </View>
+
+          <TouchableOpacity
+            onPress={() => setBalanceModalVisible(true)}
+            activeOpacity={0.7}
+            style={styles.updateBalBtn}
+          >
+            <AppIcon icon={Scale} size={13} color={currentTheme.primary} style={{ marginRight: 4 }} />
+            <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700' }}>
+              Correct Balance
+            </AppText>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.statsGrid}>
+          <View style={styles.statCol}>
+            <AppText variant="caption" color={currentTheme.textSecondary}>
+              Total Paid
+            </AppText>
+            <AppText variant="titleMedium" color={currentTheme.primary} style={{ fontWeight: '800' }}>
+              {formatCurrency(paymentStats.totalPaid)}
+            </AppText>
+          </View>
+
+          <View style={styles.statDivider} />
+
+          <View style={styles.statCol}>
+            <AppText variant="caption" color={currentTheme.textSecondary}>
+              Total Payments
+            </AppText>
+            <AppText variant="titleMedium" style={{ fontWeight: '700' }}>
+              {paymentStats.totalPayments}
+            </AppText>
+          </View>
+        </View>
+
+        <View style={styles.statsSubRow}>
+          <AppText variant="caption" color={currentTheme.textSecondary}>
+            EMIs: <AppText variant="caption" style={{ fontWeight: '700' }}>{paymentStats.emiCount}</AppText>
+          </AppText>
+          <AppText variant="caption" color={currentTheme.textSecondary}>
+            Prepayments: <AppText variant="caption" style={{ fontWeight: '700' }}>{paymentStats.prepaymentCount}</AppText>
+          </AppText>
+          {paymentStats.lastPaymentDate ? (
+            <AppText variant="caption" color={currentTheme.textSecondary}>
+              Last: <AppText variant="caption" style={{ fontWeight: '700' }}>{paymentStats.lastPaymentDate}</AppText>
+            </AppText>
+          ) : null}
+        </View>
+      </AppCard>
+
+      {/* How Finzo calculates this expandable section */}
+      <AppCard style={styles.assumptionsCard}>
+        <TouchableOpacity
+          onPress={() => setShowAssumptions(!showAssumptions)}
+          activeOpacity={0.7}
+          style={styles.assumptionsHeader}
+        >
+          <View style={styles.titleWithIcon}>
+            <AppIcon icon={Calculator} size={16} color={currentTheme.primary} style={{ marginRight: 8 }} />
+            <AppText variant="bodyMedium" style={{ fontWeight: '700' }}>
+              How Finzo calculates this
+            </AppText>
+          </View>
+          <AppIcon
+            icon={showAssumptions ? ChevronDown : ChevronRight}
+            size={16}
+            color={currentTheme.textSecondary}
+          />
+        </TouchableOpacity>
+
+        {showAssumptions && (
+          <View style={styles.assumptionsBody}>
+            <View style={styles.assumptionItem}>
+              <AppText variant="caption" color={currentTheme.textSecondary}>Interest Method:</AppText>
+              <AppText variant="caption" style={{ fontWeight: '600' }}>Monthly reducing balance</AppText>
+            </View>
+            <View style={styles.assumptionItem}>
+              <AppText variant="caption" color={currentTheme.textSecondary}>Annual Interest Rate:</AppText>
+              <AppText variant="caption" style={{ fontWeight: '600' }}>{profile.formattedInterestRate}</AppText>
+            </View>
+            <View style={styles.assumptionItem}>
+              <AppText variant="caption" color={currentTheme.textSecondary}>Balance Source:</AppText>
+              <AppText variant="caption" style={{ fontWeight: '600' }}>
+                {isBankConfirmed ? 'Bank confirmed' : 'Finzo estimate'}
+              </AppText>
+            </View>
+            <View style={styles.assumptionItem}>
+              <AppText variant="caption" color={currentTheme.textSecondary}>Recorded Payments Included:</AppText>
+              <AppText variant="caption" style={{ fontWeight: '600' }}>{paymentStats.totalPayments}</AppText>
+            </View>
+            {isBankConfirmed && balanceState.lastConfirmedDate && (
+              <View style={styles.assumptionItem}>
+                <AppText variant="caption" color={currentTheme.textSecondary}>Last Confirmation Date:</AppText>
+                <AppText variant="caption" style={{ fontWeight: '600' }}>
+                  {balanceState.lastConfirmedDate.split('T')[0]}
+                </AppText>
+              </View>
+            )}
+          </View>
+        )}
+      </AppCard>
+
+      {/* Recent Payments Section */}
+      <View style={styles.recentSection}>
+        <View style={styles.sectionHeaderRow}>
+          <AppText variant="sectionTitle" style={{ fontSize: 16 }}>
+            Recent Payments
+          </AppText>
+          {payments.length > 0 && (
+            <TouchableOpacity
+              onPress={() => navigation.navigate(ROUTES.LOAN_PAYMENT_HISTORY, { loanId: profile.id })}
+              activeOpacity={0.7}
+              style={styles.viewAllRow}
+            >
+              <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700', marginRight: 2 }}>
+                View All ({payments.length})
+              </AppText>
+              <AppIcon icon={ChevronRight} size={14} color={currentTheme.primary} />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {recentPayments.length > 0 ? (
+          recentPayments.map((p) => (
+            <LoanPaymentCard
+              key={p.id}
+              payment={p}
+              onPress={() => navigation.navigate(ROUTES.EDIT_PAYMENT, { paymentId: p.id })}
+            />
+          ))
+        ) : (
+          <AppCard style={styles.emptyCard}>
+            <AppText variant="bodySmall" color={currentTheme.textSecondary} style={{ textAlign: 'center', marginBottom: 10 }}>
+              No payments recorded yet for this loan account.
+            </AppText>
+            <TouchableOpacity
+              onPress={() => navigation.navigate(ROUTES.ADD_PAYMENT, { loanId: profile.id })}
+              activeOpacity={0.7}
+              style={styles.emptyAddBtn}
+            >
+              <AppIcon icon={Plus} size={14} color={currentTheme.primary} style={{ marginRight: 6 }} />
+              <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700' }}>
+                Record First Payment
+              </AppText>
+            </TouchableOpacity>
+          </AppCard>
+        )}
+      </View>
 
       {/* Details Breakdown Card */}
       <AppCard style={styles.detailsCard}>
@@ -279,6 +465,12 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
       {/* Action Buttons */}
       <View style={styles.actionsGroup}>
         <PrimaryButton
+          title="Record Payment"
+          icon={Plus}
+          onPress={() => navigation.navigate(ROUTES.ADD_PAYMENT, { loanId: profile.id })}
+        />
+
+        <SecondaryButton
           title="Edit Loan Profile"
           icon={Edit3}
           onPress={() => navigation.navigate(ROUTES.EDIT_LOAN, { loanId: profile.id })}
@@ -298,14 +490,21 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
           textStyle={{ color: currentTheme.error }}
         />
       </View>
+
+      {/* Manual Balance Update Modal */}
+      <ManualBalanceUpdateModal
+        visible={balanceModalVisible}
+        onClose={() => setBalanceModalVisible(false)}
+        loan={profile}
+      />
     </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
-    paddingBottom: 32,
+    paddingTop: 12,
+    paddingBottom: 40,
   },
   notFound: {
     alignItems: 'center',
@@ -364,13 +563,26 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
   },
-  labelMargin: {
+  outstandingHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginTop: 4,
+  },
+  sourceBadgeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
   },
   outstandingAmount: {
     fontSize: 28,
+    lineHeight: 36,
     fontWeight: '800',
-    marginTop: 2,
+    marginTop: 4,
+    paddingVertical: 2,
   },
   progressContainer: {
     marginTop: 14,
@@ -405,6 +617,91 @@ const styles = StyleSheet.create({
   boldVal: {
     fontWeight: '700',
     marginTop: 2,
+  },
+  paymentSummaryCard: {
+    padding: 16,
+    marginBottom: 16,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  titleWithIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  updateBalBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  statCol: {
+    flex: 1,
+  },
+  statDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: '#E5E7EB',
+    marginHorizontal: 12,
+  },
+  statsSubRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  assumptionsCard: {
+    padding: 16,
+    marginBottom: 16,
+  },
+  assumptionsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  assumptionsBody: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F3F4F6',
+    gap: 8,
+  },
+  assumptionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  recentSection: {
+    marginBottom: 16,
+  },
+  viewAllRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  emptyCard: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  emptyAddBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
   },
   detailsCard: {
     padding: 16,

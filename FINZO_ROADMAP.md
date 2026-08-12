@@ -17,18 +17,22 @@
 - [x] Phase 14 — Rewards Store, Point Redemption & Ad-Free Entitlements
 - [x] Phase 15 — Firebase RTDB + Dynamic Rewards + Streak Check-In + Discounts + Configurable Rewards UI
 - [x] Phase 16 — Real Loan Profiles + Loan Dashboard Foundation
-- [ ] Phase 17 — Monetization & Rewarded Ads SDK
-- [ ] Phase 18 — Final QA + Store Preparation
+- [x] Phase 16.1 — My Loans Access & Multi-Loan UX
+- [x] Phase 16.2 — My Loans Personal Financial Workspace
+- [x] Phase 17 — Loan Payment History + Balance Tracking
+- [x] Phase 17.1 — Loan Balance & Payment Calculation Correction
+- [x] Phase 17.2 — Loan Ledger Hardening
+- [x] Phase 17.3 — RTDB Configuration Provisioning & Hardening
+- [ ] Phase 18 — Prepayment Simulator
+- [ ] Phase 19 — Monetization & Rewarded Ads SDK
+- [ ] Phase 20 — Final QA + Store Preparation
 
 ---
 
-## Architectural Notes: Real Loan Profiles & Loan Dashboard Foundation (Phase 16)
+## Architectural Notes: RTDB Configuration Provisioning & Hardening (Phase 17.3)
 
-- **Domain Separation**: Strict architectural boundary separating hypothetical calculator loans (`src/features/calculators/loans/`) from real user loan accounts (`src/features/loans/`).
-- **Data Model**: `schemaVersion: 1` data model with high-precision numeric values, ISO calendar dates, and support for 6 loan types (`home_loan`, `personal_loan`, `car_loan`, `education_loan`, `business_loan`, `other`).
-- **State Management & Persistence**: Redux Toolkit `loanProfilesSlice` whitelisted in `redux-persist` via `@react-native-async-storage/async-storage`. Hydration safety guards ignore corrupted records automatically.
-- **Primary Loan Invariant**: Single-primary constraint enforced across creation, edits, switches, archives, and deletions.
-- **Loan Dashboard & Cards**: Dashboard summary displaying Total Outstanding, Total Monthly EMI, and Active Loan Count. Tabbed view for Active vs Archived loans.
-- **Date Handling & Progress**: `date-fns` calendar calculations for next EMI status (`daysUntilPayment`, `isDueToday`, `isPastDue`). Approximate principal repayment progress indicator clamped to $[0, 1]$.
-- **Home & Profile Integration**: Compact primary loan widget and "Track Your Loans" banner on Home tab; "My Loans" section on Profile tab.
-- **Privacy Enforcement**: 100% local device storage. Zero loan data uploaded to Firebase RTDB, Firestore, or cloud backends.
+- **Provisioned Firebase RTDB `/config`**: Persisted authoritative production JSON configuration payload containing `version`, `rewards`, `redemption`, `discounts`, and `ads` (disabled).
+- **3-Tier Fallback Hierarchy**: Valid Firebase RTDB `/config` $\rightarrow$ Last-Known-Good AsyncStorage config (`@finzo_last_known_config`) $\rightarrow$ Local defaults (`DEFAULT_REALTIME_CONFIG`).
+- **Hardened Schema Validation**: Bounded integer validation (`pointsCost >= 1`, `durationMinutes >= 1`), strict daily reward ladder validation ($> 0$), string length caps, and discount percentage floor safety.
+- **Empty RTDB & Offline Resilience**: Empty (`null`), malformed, or unreachable remote payloads safely fall back to cached/default configuration without crashing or modifying user state.
+- **100% User Data Privacy**: Zero user points, streaks, loan profiles, payment history, or saved calculations reside in Firebase. RTDB is strictly read-only remote config.

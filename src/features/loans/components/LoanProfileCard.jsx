@@ -1,14 +1,22 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { useSelector } from 'react-redux';
 import AppCard from '../../../components/cards/AppCard';
 import AppText from '../../../components/common/AppText';
 import AppIcon from '../../../components/common/AppIcon';
 import { useAppTheme } from '../../../hooks/useAppTheme';
 import { adaptLoanProfileForDisplay } from '../utils/loanPresentationAdapters';
-import { Calendar, ChevronRight, Star } from 'lucide-react-native';
+import { selectLatestPaymentForLoan, selectTotalPaymentsForLoan } from '../../../store/slices/loanPaymentsSlice';
+import { adaptLoanPaymentForDisplay } from '../utils/loanPaymentPresentationAdapters';
+import { Calendar, ChevronRight, Star, ReceiptText } from 'lucide-react-native';
 
 export const LoanProfileCard = ({ profile, onPress, style }) => {
   const { currentTheme } = useAppTheme();
+
+  const latestPaymentRaw = useSelector((state) => selectLatestPaymentForLoan(state, profile?.id));
+  const paymentCount = useSelector((state) => selectTotalPaymentsForLoan(state, profile?.id));
+  const latestPayment = adaptLoanPaymentForDisplay(latestPaymentRaw);
+
   const adapted = adaptLoanProfileForDisplay(profile);
 
   if (!adapted) return null;
@@ -102,6 +110,21 @@ export const LoanProfileCard = ({ profile, onPress, style }) => {
           </View>
         </View>
 
+        {/* Latest Payment Sub-strip */}
+        {latestPayment ? (
+          <View style={styles.latestPaymentStrip}>
+            <View style={styles.latestPaymentLeft}>
+              <AppIcon icon={ReceiptText} size={13} color={currentTheme.primary} style={{ marginRight: 6 }} />
+              <AppText variant="caption" color={currentTheme.textSecondary} numberOfLines={1}>
+                Latest: <AppText variant="caption" style={{ fontWeight: '700', color: currentTheme.textPrimary }}>{latestPayment.formattedAmount}</AppText> ({latestPayment.formattedCompactDate})
+              </AppText>
+            </View>
+            <AppText variant="caption" color={currentTheme.textMuted}>
+              {paymentCount} {paymentCount === 1 ? 'payment' : 'payments'}
+            </AppText>
+          </View>
+        ) : null}
+
         {/* Footer Sub-info */}
         <View style={styles.footerRow}>
           <View style={styles.footerTag}>
@@ -192,6 +215,22 @@ const styles = StyleSheet.create({
     height: 28,
     backgroundColor: '#E5E7EB',
     marginHorizontal: 12,
+  },
+  latestPaymentStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    backgroundColor: 'rgba(59, 130, 246, 0.06)',
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  latestPaymentLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 8,
   },
   footerRow: {
     flexDirection: 'row',

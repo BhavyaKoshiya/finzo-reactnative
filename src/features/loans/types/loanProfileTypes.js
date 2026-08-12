@@ -11,6 +11,7 @@ export const LOAN_PROFILE_SCHEMA_VERSION = 1;
 export const createLoanProfile = ({
   id = `loan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
   schemaVersion = LOAN_PROFILE_SCHEMA_VERSION,
+  ledgerVersion = 1,
   name = 'My Loan',
   loanType = 'home_loan',
   lenderName = '',
@@ -18,6 +19,9 @@ export const createLoanProfile = ({
   currentOutstandingPrincipal = 0,
   annualInterestRate = 0,
   emiAmount = 0,
+  balanceSource = 'bank_confirmed',
+  userConfirmedBalance = null,
+  lastBalanceConfirmationDate = null,
   originalTenure = { value: 0, unit: 'months' },
   remainingTenure = { value: 0, unit: 'months' },
   loanStartDate = new Date().toISOString().split('T')[0],
@@ -29,34 +33,46 @@ export const createLoanProfile = ({
   status = 'active',
   createdAt = new Date().toISOString(),
   updatedAt = new Date().toISOString(),
-} = {}) => ({
-  id,
-  schemaVersion,
-  name: String(name || 'My Loan').trim(),
-  loanType,
-  lenderName: String(lenderName || '').trim(),
-  originalPrincipal: Number(originalPrincipal) || 0,
-  currentOutstandingPrincipal: Number(currentOutstandingPrincipal) || 0,
-  annualInterestRate: Number(annualInterestRate) || 0,
-  emiAmount: Number(emiAmount) || 0,
-  originalTenure: {
-    value: Number(originalTenure?.value) || 0,
-    unit: originalTenure?.unit === 'years' ? 'years' : 'months',
-  },
-  remainingTenure: {
-    value: Number(remainingTenure?.value) || 0,
-    unit: remainingTenure?.unit === 'years' ? 'years' : 'months',
-  },
-  loanStartDate: String(loanStartDate).trim(),
-  nextEmiDate: String(nextEmiDate).trim(),
-  emiFrequency: String(emiFrequency || 'monthly'),
-  processingFee: Number(processingFee) || 0,
-  notes: String(notes || '').trim(),
-  isPrimary: Boolean(isPrimary),
-  status: status === 'archived' ? 'archived' : 'active',
-  createdAt,
-  updatedAt,
-});
+} = {}) => {
+  const numCurrent = Number(currentOutstandingPrincipal) || 0;
+  const numOriginal = Number(originalPrincipal) || 0;
+  const numUserConfirmed = userConfirmedBalance !== null && userConfirmedBalance !== undefined && !isNaN(Number(userConfirmedBalance))
+    ? Number(userConfirmedBalance)
+    : (numCurrent > 0 ? numCurrent : numOriginal);
+
+  return {
+    id,
+    schemaVersion,
+    ledgerVersion: Number(ledgerVersion) || 1,
+    name: String(name || 'My Loan').trim(),
+    loanType,
+    lenderName: String(lenderName || '').trim(),
+    originalPrincipal: numOriginal,
+    currentOutstandingPrincipal: numCurrent,
+    annualInterestRate: Number(annualInterestRate) || 0,
+    emiAmount: Number(emiAmount) || 0,
+    balanceSource: balanceSource || 'bank_confirmed',
+    userConfirmedBalance: numUserConfirmed,
+    lastBalanceConfirmationDate: lastBalanceConfirmationDate || (balanceSource === 'bank_confirmed' ? loanStartDate : null),
+    originalTenure: {
+      value: Number(originalTenure?.value) || 0,
+      unit: originalTenure?.unit === 'years' ? 'years' : 'months',
+    },
+    remainingTenure: {
+      value: Number(remainingTenure?.value) || 0,
+      unit: remainingTenure?.unit === 'years' ? 'years' : 'months',
+    },
+    loanStartDate: String(loanStartDate).trim(),
+    nextEmiDate: String(nextEmiDate).trim(),
+    emiFrequency: String(emiFrequency || 'monthly'),
+    processingFee: Number(processingFee) || 0,
+    notes: String(notes || '').trim(),
+    isPrimary: Boolean(isPrimary),
+    status: status === 'archived' ? 'archived' : 'active',
+    createdAt,
+    updatedAt,
+  };
+};
 
 /**
  * Type guard / schema validator to ensure hydrated persisted profiles are safe.

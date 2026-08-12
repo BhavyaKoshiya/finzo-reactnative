@@ -25,6 +25,7 @@ import {
 import { formatCurrencyCompact } from '../../utils/financeFormatters';
 import { useAppTheme } from '../../hooks/useAppTheme';
 import { ROUTES } from '../../navigation/routes';
+import { navigateToMyLoans } from '../../navigation/navigationHelpers';
 
 export const ProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -82,7 +83,7 @@ export const ProfileScreen = ({ navigation }) => {
           icon={WalletCards}
           title="My Loans & Liabilities"
           subtitle={loanSummaryText}
-          onPress={() => navigation.navigate(ROUTES.LOAN_DASHBOARD)}
+          onPress={() => navigateToMyLoans(navigation, { initialSegment: 'loans' })}
           accessibilityLabel="Manage your real-world loans and EMIs"
         />
       </ProfileSection>

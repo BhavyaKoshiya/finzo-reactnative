@@ -5,11 +5,12 @@ import ScreenContainer from '../../../components/containers/ScreenContainer';
 import AppHeader from '../../../components/navigation/AppHeader';
 import LoanProfileForm from '../components/LoanProfileForm';
 import { useLoanProfileForm } from '../hooks/useLoanProfileForm';
+import { navigateToMyLoans } from '../../../navigation/navigationHelpers';
 
 export const AddLoanScreen = ({ navigation }) => {
   const form = useLoanProfileForm(null, () => {
     Alert.alert('Loan Created', 'Your loan profile has been saved successfully!');
-    navigation.goBack();
+    navigateToMyLoans(navigation, { initialSegment: 'loans' });
   });
 
   const renderHeader = () => (
@@ -29,8 +30,8 @@ export const AddLoanScreen = ({ navigation }) => {
       scrollable
       header={renderHeader()}
       useSafeAreaTop={false}
-      useSafeAreaBottom={false}
-      style={styles.container}
+      useSafeAreaBottom={true}
+      contentContainerStyle={styles.contentContainer}
     >
       <LoanProfileForm
         form={form}
@@ -42,9 +43,9 @@ export const AddLoanScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
+  contentContainer: {
+    paddingTop: 12,
+    paddingBottom: 40,
   },
 });
 
