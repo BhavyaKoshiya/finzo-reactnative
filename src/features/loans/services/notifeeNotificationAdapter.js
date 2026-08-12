@@ -148,3 +148,43 @@ export const getScheduledTriggerNotificationIds = async () => {
   }
   return [];
 };
+/**
+ * Sends a test local notification after specified delay (default 5s).
+ */
+export const sendTestNotification = async (delaySeconds = 5) => {
+  try {
+    const perm = await requestNotificationPermissions();
+    if (!perm.authorized) {
+      return { success: false, error: 'Permission denied' };
+    }
+
+    await ensureNotificationChannel();
+
+    const fireTime = Date.now() + delaySeconds * 1000;
+    const trigger = {
+      type: TriggerType.TIMESTAMP,
+      timestamp: fireTime,
+    };
+
+    if (typeof notifee?.createTriggerNotification === 'function') {
+      await notifee.createTriggerNotification(
+        {
+          id: `test_notif_${Date.now()}`,
+          title: '🔔 Finzo Payment Reminder (Test)',
+          body: `Test local notification delivered successfully! (${delaySeconds}s delay)`,
+          android: {
+            channelId: NOTIFICATION_CHANNEL_ID,
+            pressAction: { id: 'default' },
+          },
+          data: { type: 'test_notification' },
+        },
+        trigger
+      );
+      return { success: true, fireTime };
+    }
+  } catch (error) {
+    console.warn('[notifeeAdapter] Test notification failed:', error);
+    return { success: false, error: error.message };
+  }
+  return { success: false, error: 'Notifee unavailable' };
+};

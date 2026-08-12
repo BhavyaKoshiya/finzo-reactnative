@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Modal, TouchableOpacity, ScrollView, Switch, Linking } from 'react-native';
+import { View, StyleSheet, Modal, TouchableOpacity, ScrollView, Switch, Linking, Alert } from 'react-native';
 import notifee from '@notifee/react-native';
 import { Bell, X, Check, Calendar, Clock } from 'lucide-react-native';
 import AppText from '../../../components/common/AppText';

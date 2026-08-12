@@ -114,3 +114,12 @@ Users may optionally provide actual bank statement figures:
 - **Anchor Consistency**: Simulations resolve starting balance directly from `getCurrentLoanBalance(loan, payments)` (respecting bank-confirmed anchors).
 - **Recording Transition**: Tapping "Record this prepayment" routes to `AddPaymentScreen` with pre-filled `paymentType = 'prepayment'` and simulated amount, preserving the Phase 16.4 payment recording flow as the single source of truth.
 
+---
+
+## 10. LOAN INSIGHTS & ANALYTICS CONSUMPTION (PHASE 16.8)
+
+- **Pure Read-Only Consumption**: `loanInsightUtils` consumes ledger state exclusively via `getCurrentLoanBalance(loan, payments)` and `sortPaymentsChronologically(payments)`.
+- **Snapshot Fidelity**: Cumulative principal and interest analytics consume stored `calculationSnapshot` values and bank-confirmed actual figures without recalculating historical records at current interest rates.
+- **Zero Mutation**: Insight calculations do not alter `ledgerVersion`, balance anchors, or recorded payment structures.
+
+

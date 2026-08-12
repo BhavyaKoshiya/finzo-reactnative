@@ -9,6 +9,7 @@ import {
   getScheduledTriggerNotificationIds,
   checkNotificationPermissions,
   requestNotificationPermissions,
+  sendTestNotification,
 } from './notifeeNotificationAdapter';
 
 /**
@@ -225,6 +226,14 @@ export const loanReminderService = {
    */
   getScheduledNotifications() {
     return Array.from(scheduledRegistry.values());
+  },
+
+  /**
+   * Triggers a test local notification after specified delay (default 5 seconds).
+   * @param {number} [delaySeconds=5]
+   */
+  async sendTestNotification(delaySeconds = 5) {
+    return await sendTestNotification(delaySeconds);
   },
 
   /**

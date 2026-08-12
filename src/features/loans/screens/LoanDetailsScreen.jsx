@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { ArrowLeft, Edit3, Archive, Trash2, Calendar, Landmark, Star, StarOff, Plus, ReceiptText, ChevronRight, ChevronDown, Scale, ShieldCheck, Calculator, Sparkles } from 'lucide-react-native';
+import { ArrowLeft, Edit3, Archive, Trash2, Calendar, Landmark, Star, StarOff, Plus, ReceiptText, ChevronRight, ChevronDown, Scale, ShieldCheck, Calculator, Sparkles, TrendingUp } from 'lucide-react-native';
 import ScreenContainer from '../../../components/containers/ScreenContainer';
 import AppHeader from '../../../components/navigation/AppHeader';
 import AppText from '../../../components/common/AppText';
@@ -24,9 +24,11 @@ import {
 import { adaptLoanProfileForDisplay } from '../utils/loanPresentationAdapters';
 import { getPaymentStats } from '../utils/loanBalanceUtils';
 import { getCurrentLoanBalance } from '../utils/paymentBalanceUtils';
+import { buildLoanInsightSummary } from '../utils/loanInsightUtils';
 import LoanPaymentCard from '../components/LoanPaymentCard';
 import UpcomingPaymentCard from '../components/UpcomingPaymentCard';
 import LoanReminderSettingsModal from '../components/LoanReminderSettingsModal';
+import LoanInsightsPreviewCard from '../components/LoanInsightsPreviewCard';
 import ManualBalanceUpdateModal from './ManualBalanceUpdateModal';
 import { formatCurrency } from '../../../utils/financeFormatters';
 import { PAYMENT_TYPES } from '../constants/loanPaymentConstants';
@@ -46,6 +48,7 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
   const profile = adaptLoanProfileForDisplay(rawProfile);
   const paymentStats = getPaymentStats(payments, loanId);
   const balanceState = getCurrentLoanBalance(rawProfile, payments);
+  const insightSummary = buildLoanInsightSummary(rawProfile, payments);
   const recentPayments = payments.slice(0, 3);
 
   if (!profile) {
@@ -236,6 +239,12 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
         onOpenSettings={() => setReminderModalVisible(true)}
       />
 
+      {/* Compact Loan Insights Preview Card */}
+      <LoanInsightsPreviewCard
+        summary={insightSummary}
+        onViewInsights={() => navigation.navigate(ROUTES.LOAN_INSIGHTS, { loanId: profile.id })}
+      />
+
       {/* Payment Summary Section */}
       <AppCard style={styles.paymentSummaryCard}>
         <View style={styles.sectionHeaderRow}>
@@ -246,29 +255,18 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
             </AppText>
           </View>
 
-          <View style={styles.topCardActionsRow}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate(ROUTES.LOAN_PREPAYMENT_SIMULATOR, { loanId: profile.id })}
-              activeOpacity={0.7}
-              style={[styles.updateBalBtn, { backgroundColor: 'rgba(99, 102, 241, 0.1)', marginRight: 6 }]}
-            >
-              <AppIcon icon={Sparkles} size={13} color={currentTheme.primary} style={{ marginRight: 4 }} />
-              <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700' }}>
-                Simulate
-              </AppText>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => setBalanceModalVisible(true)}
-              activeOpacity={0.7}
-              style={styles.updateBalBtn}
-            >
-              <AppIcon icon={Scale} size={13} color={currentTheme.primary} style={{ marginRight: 4 }} />
-              <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700' }}>
-                Correct Balance
-              </AppText>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            onPress={() => setBalanceModalVisible(true)}
+            activeOpacity={0.7}
+            style={styles.updateBalBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Correct loan balance"
+          >
+            <AppIcon icon={Scale} size={13} color={currentTheme.primary} style={{ marginRight: 4 }} />
+            <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700' }}>
+              Correct Balance
+            </AppText>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.statsGrid}>
@@ -508,6 +506,12 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
           title="Simulate Prepayment"
           icon={Sparkles}
           onPress={() => navigation.navigate(ROUTES.LOAN_PREPAYMENT_SIMULATOR, { loanId: profile.id })}
+        />
+
+        <SecondaryButton
+          title="View Loan Insights"
+          icon={TrendingUp}
+          onPress={() => navigation.navigate(ROUTES.LOAN_INSIGHTS, { loanId: profile.id })}
         />
 
         <SecondaryButton

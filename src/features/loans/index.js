@@ -2,6 +2,7 @@ export { default as LoanDashboardScreen } from './screens/LoanDashboardScreen';
 export { default as AddLoanScreen } from './screens/AddLoanScreen';
 export { default as EditLoanScreen } from './screens/EditLoanScreen';
 export { default as LoanDetailsScreen } from './screens/LoanDetailsScreen';
+export { default as LoanInsightsScreen } from './screens/LoanInsightsScreen';
 export { default as AddPaymentScreen } from './screens/AddPaymentScreen';
 export { default as EditPaymentScreen } from './screens/EditPaymentScreen';
 export { default as LoanPaymentHistoryScreen } from './screens/LoanPaymentHistoryScreen';
@@ -15,6 +16,8 @@ export { default as LoanPaymentForm } from './components/LoanPaymentForm';
 export { default as LoanPaymentCard } from './components/LoanPaymentCard';
 export { default as UpcomingPaymentCard } from './components/UpcomingPaymentCard';
 export { default as LoanReminderSettingsModal } from './components/LoanReminderSettingsModal';
+export { default as LoanInsightsPreviewCard } from './components/LoanInsightsPreviewCard';
+export { default as LoanInsightsTrendChart } from './components/LoanInsightsTrendChart';
 
 export { useLoanProfileForm } from './hooks/useLoanProfileForm';
 export { useLoanPaymentForm } from './hooks/useLoanPaymentForm';

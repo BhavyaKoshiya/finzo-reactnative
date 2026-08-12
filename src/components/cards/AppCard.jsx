@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
       height: 2,
     },
     padding: 16,
+    overflow: 'hidden',
   },
 });
 

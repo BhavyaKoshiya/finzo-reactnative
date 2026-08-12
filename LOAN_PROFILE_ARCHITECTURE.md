@@ -159,3 +159,12 @@ Display Text: `"Approx. principal repaid ₹2,57,500 (25.75%)"`
 - **Global Settings Override**: Master toggle `loanRemindersEnabled` in `settingsSlice` can globally suppress all local payment alerts.
 - **Ledger Non-Mutation Invariant**: Updating reminder preferences updates loan profile metadata but leaves financial `ledgerVersion` untouched.
 
+---
+
+## 10. DERIVED LOAN INSIGHT METRICS (PHASE 16.8)
+
+- **Derived Insights Model**: `buildLoanInsightSummary(loan, payments)` calculates derived payoff progress, total recorded payments, cumulative interest paid, estimated remaining interest, estimated payoff date, and prepayment impact.
+- **Zero Profile Mutation**: Derived insights are computed on-the-fly during render or selector memoization without storing computed outputs into `loanProfilesSlice`.
+- **Presentation Tags**: Loan profile display adapters (`adaptLoanProfileForDisplay`) expose compact progress strings (`repaymentPercentage% paid (formattedPrincipalRepaid)`).
+
+

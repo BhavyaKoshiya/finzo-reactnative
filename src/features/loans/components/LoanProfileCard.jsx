@@ -33,6 +33,8 @@ export const LoanProfileCard = ({ profile, onPress, style }) => {
     nextEmiInfo,
     isPrimary,
     accessibilityLabel,
+    repaymentPercentage,
+    formattedPrincipalRepaid,
   } = adapted;
 
   return (
@@ -129,7 +131,7 @@ export const LoanProfileCard = ({ profile, onPress, style }) => {
         <View style={styles.footerRow}>
           <View style={styles.footerTag}>
             <AppText variant="bodySmall" color={currentTheme.textSecondary} numberOfLines={1}>
-              {formattedInterestRate} • {remainingTenureText} left
+              {formattedInterestRate} • {repaymentPercentage}% paid ({formattedPrincipalRepaid})
             </AppText>
           </View>
 

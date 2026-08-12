@@ -12,6 +12,29 @@ import {
  * @param {Date} [referenceDate=new Date()]
  * @returns {Object} { nextEmiDate, daysUntilPayment, isDueToday, isPastDue, isUpcoming, formattedDate }
  */
+export const parseLocalDateStr = (dateString) => {
+  if (!dateString) return null;
+  if (dateString instanceof Date) return dateString;
+  const clean = String(dateString).split('T')[0];
+  const parts = clean.split('-');
+  if (parts.length === 3) {
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10) - 1;
+    const d = parseInt(parts[2], 10);
+    if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+      return new Date(y, m, d);
+    }
+  }
+  const parsed = parseISO(dateString);
+  return isValid(parsed) ? parsed : null;
+};
+
+/**
+ * Calculates next EMI status based on target date vs reference date.
+ * @param {string|Date} nextEmiDate
+ * @param {Date} [referenceDate=new Date()]
+ * @returns {Object} { nextEmiDate, daysUntilPayment, isDueToday, isPastDue, isUpcoming, formattedDate }
+ */
 export const getNextEmiInfo = (nextEmiDate, referenceDate = new Date()) => {
   if (!nextEmiDate) {
     return {
@@ -24,8 +47,8 @@ export const getNextEmiInfo = (nextEmiDate, referenceDate = new Date()) => {
     };
   }
 
-  const targetDate = typeof nextEmiDate === 'string' ? parseISO(nextEmiDate) : nextEmiDate;
-  if (!isValid(targetDate)) {
+  const targetDate = parseLocalDateStr(nextEmiDate);
+  if (!targetDate || !isValid(targetDate)) {
     return {
       nextEmiDate: null,
       daysUntilPayment: 0,
@@ -51,8 +74,12 @@ export const getNextEmiInfo = (nextEmiDate, referenceDate = new Date()) => {
     formattedDate = String(nextEmiDate);
   }
 
+  const y = targetDate.getFullYear();
+  const m = String(targetDate.getMonth() + 1).padStart(2, '0');
+  const d = String(targetDate.getDate()).padStart(2, '0');
+
   return {
-    nextEmiDate: targetDate.toISOString().split('T')[0],
+    nextEmiDate: `${y}-${m}-${d}`,
     daysUntilPayment,
     isDueToday,
     isPastDue,
@@ -70,8 +97,8 @@ export const getNextEmiInfo = (nextEmiDate, referenceDate = new Date()) => {
 export const formatLoanDate = (dateString, pattern = 'dd MMM yyyy') => {
   if (!dateString) return 'N/A';
   try {
-    const d = typeof dateString === 'string' ? parseISO(dateString) : dateString;
-    return isValid(d) ? format(d, pattern) : String(dateString);
+    const d = parseLocalDateStr(dateString);
+    return d && isValid(d) ? format(d, pattern) : String(dateString);
   } catch (e) {
     return String(dateString);
   }

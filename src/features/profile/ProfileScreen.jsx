@@ -246,6 +246,25 @@ export const ProfileScreen = ({ navigation }) => {
       {__DEV__ && (
         <ProfileSection title="Developer Tools" isLast>
           <ProfileRow
+            icon={Bell}
+            title="Test Local Notification"
+            subtitle="Fire a test notification in 5 seconds"
+            onPress={async () => {
+              const res = await loanReminderService.sendTestNotification(5);
+              if (res.success) {
+                Alert.alert(
+                  'Test Notification Scheduled! 🔔',
+                  'A local notification will fire in 5 seconds.\n\nLock your phone or exit the app now to see it in your notification tray!'
+                );
+              } else {
+                Alert.alert('Test Notification Failed', res.error || 'Could not schedule local notification.');
+              }
+            }}
+            accessibilityLabel="Test local notification delivery"
+            style={{ marginBottom: 10 }}
+          />
+
+          <ProfileRow
             icon={Code}
             title="Component Showcase"
             subtitle="Preview core UI tokens, buttons, inputs, and cards"

@@ -70,7 +70,9 @@ export const createLoanProfile = ({
     loanStartDate: String(loanStartDate).trim(),
     nextEmiDate: String(nextEmiDate).trim(),
     nextPaymentDate: nextPaymentDate ? String(nextPaymentDate).trim() : (nextEmiDate ? String(nextEmiDate).trim() : null),
-    dueDay: Number(dueDay) || 5,
+    dueDay: dueDay !== undefined && dueDay !== null && !isNaN(Number(dueDay))
+      ? Number(dueDay)
+      : (nextEmiDate ? (new Date(nextEmiDate).getDate() || 5) : 5),
     remindersEnabled: Boolean(remindersEnabled),
     reminderDaysBefore: Number(reminderDaysBefore) || 3,
     reminderTime: String(reminderTime || '09:00'),

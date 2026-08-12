@@ -37,6 +37,8 @@ export const ROUTES = {
   LOAN_PAYMENT_HISTORY: 'LoanPaymentHistory',
   // Prepayment Simulator (Phase 16.5)
   LOAN_PREPAYMENT_SIMULATOR: 'LoanPrepaymentSimulator',
+  // Loan Insights (Phase 16.8)
+  LOAN_INSIGHTS: 'LoanInsights',
 };
 
 export default ROUTES;

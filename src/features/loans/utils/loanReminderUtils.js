@@ -135,15 +135,19 @@ export const getPaymentPeriodKey = (loanId, dateOrPeriod) => {
 export const isPaymentPeriodSatisfied = (loan, payments = [], periodKey) => {
   if (!loan || !Array.isArray(payments)) return false;
 
-  const targetLoanId = loan.id;
+  const targetLoanId = String(loan.id);
   const parts = String(periodKey || '').split('_');
   const targetPeriod = parts[parts.length - 1];
 
-  const loanPayments = payments.filter((p) => p.loanId === targetLoanId);
+  const loanPayments = payments.filter((p) => String(p.loanId) === targetLoanId);
 
   return loanPayments.some((p) => {
-    // Must be regular EMI type
-    const isEmiType = p.paymentType === PAYMENT_TYPES.REGULAR_EMI || p.paymentType === 'regular_emi' || p.paymentType === 'emi';
+    // Regular EMI and Custom Payments satisfy the monthly period. Prepayments & Balance Corrections do NOT replace scheduled monthly EMIs.
+    const isEmiType = p.paymentType === PAYMENT_TYPES.REGULAR_EMI ||
+      p.paymentType === 'regular_emi' ||
+      p.paymentType === 'emi' ||
+      p.paymentType === PAYMENT_TYPES.CUSTOM_PAYMENT ||
+      p.paymentType === 'custom_payment';
     if (!isEmiType) return false;
 
     const paymentDateStr = (p.paymentDate || p.dueDate || '').substring(0, 7);
@@ -186,18 +190,36 @@ export const getPaymentStatus = (loan, payments = [], relativeDate = new Date())
   const todayStr = formatDateISO(refDate);
   const refYear = refDate.getFullYear();
   const refMonth = refDate.getMonth();
-
-  // 1. Evaluate current month's scheduled due date
-  const currentMonthDueDate = getDueDateForMonth(loan.dueDay || 5, refYear, refMonth);
-  const currentPeriodKey = getPaymentPeriodKey(loan.id, currentMonthDueDate);
-  const isCurrentSatisfied = isPaymentPeriodSatisfied(loan, payments, currentPeriodKey);
-
   const todayTime = new Date(todayStr).getTime();
-  const currentDueTime = new Date(currentMonthDueDate).getTime();
+
+  const effectiveDueDay = loan.dueDay && Number(loan.dueDay) >= 1 && Number(loan.dueDay) <= 31
+    ? normalizeDueDay(loan.dueDay)
+    : (loan.nextEmiDate ? (new Date(loan.nextEmiDate).getDate() || 5) : 5);
+
+  // 1. Evaluate target due date
+  let targetDueDateStr = null;
+  if (loan.nextEmiDate && typeof loan.nextEmiDate === 'string') {
+    const nextDateObj = new Date(loan.nextEmiDate);
+    if (!isNaN(nextDateObj.getTime())) {
+      const nextDateISO = formatDateISO(nextDateObj);
+      const nextDateTime = new Date(nextDateISO).getTime();
+      if (nextDateTime > todayTime) {
+        targetDueDateStr = nextDateISO;
+      }
+    }
+  }
+
+  if (!targetDueDateStr) {
+    targetDueDateStr = getDueDateForMonth(effectiveDueDay, refYear, refMonth);
+  }
+
+  const currentPeriodKey = getPaymentPeriodKey(loan.id, targetDueDateStr);
+  const isCurrentSatisfied = isPaymentPeriodSatisfied(loan, payments, currentPeriodKey);
+  const currentDueTime = new Date(targetDueDateStr).getTime();
 
   if (!isCurrentSatisfied) {
     if (todayTime > currentDueTime) {
-      // Due date for current month has passed and is unpaid -> OVERDUE
+      // Due date has passed and is unpaid -> OVERDUE
       const diffMs = todayTime - currentDueTime;
       const daysOverdue = Math.round(diffMs / (1000 * 60 * 60 * 24));
       return {
@@ -205,7 +227,7 @@ export const getPaymentStatus = (loan, payments = [], relativeDate = new Date())
         isCurrentPeriodPaid: false,
         daysOverdue,
         daysRemaining: 0,
-        nextDueDate: currentMonthDueDate,
+        nextDueDate: targetDueDateStr,
         periodKey: currentPeriodKey,
       };
     } else if (todayTime === currentDueTime) {
@@ -215,11 +237,11 @@ export const getPaymentStatus = (loan, payments = [], relativeDate = new Date())
         isCurrentPeriodPaid: false,
         daysOverdue: 0,
         daysRemaining: 0,
-        nextDueDate: currentMonthDueDate,
+        nextDueDate: targetDueDateStr,
         periodKey: currentPeriodKey,
       };
     } else {
-      // Due date is in future of current month -> UPCOMING
+      // Due date is in future -> UPCOMING
       const diffMs = currentDueTime - todayTime;
       const daysRemaining = Math.round(diffMs / (1000 * 60 * 60 * 24));
       return {
@@ -227,20 +249,22 @@ export const getPaymentStatus = (loan, payments = [], relativeDate = new Date())
         isCurrentPeriodPaid: false,
         daysOverdue: 0,
         daysRemaining,
-        nextDueDate: currentMonthDueDate,
+        nextDueDate: targetDueDateStr,
         periodKey: currentPeriodKey,
       };
     }
   }
 
-  // 2. Current month is satisfied -> check next month's due date
-  let nextMonthYear = refYear;
-  let nextMonth = refMonth + 1;
+  // 2. Current target period is satisfied -> check next month's due date
+  const [tYear, tMonth] = targetDueDateStr.split('-').map((v) => parseInt(v, 10));
+  let nextMonthYear = tYear;
+  let nextMonth = tMonth; // 1-indexed, so tMonth (e.g. 8 for August) is next month's 0-indexed index (Sept is index 8)
   if (nextMonth > 11) {
     nextMonth = 0;
     nextMonthYear += 1;
   }
-  const nextMonthDueDate = getDueDateForMonth(loan.dueDay || 5, nextMonthYear, nextMonth);
+
+  const nextMonthDueDate = getDueDateForMonth(effectiveDueDay, nextMonthYear, nextMonth);
   const nextPeriodKey = getPaymentPeriodKey(loan.id, nextMonthDueDate);
   const isNextSatisfied = isPaymentPeriodSatisfied(loan, payments, nextPeriodKey);
 
@@ -250,7 +274,7 @@ export const getPaymentStatus = (loan, payments = [], relativeDate = new Date())
       isCurrentPeriodPaid: true,
       daysOverdue: 0,
       daysRemaining: 0,
-      nextDueDate: currentMonthDueDate,
+      nextDueDate: targetDueDateStr,
       periodKey: currentPeriodKey,
     };
   }

@@ -27,30 +27,46 @@ export const DatePickerField = ({
   const { currentTheme } = useAppTheme();
   const [modalVisible, setModalVisible] = useState(false);
 
+  const parseValueToLocalDate = (val) => {
+    if (!val) return new Date();
+    if (val instanceof Date) return val;
+    const parts = String(val).split('T')[0].split('-');
+    if (parts.length === 3) {
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10) - 1;
+      const d = parseInt(parts[2], 10);
+      if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+        return new Date(y, m, d);
+      }
+    }
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? new Date() : d;
+  };
+
   // Parse initial date
-  const parsedDate = value ? new Date(value) : new Date();
-  const initialYear = isNaN(parsedDate.getFullYear()) ? new Date().getFullYear() : parsedDate.getFullYear();
-  const initialMonth = isNaN(parsedDate.getMonth()) ? new Date().getMonth() : parsedDate.getMonth();
-  const initialDay = isNaN(parsedDate.getDate()) ? new Date().getDate() : parsedDate.getDate();
+  const parsedDate = parseValueToLocalDate(value);
+  const initialYear = parsedDate.getFullYear();
+  const initialMonth = parsedDate.getMonth();
+  const initialDay = parsedDate.getDate();
 
   const [selectedYear, setSelectedYear] = useState(initialYear);
   const [selectedMonth, setSelectedMonth] = useState(initialMonth);
   const [selectedDay, setSelectedDay] = useState(initialDay);
 
   const openPicker = () => {
-    const d = value ? new Date(value) : new Date();
-    if (!isNaN(d.getTime())) {
-      setSelectedYear(d.getFullYear());
-      setSelectedMonth(d.getMonth());
-      setSelectedDay(d.getDate());
-    }
+    const d = parseValueToLocalDate(value);
+    setSelectedYear(d.getFullYear());
+    setSelectedMonth(d.getMonth());
+    setSelectedDay(d.getDate());
     setModalVisible(true);
   };
 
   const handleConfirm = () => {
     setModalVisible(false);
-    const d = new Date(selectedYear, selectedMonth, selectedDay);
-    const isoDate = d.toISOString().split('T')[0];
+    const yStr = String(selectedYear);
+    const mStr = String(selectedMonth + 1).padStart(2, '0');
+    const dStr = String(selectedDay).padStart(2, '0');
+    const isoDate = `${yStr}-${mStr}-${dStr}`;
     if (onDateChange) {
       onDateChange(isoDate);
     }
