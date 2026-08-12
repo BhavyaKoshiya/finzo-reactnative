@@ -10,6 +10,13 @@ export const DEFAULT_COMPOUND_INTEREST_INPUTS = {
   compoundingFrequency: 'yearly',
 };
 
+export const COMPOUNDING_FREQUENCY_OPTIONS = [
+  { label: 'Yearly', value: 'yearly' },
+  { label: 'Half-Yearly', value: 'half-yearly' },
+  { label: 'Quarterly', value: 'quarterly' },
+  { label: 'Monthly', value: 'monthly' },
+];
+
 export const useCompoundInterestCalculator = (initialInputs = {}) => {
   const defaults = { ...DEFAULT_COMPOUND_INTEREST_INPUTS, ...initialInputs };
 

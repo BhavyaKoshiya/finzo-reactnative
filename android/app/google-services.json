@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "241984760178",
+    "project_id": "finzo-app-calc",
+    "storage_bucket": "finzo-app-calc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:241984760178:android:6419782bee77414b9dd5eb",
+        "android_client_info": {
+          "package_name": "com.finzo.financecalculator"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIEum633j8cWcr9z7OQjEz-lDsTwL6OMo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

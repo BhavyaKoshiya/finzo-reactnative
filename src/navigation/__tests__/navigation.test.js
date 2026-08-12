@@ -7,7 +7,7 @@ describe('Navigation Architecture', () => {
     expect(ROUTES.HOME).toBe('Home');
     expect(ROUTES.CALCULATORS).toBe('Calculators');
     expect(ROUTES.SAVED).toBe('Saved');
-    expect(ROUTES.SETTINGS).toBe('Settings');
+    expect(ROUTES.PROFILE).toBe('Profile');
     expect(ROUTES.MAIN_TABS).toBe('MainTabs');
     expect(ROUTES.SHOWCASE).toBe('Showcase');
   });

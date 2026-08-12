@@ -35,7 +35,8 @@ export const SelectField = ({
     if (onSelect) onSelect(optValue);
   };
 
-  const selectedOption = options.find((opt) => opt.value === value);
+  const safeOptions = Array.isArray(options) ? options : [];
+  const selectedOption = safeOptions.find((opt) => opt.value === value);
   const displayLabel = selectedOption ? selectedOption.label : placeholder;
 
   const chevron = (
@@ -94,7 +95,7 @@ export const SelectField = ({
             </View>
 
             <FlatList
-              data={options}
+              data={safeOptions}
               keyExtractor={(item) => item.value}
               renderItem={({ item, index }) => {
                 const isSelected = item.value === value;
@@ -104,10 +105,11 @@ export const SelectField = ({
                     activeOpacity={0.7}
                     style={[
                       styles.optionRow,
-                      index < options.length - 1 && styles.borderBottom,
-                      index < options.length - 1 && { borderBottomColor: currentTheme.border },
+                      index < safeOptions.length - 1 && styles.borderBottom,
+                      index < safeOptions.length - 1 && { borderBottomColor: currentTheme.border },
                     ]}
                   >
+
                     <AppText
                       variant="bodyMedium"
                       color={isSelected ? currentTheme.primary : currentTheme.textPrimary}

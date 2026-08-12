@@ -2,11 +2,11 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Home, Calculator, Bookmark, Settings } from 'lucide-react-native';
+import { Home, Calculator, Bookmark, UserRound } from 'lucide-react-native';
 import HomeScreen from '../features/home/HomeScreen';
 import CalculatorsScreen from '../features/calculators/CalculatorsScreen';
 import SavedScreen from '../features/saved/SavedScreen';
-import SettingsScreen from '../features/settings/SettingsScreen';
+import ProfileScreen from '../features/profile/ProfileScreen';
 import AppIcon from '../components/common/AppIcon';
 import { useAppTheme } from '../hooks/useAppTheme';
 import { ROUTES } from './routes';
@@ -25,8 +25,8 @@ const renderSavedIcon = ({ color, size }) => (
   <AppIcon icon={Bookmark} size={size || 22} color={color} />
 );
 
-const renderSettingsIcon = ({ color, size }) => (
-  <AppIcon icon={Settings} size={size || 22} color={color} />
+const renderProfileIcon = ({ color, size }) => (
+  <AppIcon icon={UserRound} size={size || 22} color={color} />
 );
 
 export const MainTabNavigator = () => {
@@ -82,11 +82,11 @@ export const MainTabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name={ROUTES.SETTINGS}
-        component={SettingsScreen}
+        name={ROUTES.PROFILE}
+        component={ProfileScreen}
         options={{
-          tabBarLabel: 'Settings',
-          tabBarIcon: renderSettingsIcon,
+          tabBarLabel: 'Profile',
+          tabBarIcon: renderProfileIcon,
         }}
       />
     </Tab.Navigator>

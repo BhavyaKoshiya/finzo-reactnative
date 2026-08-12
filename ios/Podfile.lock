@@ -33,8 +33,67 @@ PODS:
   - DoubleConversion (1.1.6)
   - fast_float (8.0.0)
   - FBLazyVector (0.83.10)
+  - Firebase/CoreOnly (12.17.0):
+    - FirebaseCore (~> 12.17.0)
+  - Firebase/Database (12.17.0):
+    - Firebase/CoreOnly
+    - FirebaseDatabase (~> 12.17.0)
+  - FirebaseAppCheckInterop (12.17.0)
+  - FirebaseCore (12.17.0):
+    - FirebaseCoreInternal (~> 12.17.0)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/Logger (~> 8.1)
+  - FirebaseCoreInternal (12.17.0):
+    - "GoogleUtilities/NSData+zlib (~> 8.1)"
+  - FirebaseDatabase (12.17.0):
+    - FirebaseAppCheckInterop (~> 12.17.0)
+    - FirebaseCore (~> 12.17.0)
+    - FirebaseSharedSwift (~> 12.17.0)
+    - GoogleUtilities/UserDefaults (~> 8.1)
+    - leveldb-library (~> 1.22)
+  - FirebaseSharedSwift (12.17.0)
   - fmt (12.1.0)
   - glog (0.3.5)
+  - GoogleUtilities (8.1.2):
+    - GoogleUtilities/AppDelegateSwizzler (= 8.1.2)
+    - GoogleUtilities/Environment (= 8.1.2)
+    - GoogleUtilities/Logger (= 8.1.2)
+    - GoogleUtilities/MethodSwizzler (= 8.1.2)
+    - GoogleUtilities/Network (= 8.1.2)
+    - "GoogleUtilities/NSData+zlib (= 8.1.2)"
+    - GoogleUtilities/Privacy (= 8.1.2)
+    - GoogleUtilities/Reachability (= 8.1.2)
+    - GoogleUtilities/SwizzlerTestHelpers (= 8.1.2)
+    - GoogleUtilities/UserDefaults (= 8.1.2)
+  - GoogleUtilities/AppDelegateSwizzler (8.1.2):
+    - GoogleUtilities/Environment
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Network
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Environment (8.1.2):
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Logger (8.1.2):
+    - GoogleUtilities/Environment
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/MethodSwizzler (8.1.2):
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Network (8.1.2):
+    - GoogleUtilities/Logger
+    - "GoogleUtilities/NSData+zlib"
+    - GoogleUtilities/Privacy
+    - GoogleUtilities/Reachability
+  - "GoogleUtilities/NSData+zlib (8.1.2)":
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Privacy (8.1.2)
+  - GoogleUtilities/Reachability (8.1.2):
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/SwizzlerTestHelpers (8.1.2):
+    - GoogleUtilities/MethodSwizzler
+  - GoogleUtilities/UserDefaults (8.1.2):
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Privacy
   - hermes-engine (0.14.1):
     - hermes-engine/Pre-built (= 0.14.1)
   - hermes-engine/Pre-built (0.14.1)
@@ -66,6 +125,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - leveldb-library (1.22.6)
   - libavif/core (0.11.1)
   - libavif/libdav1d (0.11.1):
     - libavif/core
@@ -2782,6 +2842,65 @@ PODS:
     - SDWebImageWebPCoder (~> 0.14)
     - SocketRocket
     - Yoga
+  - RNFBApp (26.2.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - Firebase/CoreOnly (= 12.17.0)
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
+  - RNFBDatabase (26.2.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - Firebase/Database (= 12.17.0)
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - RNFBApp
+    - SocketRocket
+    - Yoga
   - RNGestureHandler (3.1.0):
     - boost
     - DoubleConversion
@@ -3159,10 +3278,16 @@ DEPENDENCIES:
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - fast_float (from `../node_modules/react-native/third-party-podspecs/fast_float.podspec`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
+  - FirebaseAppCheckInterop
+  - FirebaseCore
+  - FirebaseCoreInternal
+  - FirebaseDatabase
   - fmt (from `../node_modules/react-native/third-party-podspecs/fmt.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
+  - GoogleUtilities
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - HtmlToPdf (from `../node_modules/react-native-html-to-pdf`)
+  - leveldb-library
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
   - RCTRequired (from `../node_modules/react-native/Libraries/Required`)
@@ -3238,6 +3363,8 @@ DEPENDENCIES:
   - ReactCodegen (from `build/generated/ios/ReactCodegen`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNFastImage (from `../node_modules/@d11/react-native-fast-image`)"
+  - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
+  - "RNFBDatabase (from `../node_modules/@react-native-firebase/database`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
@@ -3248,6 +3375,14 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - Firebase
+    - FirebaseAppCheckInterop
+    - FirebaseCore
+    - FirebaseCoreInternal
+    - FirebaseDatabase
+    - FirebaseSharedSwift
+    - GoogleUtilities
+    - leveldb-library
     - libavif
     - libdav1d
     - libwebp
@@ -3427,6 +3562,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   RNFastImage:
     :path: "../node_modules/@d11/react-native-fast-image"
+  RNFBApp:
+    :path: "../node_modules/@react-native-firebase/app"
+  RNFBDatabase:
+    :path: "../node_modules/@react-native-firebase/database"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
   RNReanimated:
@@ -3447,10 +3586,18 @@ SPEC CHECKSUMS:
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: b32c788ed9c6a8c584d114d0047beda9664e7cc6
   FBLazyVector: 07433c4ab85da44d0b5ceac374ff4e1d57c7aa23
+  Firebase: e8400c058702940d53f31fc0653e4e7a06332326
+  FirebaseAppCheckInterop: 6d4cd7b9df8047da8cfc98c3fef4618bab2a8e0d
+  FirebaseCore: 52d4512296984a44a8c8870c6494870fc7aeee2f
+  FirebaseCoreInternal: 3b310521b34a51ce3a6c605e4618b9aef8f6c112
+  FirebaseDatabase: 9b8c0e705a35612c2154c173cf4542e7c85462f5
+  FirebaseSharedSwift: 983820e9aa55d2acd6af77f9a1f252ba0afb3150
   fmt: 530618a01105dae0fa3a2f27c81ae11fa8f67eac
   glog: 0456694f3aaf09460b660ea327cfc11defbeea4c
+  GoogleUtilities: 766ace00c6b10d8148408f329d10c4f051931850
   hermes-engine: f37e1d6f1eb198649a60b3f17b6f685a6ac12470
   HtmlToPdf: 6a9c28f54ec810d1d120a698a9b3c83e2bdb1672
+  leveldb-library: cc8b8f8e013647a295ad3f8cd2ddf49a6f19be19
   libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: af5937a13536ef73f3784d69cc342b98961acf33
@@ -3528,6 +3675,8 @@ SPEC CHECKSUMS:
   ReactCodegen: def1d229e98dfa107fa837df57870ee7b9114a63
   ReactCommon: d71e3b6d0134b09c1ec8e656f81daefae6902a97
   RNFastImage: b076a6378b1ce90debc27a927a437db3652bef14
+  RNFBApp: 1439e338161610c4d2dc3751c68fd6a523cfb25f
+  RNFBDatabase: 39eb0a5552689a00c8f56865ac667574d544a77d
   RNGestureHandler: dc3a8533b9b2f093cc469b9c253bbb993b0df24d
   RNReanimated: 1aecb4119b4fc751ea46fd268e97f51bb280dd7b
   RNScreens: 48bbaca97a5f9aedc3e52bd48673efd2b6aac4f6
@@ -3540,6 +3689,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: d2ed98551adb569fc38be0148666854e1ff60692
 
-PODFILE CHECKSUM: e9f1379993ee4a650afcacd15786bc05e16a9e16
+PODFILE CHECKSUM: e8b1d4076968ae169ac65dc79ec2defe1343b7c4
 
 COCOAPODS: 1.15.2

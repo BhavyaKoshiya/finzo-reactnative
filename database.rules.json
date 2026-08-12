@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "config": {
+      ".read": true,
+      ".write": false
+    }
+  }
+}

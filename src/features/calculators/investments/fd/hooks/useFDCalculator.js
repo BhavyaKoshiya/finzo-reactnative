@@ -10,6 +10,13 @@ export const DEFAULT_FD_INPUTS = {
   compoundingFrequency: 'quarterly',
 };
 
+export const COMPOUNDING_OPTIONS = [
+  { label: 'Quarterly', value: 'quarterly' },
+  { label: 'Monthly', value: 'monthly' },
+  { label: 'Half-Yearly', value: 'half-yearly' },
+  { label: 'Yearly', value: 'yearly' },
+];
+
 export const useFDCalculator = (initialInputs = {}) => {
   const defaults = { ...DEFAULT_FD_INPUTS, ...initialInputs };
 

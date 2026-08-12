@@ -24,6 +24,13 @@ import {
 } from '../features/calculators/everyday';
 import CalculatorSearchScreen from '../features/search/CalculatorSearchScreen';
 import ComponentShowcaseScreen from '../features/showcase/ComponentShowcaseScreen';
+import { RewardsScreen } from '../features/rewards';
+import {
+  LoanDashboardScreen,
+  AddLoanScreen,
+  EditLoanScreen,
+  LoanDetailsScreen,
+} from '../features/loans';
 import { ROUTES } from './routes';
 
 const Stack = createNativeStackNavigator();
@@ -54,6 +61,15 @@ export const RootNavigator = () => {
 
       {/* Global Calculator Search Screen */}
       <Stack.Screen name={ROUTES.CALCULATOR_SEARCH} component={CalculatorSearchScreen} />
+
+      {/* Rewards System Screen */}
+      <Stack.Screen name={ROUTES.REWARDS} component={RewardsScreen} />
+
+      {/* Real Loan Profiles & Dashboard Screens (Phase 16) */}
+      <Stack.Screen name={ROUTES.LOAN_DASHBOARD} component={LoanDashboardScreen} />
+      <Stack.Screen name={ROUTES.ADD_LOAN} component={AddLoanScreen} />
+      <Stack.Screen name={ROUTES.EDIT_LOAN} component={EditLoanScreen} />
+      <Stack.Screen name={ROUTES.LOAN_DETAILS} component={LoanDetailsScreen} />
 
       {__DEV__ && (
         <Stack.Screen

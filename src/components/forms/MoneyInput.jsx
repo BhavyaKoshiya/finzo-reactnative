@@ -101,6 +101,7 @@ export const MoneyInput = ({
           onBlur={handleBlur}
           placeholder={placeholder}
           placeholderTextColor={currentTheme.textMuted}
+          selectionColor={currentTheme.primary}
           keyboardType="decimal-pad"
           editable={!disabled}
           accessibilityLabel={label || 'Monetary amount'}

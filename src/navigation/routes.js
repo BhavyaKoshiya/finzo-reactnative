@@ -3,7 +3,9 @@ export const ROUTES = {
   HOME: 'Home',
   CALCULATORS: 'Calculators',
   SAVED: 'Saved',
-  SETTINGS: 'Settings',
+  PROFILE: 'Profile',
+  REWARDS: 'Rewards',
+  SETTINGS: 'Profile', // Maintained for backwards-compatibility alias
   SHOWCASE: 'Showcase',
   CALCULATOR_SEARCH: 'CalculatorSearch',
   CALCULATOR_DETAIL: 'CalculatorDetail',
@@ -23,6 +25,11 @@ export const ROUTES = {
   SIMPLE_INTEREST_CALCULATOR: 'SimpleInterestCalculator',
   COMPOUND_INTEREST_CALCULATOR: 'CompoundInterestCalculator',
   PERCENTAGE_CALCULATOR: 'PercentageCalculator',
+  // Real Loan Profiles & Dashboard Routes (Phase 16)
+  LOAN_DASHBOARD: 'LoanDashboard',
+  ADD_LOAN: 'AddLoan',
+  EDIT_LOAN: 'EditLoan',
+  LOAN_DETAILS: 'LoanDetails',
 };
 
 export default ROUTES;

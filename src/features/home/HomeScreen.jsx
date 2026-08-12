@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Search, ChevronRight } from 'lucide-react-native';
+import { Search, ChevronRight, Plus, Landmark } from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
 import AppIcon from '../../components/common/AppIcon';
+import AppCard from '../../components/cards/AppCard';
 import CalculatorCard from '../../components/cards/CalculatorCard';
 import CategoryCard from '../../components/cards/CategoryCard';
 import SavedCalculationCard from '../saved/components/SavedCalculationCard';
@@ -17,6 +18,8 @@ import {
   toggleFavorite,
   deleteSavedCalculation,
 } from '../../store/slices/savedCalculationsSlice';
+import { selectPrimaryLoan } from '../../store/slices/loanProfilesSlice';
+import { adaptLoanProfileForDisplay } from '../loans/utils/loanPresentationAdapters';
 
 import {
   getExportModelForCalculator,
@@ -47,6 +50,9 @@ export const HomeScreen = ({ navigation }) => {
   const categories = getCalculatorCategories();
   const savedCalculations = useSelector(selectSavedCalculations);
   const recentSavedCalculations = savedCalculations.slice(0, 3);
+
+  const primaryLoanRaw = useSelector(selectPrimaryLoan);
+  const primaryLoan = adaptLoanProfileForDisplay(primaryLoanRaw);
 
   const handleToggleFavorite = (id) => {
     dispatch(toggleFavorite(id));
@@ -172,6 +178,73 @@ export const HomeScreen = ({ navigation }) => {
         </AppText>
       </TouchableOpacity>
 
+      {/* Primary Loan Widget (Requirement 28) */}
+      <View style={styles.loanWidgetSection}>
+        {primaryLoan ? (
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate(ROUTES.LOAN_DETAILS, { loanId: primaryLoan.id })}
+          >
+            <AppCard style={[styles.loanWidgetCard, { backgroundColor: currentTheme.primaryLight }]}>
+              <View style={styles.loanWidgetHeader}>
+                <View style={styles.loanWidgetTitleRow}>
+                  <AppIcon icon={primaryLoan.loanTypeIcon} size={18} color={currentTheme.primary} style={{ marginRight: 6 }} />
+                  <AppText variant="bodyMedium" style={{ fontWeight: '700' }} numberOfLines={1}>
+                    {primaryLoan.name}
+                  </AppText>
+                </View>
+                <View style={styles.viewLoanBtn}>
+                  <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700', marginRight: 2 }}>
+                    View Loan
+                  </AppText>
+                  <AppIcon icon={ChevronRight} size={14} color={currentTheme.primary} />
+                </View>
+              </View>
+
+              <View style={styles.loanWidgetBody}>
+                <View>
+                  <AppText variant="caption" color={currentTheme.textSecondary}>
+                    Outstanding Balance
+                  </AppText>
+                  <AppText variant="titleMedium" color={currentTheme.textPrimary} style={{ fontWeight: '800' }}>
+                    {primaryLoan.formattedCurrentOutstanding}
+                  </AppText>
+                </View>
+
+                <View style={{ alignItems: 'flex-end' }}>
+                  <AppText variant="caption" color={currentTheme.textSecondary}>
+                    Monthly EMI
+                  </AppText>
+                  <AppText variant="bodyMedium" color={currentTheme.primary} style={{ fontWeight: '700' }}>
+                    {primaryLoan.formattedEmiAmount}
+                  </AppText>
+                </View>
+              </View>
+            </AppCard>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate(ROUTES.LOAN_DASHBOARD)}
+          >
+            <AppCard style={styles.trackLoanBanner}>
+              <View style={styles.trackLoanLeft}>
+                <AppIcon icon={Landmark} size={20} color={currentTheme.primary} style={{ marginRight: 10 }} />
+                <View>
+                  <AppText variant="bodyMedium" style={{ fontWeight: '600' }}>
+                    Track Your Real Loans
+                  </AppText>
+                  <AppText variant="caption" color={currentTheme.textSecondary}>
+                    Manage your home, personal or car loan EMIs in Finzo
+                  </AppText>
+                </View>
+              </View>
+              <AppIcon icon={Plus} size={18} color={currentTheme.primary} />
+            </AppCard>
+          </TouchableOpacity>
+        )}
+      </View>
+
       {/* Saved Calculations Section */}
       {recentSavedCalculations.length > 0 && (
         <View style={styles.section}>
@@ -281,10 +354,52 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     marginTop: 8,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   searchIcon: {
     marginRight: 10,
+  },
+  loanWidgetSection: {
+    marginBottom: 20,
+  },
+  loanWidgetCard: {
+    padding: 14,
+    borderRadius: 14,
+  },
+  loanWidgetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  loanWidgetTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  viewLoanBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  loanWidgetBody: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(59, 130, 246, 0.2)',
+  },
+  trackLoanBanner: {
+    padding: 14,
+    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  trackLoanLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
   section: {
     marginBottom: 20,

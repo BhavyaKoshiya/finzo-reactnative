@@ -52,6 +52,7 @@ export const NumberInput = ({
         onChangeText={handleChangeText}
         placeholder={placeholder}
         placeholderTextColor={currentTheme.textMuted}
+        selectionColor={currentTheme.primary}
         keyboardType={allowDecimal ? 'decimal-pad' : 'number-pad'}
         editable={!disabled}
         accessibilityLabel={label || 'Numeric input'}
