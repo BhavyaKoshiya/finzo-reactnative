@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Plus, ShieldAlert, Bookmark, Star } from 'lucide-react-native';
@@ -20,6 +26,8 @@ import {
 } from '../../store/slices/loanProfilesSlice';
 import LoanDashboardSummary from '../loans/components/LoanDashboardSummary';
 import LoanProfileCard from '../loans/components/LoanProfileCard';
+import UpcomingPaymentCard from '../loans/components/UpcomingPaymentCard';
+import { PAYMENT_TYPES } from '../loans/constants/loanPaymentConstants';
 
 // Saved Slice & Components
 import {
@@ -65,21 +73,27 @@ export const MyLoansScreen = ({ route, navigation }) => {
   const totalOutstanding = useSelector(selectTotalOutstanding);
   const totalMonthlyEMI = useSelector(selectTotalMonthlyEMI);
   const activeCount = useSelector(selectActiveLoanCount);
+  const allPayments = useSelector((state) => state.loanPayments?.payments || []);
+  const primaryOrUrgentLoan = activeLoans.find((l) => l.isPrimary) || activeLoans[0] || null;
+  const bottomListPadding = Math.max(insets.bottom + 80, 100);
 
   // 2. Saved Calculations Data
   const savedCalculations = useSelector(selectSavedCalculations);
-  const filteredSavedItems = savedFilterMode === 'favorites'
-    ? savedCalculations.filter((item) => item.isFavorite)
-    : savedCalculations;
-  const favoriteCount = savedCalculations.filter((item) => item.isFavorite).length;
+  const filteredSavedItems =
+    savedFilterMode === 'favorites'
+      ? savedCalculations.filter(item => item.isFavorite)
+      : savedCalculations;
+  const favoriteCount = savedCalculations.filter(
+    item => item.isFavorite,
+  ).length;
 
   // Saved Actions
-  const handleOpenSavedItem = (item) => {
+  const handleOpenSavedItem = item => {
     const calcMetadata = getCalculatorById(item.calculatorId);
     if (!calcMetadata || !calcMetadata.route) {
       Alert.alert(
         'Calculator Unavailable',
-        'This calculator is no longer available in the app catalog.'
+        'This calculator is no longer available in the app catalog.',
       );
       return;
     }
@@ -88,11 +102,11 @@ export const MyLoansScreen = ({ route, navigation }) => {
     });
   };
 
-  const handleToggleFavorite = (id) => {
+  const handleToggleFavorite = id => {
     dispatch(toggleFavorite(id));
   };
 
-  const handleDeleteSavedItem = (item) => {
+  const handleDeleteSavedItem = item => {
     Alert.alert(
       'Delete Calculation?',
       `"${item.title || 'Calculation'}" will be permanently removed.`,
@@ -103,17 +117,17 @@ export const MyLoansScreen = ({ route, navigation }) => {
           style: 'destructive',
           onPress: () => dispatch(deleteSavedCalculation(item.id)),
         },
-      ]
+      ],
     );
   };
 
-  const handleShareSavedItem = async (item) => {
+  const handleShareSavedItem = async item => {
     try {
       const exportModel = getExportModelForCalculator(
         item.calculatorId,
         item.inputs,
         item.result,
-        { customTitle: item.title, date: item.savedAt || item.updatedAt }
+        { customTitle: item.title, date: item.savedAt || item.updatedAt },
       );
       await shareCalculationText(exportModel);
     } catch (err) {
@@ -121,12 +135,12 @@ export const MyLoansScreen = ({ route, navigation }) => {
     }
   };
 
-  const handlePdfSavedItem = (item) => {
+  const handlePdfSavedItem = item => {
     setSelectedSavedItemForPdf(item);
     setPdfModalVisible(true);
   };
 
-  const handlePdfExportConfirm = async (mode) => {
+  const handlePdfExportConfirm = async mode => {
     if (!selectedSavedItemForPdf) return;
     setIsGeneratingPdf(true);
     const targetItem = selectedSavedItemForPdf;
@@ -139,7 +153,7 @@ export const MyLoansScreen = ({ route, navigation }) => {
           customTitle: targetItem.title,
           date: targetItem.savedAt || targetItem.updatedAt,
           mode,
-        }
+        },
       );
       const pdfPath = await generateCalculationPdf({ exportModel, mode });
       setPdfModalVisible(false);
@@ -161,14 +175,28 @@ export const MyLoansScreen = ({ route, navigation }) => {
 
   // Render Header
   const renderHeader = () => (
-    <View style={[styles.headerGroup, { paddingTop: Math.max(insets.top + 12, 24) }]}>
+    <View
+      style={[
+        styles.headerGroup,
+        { paddingTop: Math.max(insets.top + 12, 24) },
+      ]}
+    >
       <AppText variant="screenTitle">My Loans</AppText>
-      <AppText variant="bodySmall" color={currentTheme.textSecondary} style={styles.subtitleMargin}>
+      <AppText
+        variant="bodySmall"
+        color={currentTheme.textSecondary}
+        style={styles.subtitleMargin}
+      >
         Your loans and saved calculations in one place.
       </AppText>
 
       {/* Main Segment Switcher: [ Loans ] [ Saved ] */}
-      <View style={[styles.mainSegmentBg, { backgroundColor: currentTheme.surfaceVariant }]}>
+      <View
+        style={[
+          styles.mainSegmentBg,
+          { backgroundColor: currentTheme.surfaceVariant },
+        ]}
+      >
         <TouchableOpacity
           onPress={() => setActiveSegment('loans')}
           activeOpacity={0.7}
@@ -177,12 +205,19 @@ export const MyLoansScreen = ({ route, navigation }) => {
           accessibilityLabel="Loans tab"
           style={[
             styles.mainSegmentBtn,
-            activeSegment === 'loans' && [styles.mainSegmentActive, { backgroundColor: currentTheme.surface }],
+            activeSegment === 'loans' && [
+              styles.mainSegmentActive,
+              { backgroundColor: currentTheme.surface },
+            ],
           ]}
         >
           <AppText
             variant="bodySmall"
-            color={activeSegment === 'loans' ? currentTheme.primary : currentTheme.textSecondary}
+            color={
+              activeSegment === 'loans'
+                ? currentTheme.primary
+                : currentTheme.textSecondary
+            }
             style={{ fontWeight: activeSegment === 'loans' ? '700' : '500' }}
           >
             Loans ({activeCount})
@@ -197,12 +232,19 @@ export const MyLoansScreen = ({ route, navigation }) => {
           accessibilityLabel="Saved calculations tab"
           style={[
             styles.mainSegmentBtn,
-            activeSegment === 'saved' && [styles.mainSegmentActive, { backgroundColor: currentTheme.surface }],
+            activeSegment === 'saved' && [
+              styles.mainSegmentActive,
+              { backgroundColor: currentTheme.surface },
+            ],
           ]}
         >
           <AppText
             variant="bodySmall"
-            color={activeSegment === 'saved' ? currentTheme.primary : currentTheme.textSecondary}
+            color={
+              activeSegment === 'saved'
+                ? currentTheme.primary
+                : currentTheme.textSecondary
+            }
             style={{ fontWeight: activeSegment === 'saved' ? '700' : '500' }}
           >
             Saved ({savedCalculations.length})
@@ -216,30 +258,53 @@ export const MyLoansScreen = ({ route, navigation }) => {
     <ScreenContainer
       header={renderHeader()}
       paddingHorizontal={0}
+      contentContainerStyle={{ paddingVertical: 0 }}
       useSafeAreaTop={false}
-      useSafeAreaBottom={true}
+      useSafeAreaBottom={false}
       style={styles.container}
     >
       {/* SEGMENT 1: LOANS */}
       {activeSegment === 'loans' && (
         <FlatList
           data={activeLoans}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
+          keyExtractor={item => item.id}
+          contentContainerStyle={[styles.listContent, { paddingBottom: 10 }]}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
             activeCount > 0 ? (
-              <LoanDashboardSummary
-                totalOutstanding={totalOutstanding}
-                totalMonthlyEMI={totalMonthlyEMI}
-                activeCount={activeCount}
-              />
+              <View>
+                <LoanDashboardSummary
+                  totalOutstanding={totalOutstanding}
+                  totalMonthlyEMI={totalMonthlyEMI}
+                  activeCount={activeCount}
+                />
+                {primaryOrUrgentLoan && (
+                  <UpcomingPaymentCard
+                    loan={primaryOrUrgentLoan}
+                    payments={allPayments}
+                    onRecordPayment={() =>
+                      navigation.navigate(ROUTES.ADD_PAYMENT, {
+                        loanId: primaryOrUrgentLoan.id,
+                        initialValues: {
+                          paymentType: PAYMENT_TYPES.REGULAR_EMI,
+                          useScheduledEmi: true,
+                        },
+                      })
+                    }
+                    onOpenSettings={() =>
+                      navigation.navigate(ROUTES.LOAN_DETAILS, { loanId: primaryOrUrgentLoan.id })
+                    }
+                  />
+                )}
+              </View>
             ) : null
           }
           renderItem={({ item }) => (
             <LoanProfileCard
               profile={item}
-              onPress={() => navigation.navigate(ROUTES.LOAN_DETAILS, { loanId: item.id })}
+              onPress={() =>
+                navigation.navigate(ROUTES.LOAN_DETAILS, { loanId: item.id })
+              }
             />
           )}
           ListFooterComponent={
@@ -285,15 +350,27 @@ export const MyLoansScreen = ({ route, navigation }) => {
                 style={[
                   styles.filterChip,
                   {
-                    backgroundColor: savedFilterMode === 'all' ? currentTheme.primary : currentTheme.surface,
-                    borderColor: savedFilterMode === 'all' ? currentTheme.primary : currentTheme.border,
+                    backgroundColor:
+                      savedFilterMode === 'all'
+                        ? currentTheme.primary
+                        : currentTheme.surface,
+                    borderColor:
+                      savedFilterMode === 'all'
+                        ? currentTheme.primary
+                        : currentTheme.border,
                   },
                 ]}
               >
                 <AppText
                   variant="caption"
-                  color={savedFilterMode === 'all' ? '#FFFFFF' : currentTheme.textPrimary}
-                  style={{ fontWeight: savedFilterMode === 'all' ? '700' : '500' }}
+                  color={
+                    savedFilterMode === 'all'
+                      ? '#FFFFFF'
+                      : currentTheme.textPrimary
+                  }
+                  style={{
+                    fontWeight: savedFilterMode === 'all' ? '700' : '500',
+                  }}
                 >
                   All ({savedCalculations.length})
                 </AppText>
@@ -305,15 +382,27 @@ export const MyLoansScreen = ({ route, navigation }) => {
                 style={[
                   styles.filterChip,
                   {
-                    backgroundColor: savedFilterMode === 'favorites' ? currentTheme.primary : currentTheme.surface,
-                    borderColor: savedFilterMode === 'favorites' ? currentTheme.primary : currentTheme.border,
+                    backgroundColor:
+                      savedFilterMode === 'favorites'
+                        ? currentTheme.primary
+                        : currentTheme.surface,
+                    borderColor:
+                      savedFilterMode === 'favorites'
+                        ? currentTheme.primary
+                        : currentTheme.border,
                   },
                 ]}
               >
                 <AppText
                   variant="caption"
-                  color={savedFilterMode === 'favorites' ? '#FFFFFF' : currentTheme.textPrimary}
-                  style={{ fontWeight: savedFilterMode === 'favorites' ? '700' : '500' }}
+                  color={
+                    savedFilterMode === 'favorites'
+                      ? '#FFFFFF'
+                      : currentTheme.textPrimary
+                  }
+                  style={{
+                    fontWeight: savedFilterMode === 'favorites' ? '700' : '500',
+                  }}
                 >
                   Favorites ({favoriteCount})
                 </AppText>
@@ -324,7 +413,11 @@ export const MyLoansScreen = ({ route, navigation }) => {
           {filteredSavedItems.length === 0 ? (
             <View style={styles.emptyContainer}>
               <EmptyState
-                title={savedFilterMode === 'favorites' ? 'No favorite calculations' : 'No saved calculations'}
+                title={
+                  savedFilterMode === 'favorites'
+                    ? 'No favorite calculations'
+                    : 'No saved calculations'
+                }
                 description={
                   savedFilterMode === 'favorites'
                     ? 'Star a saved calculation to pin it to your favorites list.'
@@ -336,8 +429,11 @@ export const MyLoansScreen = ({ route, navigation }) => {
           ) : (
             <FlatList
               data={filteredSavedItems}
-              keyExtractor={(item) => item.id}
-              contentContainerStyle={styles.listContent}
+              keyExtractor={item => item.id}
+              contentContainerStyle={[
+                styles.listContent,
+                { paddingBottom: bottomListPadding },
+              ]}
               showsVerticalScrollIndicator={false}
               renderItem={({ item }) => (
                 <SavedCalculationCard
@@ -404,7 +500,6 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 16,
     paddingTop: 12,
-    paddingBottom: 40,
   },
   addAnotherContainer: {
     marginTop: 8,

@@ -124,6 +124,22 @@ const loanProfilesSlice = createSlice({
         target.updatedAt = new Date().toISOString();
       }
     },
+
+    updateLoanReminderSettings: (state, action) => {
+      const { id, dueDay, remindersEnabled, reminderDaysBefore, reminderTime, nextPaymentDate } = action.payload || {};
+      if (!id) return;
+      const target = state.profiles.find((p) => p.id === id);
+      if (!target) return;
+
+      if (dueDay !== undefined) target.dueDay = Number(dueDay) || 5;
+      if (remindersEnabled !== undefined) target.remindersEnabled = Boolean(remindersEnabled);
+      if (reminderDaysBefore !== undefined) target.reminderDaysBefore = Number(reminderDaysBefore) || 3;
+      if (reminderTime !== undefined) target.reminderTime = String(reminderTime || '09:00');
+      if (nextPaymentDate !== undefined) target.nextPaymentDate = nextPaymentDate;
+
+      target.updatedAt = new Date().toISOString();
+      // DO NOT increment ledgerVersion (reminder preferences leave financial ledger version untouched)
+    },
   },
 });
 
@@ -135,6 +151,7 @@ export const {
   archiveLoanProfile,
   setPrimaryLoan,
   incrementLedgerVersion,
+  updateLoanReminderSettings,
 } = loanProfilesSlice.actions;
 
 // Base Input Selectors

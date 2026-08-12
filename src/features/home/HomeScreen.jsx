@@ -19,8 +19,17 @@ import {
   toggleFavorite,
   deleteSavedCalculation,
 } from '../../store/slices/savedCalculationsSlice';
-import { selectPrimaryLoan } from '../../store/slices/loanProfilesSlice';
+import UpcomingPaymentCard from '../loans/components/UpcomingPaymentCard';
+import LoanReminderSettingsModal from '../loans/components/LoanReminderSettingsModal';
+import {
+  selectActiveLoanProfiles,
+  selectPrimaryLoan,
+  updateLoanReminderSettings,
+} from '../../store/slices/loanProfilesSlice';
 import { adaptLoanProfileForDisplay } from '../loans/utils/loanPresentationAdapters';
+import { getPaymentStatus } from '../loans/utils/loanReminderUtils';
+import loanReminderService from '../loans/services/loanReminderService';
+import { selectLoanRemindersEnabled } from '../../store/slices/settingsSlice';
 
 import {
   getExportModelForCalculator,
@@ -46,14 +55,39 @@ export const HomeScreen = ({ navigation }) => {
   const [selectedSavedItemForPdf, setSelectedSavedItemForPdf] = useState(null);
   const [pdfModalVisible, setPdfModalVisible] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [reminderModalLoan, setReminderModalLoan] = useState(null);
 
   const popularCalculators = getPopularCalculators();
   const categories = getCalculatorCategories();
   const savedCalculations = useSelector(selectSavedCalculations);
   const recentSavedCalculations = savedCalculations.slice(0, 3);
 
-  const primaryLoanRaw = useSelector(selectPrimaryLoan);
-  const primaryLoan = adaptLoanProfileForDisplay(primaryLoanRaw);
+  const activeLoans = useSelector(selectActiveLoanProfiles);
+  const allPayments = useSelector((state) => state.loanPayments?.payments || []);
+  const globalRemindersEnabled = useSelector(selectLoanRemindersEnabled);
+
+  // Prioritize urgent overdue loans, then primary loan, then first active loan
+  const urgentOverdueLoan = activeLoans.find(
+    (l) => getPaymentStatus(l, allPayments).status === 'overdue'
+  );
+  const primaryOrUrgentLoan =
+    urgentOverdueLoan ||
+    activeLoans.find((l) => l.isPrimary) ||
+    activeLoans[0] ||
+    null;
+
+  const handleSaveReminderSettings = (settings) => {
+    dispatch(updateLoanReminderSettings(settings));
+
+    const updatedLoans = activeLoans.map((l) =>
+      l.id === settings.id ? { ...l, ...settings } : l
+    );
+    loanReminderService.reconcileLoanReminders({
+      loans: updatedLoans,
+      payments: allPayments,
+      globalEnabled: globalRemindersEnabled,
+    });
+  };
 
   const handleToggleFavorite = (id) => {
     dispatch(toggleFavorite(id));
@@ -160,6 +194,7 @@ export const HomeScreen = ({ navigation }) => {
       header={renderHeader()}
       useSafeAreaTop={false}
       useSafeAreaBottom={false}
+      contentContainerStyle={{ paddingVertical: 0 }}
       style={styles.container}
     >
       {/* Quick Search Entry */}
@@ -179,53 +214,25 @@ export const HomeScreen = ({ navigation }) => {
         </AppText>
       </TouchableOpacity>
 
-      {/* Primary Loan Widget */}
+      {/* Primary / Overdue Loan Widget */}
       <View style={styles.loanWidgetSection}>
-        {primaryLoan ? (
+        {primaryOrUrgentLoan ? (
           <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate(ROUTES.LOAN_DETAILS, { loanId: primaryLoan.id })}
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate(ROUTES.LOAN_DETAILS, { loanId: primaryOrUrgentLoan.id })}
           >
-            <AppCard style={[styles.loanWidgetCard, { backgroundColor: currentTheme.primaryLight }]}>
-              <View style={styles.loanWidgetHeader}>
-                <View style={styles.loanWidgetTitleRow}>
-                  <AppIcon icon={primaryLoan.loanTypeIcon} size={18} color={currentTheme.primary} style={{ marginRight: 6 }} />
-                  <AppText variant="bodyMedium" style={{ fontWeight: '700' }} numberOfLines={1}>
-                    {primaryLoan.name}
-                  </AppText>
-                </View>
-                <TouchableOpacity
-                  onPress={() => navigateToMyLoans(navigation, { initialSegment: 'loans' })}
-                  activeOpacity={0.7}
-                  style={styles.viewLoanBtn}
-                >
-                  <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700', marginRight: 2 }}>
-                    View All
-                  </AppText>
-                  <AppIcon icon={ChevronRight} size={14} color={currentTheme.primary} />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.loanWidgetBody}>
-                <View>
-                  <AppText variant="caption" color={currentTheme.textSecondary}>
-                    Outstanding Balance
-                  </AppText>
-                  <AppText variant="titleMedium" color={currentTheme.textPrimary} style={{ fontWeight: '800' }}>
-                    {primaryLoan.formattedCurrentOutstanding}
-                  </AppText>
-                </View>
-
-                <View style={{ alignItems: 'flex-end' }}>
-                  <AppText variant="caption" color={currentTheme.textSecondary}>
-                    Monthly EMI
-                  </AppText>
-                  <AppText variant="bodyMedium" color={currentTheme.primary} style={{ fontWeight: '700' }}>
-                    {primaryLoan.formattedEmiAmount}
-                  </AppText>
-                </View>
-              </View>
-            </AppCard>
+            <UpcomingPaymentCard
+              loan={primaryOrUrgentLoan}
+              payments={allPayments}
+              onRecordPayment={() =>
+                navigation.navigate(ROUTES.ADD_PAYMENT, {
+                  loanId: primaryOrUrgentLoan.id,
+                  paymentType: 'regular_emi',
+                  useScheduledEmi: true,
+                })
+              }
+              onOpenSettings={() => setReminderModalLoan(primaryOrUrgentLoan)}
+            />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
@@ -331,13 +338,20 @@ export const HomeScreen = ({ navigation }) => {
         }}
         onExport={handlePdfExportConfirm}
       />
+
+      <LoanReminderSettingsModal
+        visible={Boolean(reminderModalLoan)}
+        loan={reminderModalLoan}
+        onClose={() => setReminderModalLoan(null)}
+        onSave={handleSaveReminderSettings}
+      />
     </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 8,
+    flex: 1,
   },
   heroSection: {
     paddingHorizontal: 16,
@@ -410,7 +424,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   lastSection: {
-    marginBottom: 8,
+    marginBottom: 0,
   },
   sectionHeaderRow: {
     flexDirection: 'row',

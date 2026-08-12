@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { ArrowLeft, Edit3, Archive, Trash2, Calendar, Landmark, Star, StarOff, Plus, ReceiptText, ChevronRight, ChevronDown, Scale, ShieldCheck, Calculator } from 'lucide-react-native';
+import { ArrowLeft, Edit3, Archive, Trash2, Calendar, Landmark, Star, StarOff, Plus, ReceiptText, ChevronRight, ChevronDown, Scale, ShieldCheck, Calculator, Sparkles } from 'lucide-react-native';
 import ScreenContainer from '../../../components/containers/ScreenContainer';
 import AppHeader from '../../../components/navigation/AppHeader';
 import AppText from '../../../components/common/AppText';
@@ -15,6 +15,7 @@ import {
   deleteLoanProfile,
   archiveLoanProfile,
   setPrimaryLoan,
+  updateLoanReminderSettings,
 } from '../../../store/slices/loanProfilesSlice';
 import {
   selectPaymentsForLoan,
@@ -24,14 +25,18 @@ import { adaptLoanProfileForDisplay } from '../utils/loanPresentationAdapters';
 import { getPaymentStats } from '../utils/loanBalanceUtils';
 import { getCurrentLoanBalance } from '../utils/paymentBalanceUtils';
 import LoanPaymentCard from '../components/LoanPaymentCard';
+import UpcomingPaymentCard from '../components/UpcomingPaymentCard';
+import LoanReminderSettingsModal from '../components/LoanReminderSettingsModal';
 import ManualBalanceUpdateModal from './ManualBalanceUpdateModal';
 import { formatCurrency } from '../../../utils/financeFormatters';
+import { PAYMENT_TYPES } from '../constants/loanPaymentConstants';
 import { ROUTES } from '../../../navigation/routes';
 
 export const LoanDetailsScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const { currentTheme } = useAppTheme();
   const [balanceModalVisible, setBalanceModalVisible] = useState(false);
+  const [reminderModalVisible, setReminderModalVisible] = useState(false);
   const [showAssumptions, setShowAssumptions] = useState(false);
 
   const loanId = route?.params?.loanId;
@@ -215,6 +220,22 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
         </View>
       </AppCard>
 
+      {/* Upcoming Payment Card & Reminder Status */}
+      <UpcomingPaymentCard
+        loan={rawProfile}
+        payments={payments}
+        onRecordPayment={() =>
+          navigation.navigate(ROUTES.ADD_PAYMENT, {
+            loanId: profile.id,
+            initialValues: {
+              paymentType: PAYMENT_TYPES.REGULAR_EMI,
+              useScheduledEmi: true,
+            },
+          })
+        }
+        onOpenSettings={() => setReminderModalVisible(true)}
+      />
+
       {/* Payment Summary Section */}
       <AppCard style={styles.paymentSummaryCard}>
         <View style={styles.sectionHeaderRow}>
@@ -225,16 +246,29 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
             </AppText>
           </View>
 
-          <TouchableOpacity
-            onPress={() => setBalanceModalVisible(true)}
-            activeOpacity={0.7}
-            style={styles.updateBalBtn}
-          >
-            <AppIcon icon={Scale} size={13} color={currentTheme.primary} style={{ marginRight: 4 }} />
-            <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700' }}>
-              Correct Balance
-            </AppText>
-          </TouchableOpacity>
+          <View style={styles.topCardActionsRow}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate(ROUTES.LOAN_PREPAYMENT_SIMULATOR, { loanId: profile.id })}
+              activeOpacity={0.7}
+              style={[styles.updateBalBtn, { backgroundColor: 'rgba(99, 102, 241, 0.1)', marginRight: 6 }]}
+            >
+              <AppIcon icon={Sparkles} size={13} color={currentTheme.primary} style={{ marginRight: 4 }} />
+              <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700' }}>
+                Simulate
+              </AppText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setBalanceModalVisible(true)}
+              activeOpacity={0.7}
+              style={styles.updateBalBtn}
+            >
+              <AppIcon icon={Scale} size={13} color={currentTheme.primary} style={{ marginRight: 4 }} />
+              <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700' }}>
+                Correct Balance
+              </AppText>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.statsGrid}>
@@ -471,6 +505,12 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
         />
 
         <SecondaryButton
+          title="Simulate Prepayment"
+          icon={Sparkles}
+          onPress={() => navigation.navigate(ROUTES.LOAN_PREPAYMENT_SIMULATOR, { loanId: profile.id })}
+        />
+
+        <SecondaryButton
           title="Edit Loan Profile"
           icon={Edit3}
           onPress={() => navigation.navigate(ROUTES.EDIT_LOAN, { loanId: profile.id })}
@@ -496,6 +536,14 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
         visible={balanceModalVisible}
         onClose={() => setBalanceModalVisible(false)}
         loan={profile}
+      />
+
+      {/* Loan Reminder Settings Modal */}
+      <LoanReminderSettingsModal
+        visible={reminderModalVisible}
+        loan={rawProfile}
+        onClose={() => setReminderModalVisible(false)}
+        onSave={(settings) => dispatch(updateLoanReminderSettings(settings))}
       />
     </ScreenContainer>
   );
@@ -629,6 +677,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   titleWithIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  topCardActionsRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },

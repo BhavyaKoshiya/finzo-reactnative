@@ -35,6 +35,8 @@ export const ROUTES = {
   ADD_PAYMENT: 'AddPayment',
   EDIT_PAYMENT: 'EditPayment',
   LOAN_PAYMENT_HISTORY: 'LoanPaymentHistory',
+  // Prepayment Simulator (Phase 16.5)
+  LOAN_PREPAYMENT_SIMULATOR: 'LoanPrepaymentSimulator',
 };
 
 export default ROUTES;

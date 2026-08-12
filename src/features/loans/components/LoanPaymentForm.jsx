@@ -9,23 +9,21 @@ import PrimaryButton from '../../../components/buttons/PrimaryButton';
 import SecondaryButton from '../../../components/buttons/SecondaryButton';
 import AppCard from '../../../components/cards/AppCard';
 import AppIcon from '../../../components/common/AppIcon';
-import { Check, AlertTriangle, Calculator, Sparkles, Building2, CheckCircle2 } from 'lucide-react-native';
+import { CheckSquare, Square, Calculator, Sparkles, Building2, CheckCircle2, AlertTriangle } from 'lucide-react-native';
 import { useAppTheme } from '../../../hooks/useAppTheme';
 import { PAYMENT_TYPE_OPTIONS, PAYMENT_TYPES } from '../constants/loanPaymentConstants';
 import { formatCurrency } from '../../../utils/financeFormatters';
 
 export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding = 0 }) => {
   const { currentTheme } = useAppTheme();
-  const [showBankBalanceBox, setShowBankBalanceBox] = useState(false);
+  const [showBankDetails, setShowBankDetails] = useState(
+    Boolean(form.actualInterest || form.actualPrincipal || form.actualClosingBalance || form.isBankConfirmed)
+  );
 
   const setEmiAmount = form.setEmiAmount || 0;
+  const preview = form.preview || {};
   const numAmount = Number(form.amount) || 0;
-  const numInterest = Number(form.interestAmount) || 0;
-  const numPrincipal = Number(form.principalAmount) || 0;
-  const numEstBalance = Number(form.outstandingAfter) || 0;
-  const numBank = Number(form.actualClosingBalance);
-  const hasBankBalance = !isNaN(numBank) && form.actualClosingBalance !== null && form.actualClosingBalance !== '';
-  const diffBank = hasBankBalance ? numBank - numEstBalance : 0;
+  const isOverpayment = preview.isOverpayment;
 
   return (
     <View style={styles.container}>
@@ -44,6 +42,24 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
           required
         />
 
+        {form.paymentType === PAYMENT_TYPES.REGULAR_EMI && setEmiAmount > 0 && (
+          <TouchableOpacity
+            onPress={() => form.setUseScheduledEmi(!form.useScheduledEmi)}
+            activeOpacity={0.7}
+            style={styles.checkboxRow}
+          >
+            <AppIcon
+              icon={form.useScheduledEmi ? CheckSquare : Square}
+              size={18}
+              color={currentTheme.primary}
+              style={{ marginRight: 8 }}
+            />
+            <AppText variant="bodySmall" style={{ fontWeight: '600' }}>
+              Use scheduled EMI ({formatCurrency(setEmiAmount)})
+            </AppText>
+          </TouchableOpacity>
+        )}
+
         <MoneyInput
           label="Payment Amount"
           value={form.amount}
@@ -52,19 +68,12 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
           required
         />
 
-        {form.paymentType === PAYMENT_TYPES.REGULAR_EMI && setEmiAmount > 0 && (
-          <View style={styles.emiHelperRow}>
-            <AppIcon icon={Sparkles} size={14} color={currentTheme.primary} style={{ marginRight: 6 }} />
-            <AppText variant="caption" color={currentTheme.textSecondary} style={{ flex: 1 }}>
-              Using your configured EMI ({formatCurrency(setEmiAmount)})
+        {isOverpayment && (
+          <View style={styles.warningRow}>
+            <AppIcon icon={AlertTriangle} size={14} color={currentTheme.warning} style={{ marginRight: 6 }} />
+            <AppText variant="caption" color={currentTheme.warning} style={{ fontWeight: '600', flex: 1 }}>
+              Payment exceeds Finzo's estimated outstanding balance.
             </AppText>
-            {Number(form.amount) !== setEmiAmount && (
-              <TouchableOpacity onPress={form.handleQuickFillEmi} activeOpacity={0.7}>
-                <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700' }}>
-                  Reset to {formatCurrency(setEmiAmount)}
-                </AppText>
-              </TouchableOpacity>
-            )}
           </View>
         )}
 
@@ -75,9 +84,16 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
           errorText={form.errors.paymentDate}
           required
         />
+
+        <DatePickerField
+          label="Due Date (Optional)"
+          value={form.dueDate || ''}
+          onDateChange={form.setDueDate}
+          placeholder="Select due date if applicable"
+        />
       </AppCard>
 
-      {/* SECTION 2: Payment Summary Preview Card */}
+      {/* SECTION 2: Payment Preview Card */}
       <AppCard style={[styles.sectionCard, { backgroundColor: currentTheme.primaryLight }]}>
         <View style={styles.previewHeaderRow}>
           <AppIcon icon={Calculator} size={16} color={currentTheme.primary} style={{ marginRight: 6 }} />
@@ -91,7 +107,7 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
             Opening Balance:
           </AppText>
           <AppText variant="bodySmall" style={{ fontWeight: '600' }}>
-            {formatCurrency(currentLoanOutstanding)}
+            {formatCurrency(preview.openingBalance || currentLoanOutstanding)}
           </AppText>
         </View>
 
@@ -120,16 +136,16 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
                 Estimated Interest:
               </AppText>
               <AppText variant="bodySmall" style={{ fontWeight: '600' }}>
-                {formatCurrency(numInterest)}
+                {formatCurrency(preview.estimatedInterest)}
               </AppText>
             </View>
 
             <View style={styles.previewRow}>
               <AppText variant="caption" color={currentTheme.textSecondary}>
-                Principal Reduction:
+                Estimated Principal:
               </AppText>
               <AppText variant="bodySmall" color={currentTheme.primary} style={{ fontWeight: '700' }}>
-                {formatCurrency(numPrincipal)}
+                {formatCurrency(preview.estimatedPrincipal)}
               </AppText>
             </View>
           </>
@@ -140,68 +156,81 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
             Estimated Balance After Payment:
           </AppText>
           <AppText variant="bodyMedium" color={currentTheme.textPrimary} style={{ fontWeight: '800' }}>
-            {formatCurrency(numEstBalance)}
+            {formatCurrency(preview.estimatedClosingBalance)}
           </AppText>
         </View>
 
         <AppText variant="caption" color={currentTheme.textMuted} style={styles.disclaimerText}>
-          Based on Finzo's estimated calculation. Exact bank figures may vary slightly.
+          Based on Finzo's estimate. Exact bank figures may vary slightly.
         </AppText>
       </AppCard>
 
-      {/* SECTION 3: Optional Actual Bank Balance Correction */}
+      {/* SECTION 3: Optional Actual Bank Values */}
       <AppCard style={styles.sectionCard}>
         <TouchableOpacity
-          onPress={() => setShowBankBalanceBox(!showBankBalanceBox)}
+          onPress={() => setShowBankDetails(!showBankDetails)}
           activeOpacity={0.7}
           style={styles.bankHeaderRow}
         >
           <AppIcon icon={Building2} size={18} color={currentTheme.primary} style={{ marginRight: 8 }} />
           <View style={{ flex: 1 }}>
             <AppText variant="bodyMedium" style={{ fontWeight: '600' }}>
-              Does your bank show a different balance?
+              Have your bank's statement?
             </AppText>
             <AppText variant="caption" color={currentTheme.textSecondary}>
-              Enter your exact lender receipt balance if available
+              Enter exact bank interest, principal, or closing balance
             </AppText>
           </View>
           <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700' }}>
-            {showBankBalanceBox ? 'Hide' : 'Update Balance'}
+            {showBankDetails ? 'Hide' : 'Enter Bank Values'}
           </AppText>
         </TouchableOpacity>
 
-        {showBankBalanceBox && (
+        {showBankDetails && (
           <View style={styles.bankBoxContent}>
             <MoneyInput
-              label="Actual Bank Balance"
-              value={form.actualClosingBalance || ''}
-              onChangeValue={form.setActualClosingBalance}
-              placeholder="e.g. 726050"
+              label="Actual Bank Interest"
+              value={form.actualInterest}
+              onChangeValue={form.setActualInterest}
+              placeholder="e.g. 5180"
             />
 
-            {hasBankBalance && (
-              <View style={styles.bankDiffCard}>
-                <View style={styles.diffRow}>
-                  <AppText variant="caption" color={currentTheme.textSecondary}>Finzo Estimate:</AppText>
-                  <AppText variant="caption" style={{ fontWeight: '600' }}>{formatCurrency(numEstBalance)}</AppText>
-                </View>
-                <View style={styles.diffRow}>
-                  <AppText variant="caption" color={currentTheme.textSecondary}>Your Bank Balance:</AppText>
-                  <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700' }}>{formatCurrency(numBank)}</AppText>
-                </View>
-                <View style={[styles.diffRow, { borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.06)', paddingTop: 4, marginTop: 4 }]}>
-                  <AppText variant="caption" style={{ fontWeight: '600' }}>Difference:</AppText>
-                  <AppText variant="caption" color={diffBank !== 0 ? currentTheme.warning : currentTheme.success} style={{ fontWeight: '700' }}>
-                    {diffBank > 0 ? `+${formatCurrency(diffBank)}` : formatCurrency(diffBank)}
-                  </AppText>
-                </View>
+            <MoneyInput
+              label="Actual Bank Principal"
+              value={form.actualPrincipal}
+              onChangeValue={form.setActualPrincipal}
+              placeholder="e.g. 16270"
+            />
 
-                <View style={styles.confirmedBadgeRow}>
-                  <AppIcon icon={CheckCircle2} size={14} color={currentTheme.success} style={{ marginRight: 4 }} />
-                  <AppText variant="caption" color={currentTheme.success} style={{ fontWeight: '600' }}>
-                    Bank-confirmed balance will be used for future calculations
-                  </AppText>
-                </View>
+            <MoneyInput
+              label="Actual Bank Closing Balance"
+              value={form.actualClosingBalance}
+              onChangeValue={form.setActualClosingBalance}
+              placeholder="e.g. 709980"
+            />
+
+            <TouchableOpacity
+              onPress={() => form.setIsBankConfirmed(!form.isBankConfirmed)}
+              activeOpacity={0.7}
+              style={[styles.checkboxRow, { marginTop: 8 }]}
+            >
+              <AppIcon
+                icon={form.isBankConfirmed ? CheckSquare : Square}
+                size={18}
+                color={currentTheme.primary}
+                style={{ marginRight: 8 }}
+              />
+              <AppText variant="caption" style={{ fontWeight: '600', flex: 1 }}>
+                Is this the balance shown by your bank? (Sets active balance anchor)
+              </AppText>
+            </TouchableOpacity>
+
+            {form.isBankConfirmed && (
+              <View style={styles.confirmedBadgeRow}>
+                <AppIcon icon={CheckCircle2} size={14} color={currentTheme.success} style={{ marginRight: 4 }} />
+                <AppText variant="caption" color={currentTheme.success} style={{ fontWeight: '600' }}>
+                  Bank-confirmed balance will serve as starting anchor for future calculations
+                </AppText>
               </View>
             )}
           </View>
@@ -211,7 +240,7 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
       {/* SECTION 4: Notes / Reference */}
       <AppCard style={styles.sectionCard}>
         <TextInputField
-          label="Notes / Reference"
+          label="Notes / Reference (Optional)"
           value={form.note}
           onChangeText={form.setNote}
           placeholder="Receipt #, UTR, cheque number, or bank notes..."
@@ -249,11 +278,19 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontSize: 16,
   },
-  emiHelperRow: {
+  checkboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: -4,
     marginBottom: 12,
+    paddingVertical: 4,
+  },
+  warningRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    padding: 8,
+    backgroundColor: '#FEF3C7',
+    borderRadius: 8,
   },
   previewHeaderRow: {
     flexDirection: 'row',
@@ -286,17 +323,6 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: '#F3F4F6',
-  },
-  bankDiffCard: {
-    backgroundColor: '#F9FAFB',
-    padding: 10,
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  diffRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 2,
   },
   confirmedBadgeRow: {
     flexDirection: 'row',

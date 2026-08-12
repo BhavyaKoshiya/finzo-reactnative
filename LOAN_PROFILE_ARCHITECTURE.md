@@ -22,9 +22,10 @@ Finzo maintains a strict separation between two distinct financial domains:
 │ • Hypothetical "What-If"  │                               │ • Real-world existing     │
 │   loan projections        │                               │   loans owed by the user  │
 │ • No durable entity ID    │                               │ • Stored in Redux &       │
-│ • Isolated pure math      │                               │   persisted via AsyncStorage│
-│ • Never auto-overwrites   │                               │ • Bank-confirmed or       │
-│   real user loan profiles │                               │   estimated user balance  │
+│   persisted via AsyncStorage│                               │ • Persisted via AsyncStorage│
+│ • Isolated pure math      │                               │ • Bank-confirmed or       │
+│ • Never auto-overwrites   │                               │   estimated user balance  │
+│   real user loan profiles │                               │                           │
 └───────────────────────────┘                               └───────────────────────────┘
 ```
 
@@ -91,7 +92,15 @@ Each user loan profile is represented by a normalized JavaScript object created 
 
 ---
 
-## 4. REDUX STATE MANAGEMENT & PERSISTENCE
+## 4. SCHEDULED EMI VS. ACTUAL PAYMENT AMOUNT (PHASE 16.4)
+
+- **`loan.emiAmount`**: Stores the scheduled monthly commitment for the loan profile.
+- **Actual Payment Amount**: Recording a payment with a different amount (e.g. ₹22,000 paid vs ₹21,450 scheduled) **NEVER** updates `loan.emiAmount`.
+- **Fast Recording Shortcut**: A `"Use scheduled EMI"` option pre-fills `loan.emiAmount` on recording forms while keeping actual paid amount overrides distinct.
+
+---
+
+## 5. REDUX STATE MANAGEMENT & PERSISTENCE
 
 ### Redux Slices:
 - `loanProfilesSlice.js` (`profiles: []`)
@@ -102,7 +111,7 @@ Each user loan profile is represented by a normalized JavaScript object created 
 
 ---
 
-## 5. VALIDATION RULES (`loanProfileValidation.js`)
+## 6. VALIDATION RULES (`loanProfileValidation.js`)
 
 | Field | Rule | Error Message |
 | :--- | :--- | :--- |
@@ -120,7 +129,7 @@ Each user loan profile is represented by a normalized JavaScript object created 
 
 ---
 
-## 6. CALENDAR & DATE HANDLING (`loanDateUtils.js`)
+## 7. CALENDAR & DATE HANDLING (`loanDateUtils.js`)
 
 All date comparisons use `date-fns` calendar-safe functions:
 - `getNextEmiInfo(nextEmiDate)` computes:
@@ -132,7 +141,7 @@ All date comparisons use `date-fns` calendar-safe functions:
 
 ---
 
-## 7. DASHBOARD METRICS & REPAYMENT PROGRESS
+## 8. DASHBOARD METRICS & REPAYMENT PROGRESS
 
 ### Principal Progress Formula:
 $$\text{Principal Repaid} = \max(0, \text{originalPrincipal} - \text{currentOutstandingPrincipal})$$
@@ -140,3 +149,13 @@ $$\text{Progress Ratio} = \min\left(1, \max\left(0, \frac{\text{Principal Repaid
 $$\text{Progress Percentage} = \text{Progress Ratio} \times 100$$
 
 Display Text: `"Approx. principal repaid ₹2,57,500 (25.75%)"`
+
+---
+
+## 9. LOAN REMINDER & DUE DATE CONFIGURATION (PHASE 16.6)
+
+- **Due Day (`dueDay`)**: Configurable day of month (1..31, default `5`). Month length overflows (Feb 31) map safely to month end without crashing.
+- **Reminder Preferences**: Per-loan `remindersEnabled` (`boolean`), `reminderDaysBefore` (`1, 3, 5, 7`), and `reminderTime` (`HH:mm`).
+- **Global Settings Override**: Master toggle `loanRemindersEnabled` in `settingsSlice` can globally suppress all local payment alerts.
+- **Ledger Non-Mutation Invariant**: Updating reminder preferences updates loan profile metadata but leaves financial `ledgerVersion` untouched.
+

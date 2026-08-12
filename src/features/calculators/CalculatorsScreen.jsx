@@ -31,6 +31,7 @@ export const CalculatorsScreen = ({ navigation }) => {
       header={renderHeader()}
       useSafeAreaTop={false}
       useSafeAreaBottom={false}
+      contentContainerStyle={{ paddingBottom: 0 }}
       style={styles.container}
     >
       {/* Search Bar Entry */}
@@ -95,7 +96,7 @@ export const CalculatorsScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 8,
+    flex: 1,
   },
   headerGroup: {
     paddingHorizontal: 16,

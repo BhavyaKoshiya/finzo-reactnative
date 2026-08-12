@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Share, Alert } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Share, Alert, Switch } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { Sun, Moon, Monitor, ShieldCheck, Info, Share2, Code, ChevronRight, Star, Flame, Ban, WalletCards } from 'lucide-react-native';
+import { Sun, Moon, Monitor, ShieldCheck, Info, Share2, Code, ChevronRight, Star, Flame, Ban, WalletCards, Bell } from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
 import AppIcon from '../../components/common/AppIcon';
@@ -22,6 +22,11 @@ import {
   selectActiveLoanCount,
   selectTotalOutstanding,
 } from '../../store/slices/loanProfilesSlice';
+import {
+  selectLoanRemindersEnabled,
+  setLoanRemindersEnabled,
+} from '../../store/slices/settingsSlice';
+import loanReminderService from '../loans/services/loanReminderService';
 import { formatCurrencyCompact } from '../../utils/financeFormatters';
 import { useAppTheme } from '../../hooks/useAppTheme';
 import { ROUTES } from '../../navigation/routes';
@@ -40,6 +45,7 @@ export const ProfileScreen = ({ navigation }) => {
 
   const activeLoanCount = useSelector(selectActiveLoanCount);
   const totalOutstanding = useSelector(selectTotalOutstanding);
+  const globalRemindersEnabled = useSelector(selectLoanRemindersEnabled);
 
   const themeOptions = [
     { label: 'System Default', value: 'system', icon: Monitor },
@@ -75,6 +81,7 @@ export const ProfileScreen = ({ navigation }) => {
       header={<ProfileHeader />}
       useSafeAreaTop={false}
       useSafeAreaBottom={false}
+      contentContainerStyle={{ paddingBottom: 0 }}
       style={styles.container}
     >
       {/* 1. My Loans Section */}
@@ -141,6 +148,30 @@ export const ProfileScreen = ({ navigation }) => {
 
       {/* 3. Preferences Section */}
       <ProfileSection title="Preferences">
+        <ProfileRow
+          icon={Bell}
+          title="Loan Payment Reminders"
+          subtitle="Master toggle for all local EMI alerts"
+          rightElement={
+            <Switch
+              value={globalRemindersEnabled}
+              onValueChange={async (val) => {
+                if (val) {
+                  const perm = await loanReminderService.requestPermissions();
+                  if (!perm.authorized) {
+                    dispatch(setLoanRemindersEnabled(false));
+                    return;
+                  }
+                }
+                dispatch(setLoanRemindersEnabled(val));
+              }}
+              trackColor={{ false: currentTheme.border, true: `${currentTheme.primary}80` }}
+              thumbColor={globalRemindersEnabled ? currentTheme.primary : currentTheme.surfaceVariant}
+            />
+          }
+          style={{ marginBottom: 12 }}
+        />
+
         <AppCard style={styles.cardPadding}>
           <AppText variant="bodyMedium" style={styles.labelMargin}>
             Theme Preference
@@ -234,7 +265,7 @@ export const ProfileScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 8,
+    flex: 1,
   },
   rewardCardMargin: {
     marginBottom: 10,

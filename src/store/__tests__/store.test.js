@@ -2,10 +2,12 @@ import settingsReducer, {
   setThemeMode,
   setCurrency,
   setLocale,
+  setLoanRemindersEnabled,
   resetSettings,
   selectThemeMode,
   selectCurrency,
   selectLocale,
+  selectLoanRemindersEnabled,
 } from '../slices/settingsSlice';
 import rootReducer from '../rootReducer';
 
@@ -14,6 +16,7 @@ describe('settingsSlice', () => {
     themeMode: 'system',
     currency: 'INR',
     locale: 'en-IN',
+    loanRemindersEnabled: true,
   };
 
   it('should return initial state', () => {
@@ -37,11 +40,17 @@ describe('settingsSlice', () => {
     expect(actual.locale).toEqual('en-US');
   });
 
+  it('should handle setLoanRemindersEnabled', () => {
+    const actual = settingsReducer(initialState, setLoanRemindersEnabled(false));
+    expect(actual.loanRemindersEnabled).toEqual(false);
+  });
+
   it('should handle resetSettings', () => {
     const modifiedState = {
       themeMode: 'dark',
       currency: 'USD',
       locale: 'en-US',
+      loanRemindersEnabled: false,
     };
     const actual = settingsReducer(modifiedState, resetSettings());
     expect(actual).toEqual(initialState);
@@ -53,11 +62,13 @@ describe('settingsSlice', () => {
         themeMode: 'light',
         currency: 'INR',
         locale: 'en-IN',
+        loanRemindersEnabled: true,
       },
     };
     expect(selectThemeMode(rootState)).toEqual('light');
     expect(selectCurrency(rootState)).toEqual('INR');
     expect(selectLocale(rootState)).toEqual('en-IN');
+    expect(selectLoanRemindersEnabled(rootState)).toEqual(true);
   });
 });
 

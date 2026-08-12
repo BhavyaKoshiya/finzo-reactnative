@@ -5,9 +5,16 @@ import ScreenContainer from '../../../components/containers/ScreenContainer';
 import AppHeader from '../../../components/navigation/AppHeader';
 import AppText from '../../../components/common/AppText';
 import { selectLoanProfileById, updateLoanProfile } from '../../../store/slices/loanProfilesSlice';
-import { selectLoanPaymentById, updatePayment, deleteLoanPaymentWithRecalculation } from '../../../store/slices/loanPaymentsSlice';
+import {
+  selectLoanPaymentById,
+  selectPaymentsForLoan,
+  updatePayment,
+  updateLoanPaymentsForLoan,
+  deleteLoanPaymentWithRecalculation,
+} from '../../../store/slices/loanPaymentsSlice';
 import { useLoanPaymentForm } from '../hooks/useLoanPaymentForm';
 import LoanPaymentForm from '../components/LoanPaymentForm';
+import { recalculateLoanBalanceFromPayments } from '../utils/paymentBalanceUtils';
 
 export const EditPaymentScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -15,12 +22,15 @@ export const EditPaymentScreen = ({ route, navigation }) => {
   const paymentId = route?.params?.paymentId;
   const existingPayment = useSelector((state) => selectLoanPaymentById(state, paymentId));
   const loan = useSelector((state) => selectLoanProfileById(state, existingPayment?.loanId));
+  const payments = useSelector((state) => selectPaymentsForLoan(state, loan?.id));
 
   const form = useLoanPaymentForm({
     initialValues: existingPayment || {},
     currentLoanOutstanding: loan?.currentOutstandingPrincipal || 0,
     annualInterestRate: loan?.annualInterestRate || 0,
     setEmiAmount: loan?.emiAmount || 0,
+    loan,
+    payments,
   });
 
   if (!existingPayment || !loan) {
@@ -46,14 +56,30 @@ export const EditPaymentScreen = ({ route, navigation }) => {
     const payload = form.getPaymentPayload();
     dispatch(updatePayment(payload));
 
-    if (payload.balanceUpdated && payload.outstandingAfter !== null) {
-      dispatch(
-        updateLoanProfile({
-          id: loan.id,
-          currentOutstandingPrincipal: payload.outstandingAfter,
-        })
-      );
+    // Replay full ledger replacing updated payment
+    const updatedAllPayments = payments.map((p) => (p.id === payload.id ? payload : p));
+    const { finalEstimatedBalance, updatedPayments } = recalculateLoanBalanceFromPayments({
+      loan,
+      payments: updatedAllPayments,
+    });
+
+    if (updatedPayments.length > 0) {
+      dispatch(updateLoanPaymentsForLoan({ loanId: loan.id, payments: updatedPayments }));
     }
+
+    dispatch(
+      updateLoanProfile({
+        id: loan.id,
+        currentOutstandingPrincipal: payload.balanceSource === 'bank_confirmed' && payload.actualClosingBalance !== null
+          ? payload.actualClosingBalance
+          : finalEstimatedBalance,
+        userConfirmedBalance: payload.balanceSource === 'bank_confirmed' && payload.actualClosingBalance !== null
+          ? payload.actualClosingBalance
+          : loan.userConfirmedBalance,
+        balanceSource: payload.balanceSource,
+        lastBalanceConfirmationDate: payload.balanceSource === 'bank_confirmed' ? payload.paymentDate : loan.lastBalanceConfirmationDate,
+      })
+    );
 
     Alert.alert('Payment Updated', 'Payment record updated successfully.');
     navigation.goBack();

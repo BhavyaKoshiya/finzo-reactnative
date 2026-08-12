@@ -19,20 +19,25 @@
 - [x] Phase 16 — Real Loan Profiles + Loan Dashboard Foundation
 - [x] Phase 16.1 — My Loans Access & Multi-Loan UX
 - [x] Phase 16.2 — My Loans Personal Financial Workspace
+- [x] Phase 16.3 — Loan Ledger Hardening & Balance Integrity
+- [x] Phase 16.4 — Real-World Loan Payment Recording, Correction & Prepayment Foundation
 - [x] Phase 17 — Loan Payment History + Balance Tracking
 - [x] Phase 17.1 — Loan Balance & Payment Calculation Correction
 - [x] Phase 17.2 — Loan Ledger Hardening
-- [x] Phase 17.3 — RTDB Configuration Provisioning & Hardening
+- [x] Phase 16.5 — Loan Prepayment Simulator & What-If Analysis
+- [x] Phase 16.6 — Loan Payment Reminders & Payment Due Tracking
+- [x] Phase 16.6.1 — Real Local Notifications with @notifee/react-native
 - [ ] Phase 18 — Prepayment Simulator
 - [ ] Phase 19 — Monetization & Rewarded Ads SDK
 - [ ] Phase 20 — Final QA + Store Preparation
 
 ---
 
-## Architectural Notes: RTDB Configuration Provisioning & Hardening (Phase 17.3)
+## Architectural Notes: Real-World Loan Payment Recording (Phase 16.4)
 
-- **Provisioned Firebase RTDB `/config`**: Persisted authoritative production JSON configuration payload containing `version`, `rewards`, `redemption`, `discounts`, and `ads` (disabled).
-- **3-Tier Fallback Hierarchy**: Valid Firebase RTDB `/config` $\rightarrow$ Last-Known-Good AsyncStorage config (`@finzo_last_known_config`) $\rightarrow$ Local defaults (`DEFAULT_REALTIME_CONFIG`).
-- **Hardened Schema Validation**: Bounded integer validation (`pointsCost >= 1`, `durationMinutes >= 1`), strict daily reward ladder validation ($> 0$), string length caps, and discount percentage floor safety.
-- **Empty RTDB & Offline Resilience**: Empty (`null`), malformed, or unreachable remote payloads safely fall back to cached/default configuration without crashing or modifying user state.
-- **100% User Data Privacy**: Zero user points, streaks, loan profiles, payment history, or saved calculations reside in Firebase. RTDB is strictly read-only remote config.
+- **Scheduled EMI vs. Actual Payment Amount**: Fast "Use scheduled EMI" shortcut pre-fills `loan.emiAmount`. Recording custom actual paid amounts **NEVER** modifies `loan.emiAmount`.
+- **Dynamic Payment Preview**: `createPaymentPreview()` computes opening balance, estimated interest, principal reduction, and estimated closing balance using `getCurrentLoanBalance()`, labeled explicitly as "Finzo Estimate".
+- **Prepayments**: Treated as 100% principal reduction ($\text{Interest} = 0$). Does not alter `loan.emiAmount` or force simulation changes.
+- **Optional Bank Statement Correction**: Allows input of actual bank interest, principal, and closing balance. Toggling "Is this the balance shown by your bank?" sets `balanceSource = 'bank_confirmed'` as a trusted anchor.
+- **Full Ledger Replay**: Editing or deleting a payment replaces the event in the chronological sequence and replays remaining payments via `recalculateLoanBalanceFromPayments`.
+- **100% Local Privacy**: All loan data, payment records, bank corrections, and notes remain local on device.

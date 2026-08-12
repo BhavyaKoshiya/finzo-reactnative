@@ -97,8 +97,20 @@ const balanceState = getCurrentLoanBalance(loanProfile, payments);
 
 ---
 
-## 7. PRIVACY & LOCAL DATA BOUNDARIES
+## 7. PAYMENT CORRECTION & ACTUAL BANK VALUES (PHASE 16.4)
 
-- **100% Offline**: All ledger records reside strictly in `@react-native-async-storage/async-storage` via `redux-persist`.
-- **Zero Cloud Leakage**: No loan balances, payment history, interest rates, or financial payloads are transmitted to Firebase or remote services.
-- **Log Privacy**: System logs contain technical events only without financial amounts.
+Users may optionally provide actual bank statement figures:
+- `actualInterest`: Bank statement interest charge.
+- `actualPrincipal`: Bank statement principal deduction.
+- `actualClosingBalance`: Exact closing balance on bank receipt.
+- **Bank-Confirmed Toggle**: Explicit user confirmation sets `balanceSource = 'bank_confirmed'`, establishing a new active balance anchor for future payment replays.
+- **Preservation of Estimates**: Finzo's original `calculationSnapshot` is never overwritten when actual bank values are entered; both remain preserved and auditable.
+
+---
+
+## 9. PREPAYMENT SIMULATION & WHAT-IF ANALYSIS (PHASE 16.5)
+
+- **Pure Read-Only Engine**: `simulateLoanPrepayment` runs hypothetical lump-sum prepayments under **Reduce Tenure** or **Reduce EMI** strategies without mutating `loanProfilesSlice`, `loanPaymentsSlice`, or `AsyncStorage`.
+- **Anchor Consistency**: Simulations resolve starting balance directly from `getCurrentLoanBalance(loan, payments)` (respecting bank-confirmed anchors).
+- **Recording Transition**: Tapping "Record this prepayment" routes to `AddPaymentScreen` with pre-filled `paymentType = 'prepayment'` and simulated amount, preserving the Phase 16.4 payment recording flow as the single source of truth.
+

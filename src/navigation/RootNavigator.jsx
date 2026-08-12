@@ -34,6 +34,7 @@ import {
   AddPaymentScreen,
   EditPaymentScreen,
   LoanPaymentHistoryScreen,
+  LoanPrepaymentSimulatorScreen,
 } from '../features/loans';
 import { ROUTES } from './routes';
 
@@ -82,6 +83,7 @@ export const RootNavigator = () => {
       <Stack.Screen name={ROUTES.ADD_PAYMENT} component={AddPaymentScreen} />
       <Stack.Screen name={ROUTES.EDIT_PAYMENT} component={EditPaymentScreen} />
       <Stack.Screen name={ROUTES.LOAN_PAYMENT_HISTORY} component={LoanPaymentHistoryScreen} />
+      <Stack.Screen name={ROUTES.LOAN_PREPAYMENT_SIMULATOR} component={LoanPrepaymentSimulatorScreen} />
 
       {__DEV__ && (
         <Stack.Screen
