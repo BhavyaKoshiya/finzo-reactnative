@@ -178,4 +178,13 @@ Display Text: `"Approx. principal repaid ₹2,57,500 (25.75%)"`
 - **Historical Snapshot Protection**: past payment `calculationSnapshot` objects remain 100% immutable.
 - **Unsaved Changes Guard**: Dirty form state tracking alerts users before discarding unsaved edits.
 
+---
+
+## 12. PRIVATE DETAILS, NOTES & SECURE LOCAL ARCHITECTURE (PHASE 16.13)
+
+- **Domain Separation**: `loanPrivateDetailsSlice` and `loanNotesSlice` manage private metadata (lender branch, contacts, insurance, collateral, important dates, notes).
+- **Keychain Secure Storage**: Highly sensitive credentials are stored exclusively in platform secure storage via `securePrivateStorageService` (`react-native-keychain`). Highly sensitive credentials are **NEVER** stored in `loanProfilesSlice`, `AsyncStorage`, or `redux-persist`.
+- **Cascade Loan Delete**: Deleting a loan profile dispatches `deletePrivateDetailsForLoan(loanId)`, `deleteNotesForLoan(loanId)`, and deletes Keychain entries for that loan. Other loans remain 100% untouched.
+- **Archive & Paid-Off Preservation**: Archiving or paying off a loan retains private details and notes intact for audit history.
+
 

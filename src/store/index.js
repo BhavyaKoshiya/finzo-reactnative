@@ -16,7 +16,16 @@ const persistConfig = {
   key: 'finzo_root',
   version: 1,
   storage: AsyncStorage,
-  whitelist: ['settings', 'savedCalculations', 'rewards', 'loanProfiles', 'loanPayments', 'loanGoals'],
+  whitelist: [
+    'settings',
+    'savedCalculations',
+    'rewards',
+    'loanProfiles',
+    'loanPayments',
+    'loanGoals',
+    'loanPrivateDetails',
+    'loanNotes',
+  ],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

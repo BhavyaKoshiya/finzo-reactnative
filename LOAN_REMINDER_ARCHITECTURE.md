@@ -83,3 +83,13 @@ This document specifies the architectural model, rules, and privacy boundaries f
 - **Automatic Reconciliation Trigger**: Editing `dueDay`, `remindersEnabled`, `reminderDaysBefore`, `reminderTime`, `loanStartDate`, or loan status in `EditLoanScreen` automatically invokes `loanReminderService.reconcileLoanReminders()`.
 - **Cancellation on Delete**: Deleting a loan profile invokes `loanReminderService.cancelLoanReminders(loanId)`, clearing all scheduled Notifee notifications for that loan.
 - **Archiving Safety**: Archiving a loan pauses notification triggers; restoring an archived loan reschedules alerts for remaining due dates.
+
+---
+
+## 10. NOTIFICATION PRIVACY & PAYLOAD SAFEGUARDS (PHASE 16.13)
+
+- **No Sensitive Payload Exposure**: Local notification titles and body texts MUST NEVER contain credentials, full loan account numbers, private notes, or private contact details.
+- **Generic Notification Text**:
+  - **Allowed**: *"Your Home Loan EMI is due in 3 days."*
+  - **Prohibited**: *"Your HDFC account XXXX1234 EMI is due."*
+- **Keychain Isolation**: Notification handlers and background listeners do not access `react-native-keychain`.

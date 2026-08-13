@@ -146,4 +146,11 @@ Users may optionally provide actual bank statement figures:
 - **Zero Ledger Side Effects**: Saving, updating, pausing, or deleting a loan goal **NEVER** creates payment records, alters loan balance, or increments `ledgerVersion`.
 - **Baseline Snapshot Fidelity**: Informational `baselineSnapshot` objects preserve historical setup parameters without overriding `getCurrentLoanBalance()` as the single source of truth for active loan balances.
 
+---
+
+## 14. PRIVATE DETAILS & NOTES SEPARATION (PHASE 16.13)
+
+- **Ledger Non-Mutation Invariant**: Creating, updating, or deleting private details and notes **NEVER** alters `currentOutstandingPrincipal`, `ledgerVersion`, recorded payment snapshots, or interest rates.
+- **Secure Storage Separation**: Highly sensitive credentials are stored exclusively in platform secure storage (`react-native-keychain`) via `securePrivateStorageService`. Highly sensitive credentials are **NEVER** stored in `loanPaymentsSlice`, `loanProfilesSlice`, `AsyncStorage`, or `redux-persist`.
+
 

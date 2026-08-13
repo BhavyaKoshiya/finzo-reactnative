@@ -218,10 +218,10 @@ export const ProfileScreen = ({ navigation }) => {
       <ProfileSection title="Data & Privacy">
         <ProfileRow
           icon={ShieldCheck}
-          title="Privacy & Data"
+          title="Privacy & Local Data"
           subtitle="Finzo is designed to keep your financial data on your device"
-          onPress={() => setPrivacyModalVisible(true)}
-          accessibilityLabel="View privacy and data information"
+          onPress={() => navigation.navigate(ROUTES.LOCAL_DATA_PRIVACY)}
+          accessibilityLabel="View privacy and local data information"
         />
       </ProfileSection>
 

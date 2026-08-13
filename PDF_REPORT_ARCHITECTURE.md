@@ -93,3 +93,12 @@ Calculator and Loan business logic is decoupled from HTML rendering using a norm
 - **Personal Goal Tagging**: Loan Goal PDFs reuse `generateAndShareReport` and include explicit header tagging: *"Personal Goal — not an actual payment instruction"*.
 - **Goal Progress Metrics**: Displays goal configuration, baseline snapshot comparison, current progress %, and actual payment contributions.
 - **100% Offline**: Compiled locally and shared via native system share sheet.
+
+---
+
+## 8. PRIVATE DETAILS & PDF PRIVACY (PHASE 16.13)
+
+- **Excluded by Default**: Normal loan statement and summary PDFs exclude private details and notes by default.
+- **Explicit Opt-In**: Including private details requires explicit user selection and presents warning: *"This report contains private information. Once shared outside Finzo, it may no longer be under your control."*
+- **Account Reference Masking**: Loan account and reference numbers are masked (`XXXX1234`) by default in PDF reports.
+- **Strict Credential Exclusion**: Highly sensitive credentials stored in Keychain are **NEVER** included in PDF reports under any circumstances.

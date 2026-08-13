@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { ArrowLeft, Edit3, Archive, Trash2, Calendar, Landmark, Star, StarOff, Plus, ReceiptText, ChevronRight, ChevronDown, Scale, ShieldCheck, Calculator, Sparkles, TrendingUp, FileText, Compass, Target } from 'lucide-react-native';
+import { ArrowLeft, Edit3, Archive, Trash2, Calendar, Landmark, Star, StarOff, Plus, ReceiptText, ChevronRight, ChevronDown, Scale, ShieldCheck, Calculator, Sparkles, TrendingUp, FileText, Compass, Target, Lock } from 'lucide-react-native';
 import ScreenContainer from '../../../components/containers/ScreenContainer';
 import AppHeader from '../../../components/navigation/AppHeader';
 import AppText from '../../../components/common/AppText';
@@ -536,6 +536,12 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
           title="Your Payoff Goals"
           icon={Target}
           onPress={() => navigation.navigate(ROUTES.LOAN_GOALS, { loanId: profile.id })}
+        />
+
+        <SecondaryButton
+          title="Private Details & Notes"
+          icon={Lock}
+          onPress={() => navigation.navigate(ROUTES.LOAN_PRIVATE_DETAILS, { loanId: profile.id })}
         />
 
         <SecondaryButton

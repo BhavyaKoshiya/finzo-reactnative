@@ -91,4 +91,11 @@ It allows users to convert What-If payoff scenarios (Extra Monthly Payments, Tar
 
 ## 6. PDF Goal Report Export
 - Integrates with Phase 16.9 PDF engine (`generateAndShareReport`).
-- PDF report includes baseline snapshot, current progress, actual relevant payment history, projected payoff, and explicit disclaimer: *"Personal Goal — not an actual payment instruction."*
+- PDF report includes baseline snapshot, current progress, actual relevant payment history, projected payoff, and explicit disclaimer: *"Personal Goal — Not an actual payment instruction."*
+
+---
+
+## 7. PRIVATE DETAILS & GOAL SEPARATION (PHASE 16.13)
+
+- **Domain Isolation**: Goal objects retain purely financial scenario metrics and baseline snapshots. They do NOT contain private lender details, notes, or protected credentials.
+- **Cascade Deletion Isolation**: Deleting a loan removes loan goals via `deleteGoalsForLoan(loanId)`, while preserving unrelated loans untouched.

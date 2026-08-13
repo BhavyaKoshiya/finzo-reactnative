@@ -10,6 +10,8 @@ export { default as LoanPrepaymentSimulatorScreen } from './screens/LoanPrepayme
 export { default as LoanPayoffPlannerScreen } from './screens/LoanPayoffPlannerScreen';
 export { default as LoanGoalsScreen } from './screens/LoanGoalsScreen';
 export { default as LoanGoalDetailsScreen } from './screens/LoanGoalDetailsScreen';
+export { default as LoanPrivateDetailsScreen } from './screens/LoanPrivateDetailsScreen';
+export { default as LoanNotesScreen } from './screens/LoanNotesScreen';
 export { default as ManualBalanceUpdateModal } from './screens/ManualBalanceUpdateModal';
 
 export { default as LoanProfileCard } from './components/LoanProfileCard';
@@ -30,6 +32,8 @@ export { useLoanPaymentForm } from './hooks/useLoanPaymentForm';
 export * from './types/loanProfileTypes';
 export * from './types/loanPaymentTypes';
 export * from './types/loanGoalTypes';
+export * from './types/loanPrivateDetailsTypes';
+export * from './types/loanNoteTypes';
 export * from './constants/loanConstants';
 export * from './constants/loanPaymentConstants';
 export * from './utils/loanProfileValidation';
@@ -43,5 +47,6 @@ export * from './utils/paymentBalanceUtils';
 export * from './utils/loanPrepaymentSimulation';
 export * from './utils/loanScenarioEngine';
 export * from './utils/loanGoalUtils';
+export * from './utils/accountNumberMaskingUtils';
 export * from './utils/loanReminderUtils';
 export { default as loanReminderService } from './services/loanReminderService';

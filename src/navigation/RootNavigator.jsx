@@ -39,7 +39,10 @@ import {
   LoanPayoffPlannerScreen,
   LoanGoalsScreen,
   LoanGoalDetailsScreen,
+  LoanPrivateDetailsScreen,
+  LoanNotesScreen,
 } from '../features/loans';
+import { LocalDataPrivacyScreen } from '../features/privacy/screens/LocalDataPrivacyScreen';
 import { ROUTES } from './routes';
 
 const Stack = createNativeStackNavigator();
@@ -90,6 +93,9 @@ export const RootNavigator = () => {
       <Stack.Screen name={ROUTES.LOAN_PAYOFF_PLANNER} component={LoanPayoffPlannerScreen} />
       <Stack.Screen name={ROUTES.LOAN_GOALS} component={LoanGoalsScreen} />
       <Stack.Screen name={ROUTES.LOAN_GOAL_DETAILS} component={LoanGoalDetailsScreen} />
+      <Stack.Screen name={ROUTES.LOAN_PRIVATE_DETAILS} component={LoanPrivateDetailsScreen} />
+      <Stack.Screen name={ROUTES.LOAN_NOTES} component={LoanNotesScreen} />
+      <Stack.Screen name={ROUTES.LOCAL_DATA_PRIVACY} component={LocalDataPrivacyScreen} />
 
       {__DEV__ && (
         <Stack.Screen
