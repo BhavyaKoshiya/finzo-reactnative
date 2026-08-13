@@ -36,6 +36,9 @@ import {
   EditPaymentScreen,
   LoanPaymentHistoryScreen,
   LoanPrepaymentSimulatorScreen,
+  LoanPayoffPlannerScreen,
+  LoanGoalsScreen,
+  LoanGoalDetailsScreen,
 } from '../features/loans';
 import { ROUTES } from './routes';
 
@@ -59,19 +62,17 @@ export const RootNavigator = () => {
       <Stack.Screen name={ROUTES.CAGR_CALCULATOR} component={CAGRCalculatorScreen} />
       <Stack.Screen name={ROUTES.ROI_CALCULATOR} component={ROICalculatorScreen} />
 
-      {/* Tax & General Financial Calculator Screens */}
+      {/* Business Calculator Family Screens */}
       <Stack.Screen name={ROUTES.GST_CALCULATOR} component={GSTCalculatorScreen} />
+
+      {/* Everyday Calculator Family Screens */}
       <Stack.Screen name={ROUTES.SIMPLE_INTEREST_CALCULATOR} component={SimpleInterestCalculatorScreen} />
       <Stack.Screen name={ROUTES.COMPOUND_INTEREST_CALCULATOR} component={CompoundInterestCalculatorScreen} />
       <Stack.Screen name={ROUTES.PERCENTAGE_CALCULATOR} component={PercentageCalculatorScreen} />
 
-      {/* Global Calculator Search Screen */}
+      {/* Auxiliary Screens */}
       <Stack.Screen name={ROUTES.CALCULATOR_SEARCH} component={CalculatorSearchScreen} />
-
-      {/* Rewards System Screen */}
       <Stack.Screen name={ROUTES.REWARDS} component={RewardsScreen} />
-
-      {/* My Loans Workspace Fallback */}
       <Stack.Screen name={ROUTES.MY_LOANS} component={MyLoansScreen} />
 
       {/* Real Loan Profiles & Dashboard Screens (Phase 16) */}
@@ -86,6 +87,9 @@ export const RootNavigator = () => {
       <Stack.Screen name={ROUTES.LOAN_PAYMENT_HISTORY} component={LoanPaymentHistoryScreen} />
       <Stack.Screen name={ROUTES.LOAN_PREPAYMENT_SIMULATOR} component={LoanPrepaymentSimulatorScreen} />
       <Stack.Screen name={ROUTES.LOAN_INSIGHTS} component={LoanInsightsScreen} />
+      <Stack.Screen name={ROUTES.LOAN_PAYOFF_PLANNER} component={LoanPayoffPlannerScreen} />
+      <Stack.Screen name={ROUTES.LOAN_GOALS} component={LoanGoalsScreen} />
+      <Stack.Screen name={ROUTES.LOAN_GOAL_DETAILS} component={LoanGoalDetailsScreen} />
 
       {__DEV__ && (
         <Stack.Screen

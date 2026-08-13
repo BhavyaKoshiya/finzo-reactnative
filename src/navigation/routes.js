@@ -39,6 +39,11 @@ export const ROUTES = {
   LOAN_PREPAYMENT_SIMULATOR: 'LoanPrepaymentSimulator',
   // Loan Insights (Phase 16.8)
   LOAN_INSIGHTS: 'LoanInsights',
+  // Loan Payoff Planner (Phase 16.11)
+  LOAN_PAYOFF_PLANNER: 'LoanPayoffPlanner',
+  // Loan Goals (Phase 16.12)
+  LOAN_GOALS: 'LoanGoals',
+  LOAN_GOAL_DETAILS: 'LoanGoalDetails',
 };
 
 export default ROUTES;

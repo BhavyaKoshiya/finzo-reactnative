@@ -77,3 +77,18 @@ All calculations are encapsulated as pure, deterministic JavaScript functions wi
 - **`buildLoanInsightsReport`**: Formats all loan analytics (principal progress, remaining interest/tenure, payoff date, prepayment impact, and latest payment breakdown) into print-friendly PDF reports.
 - **Export Action**: Accessible via "Export Insights (PDF)" on `LoanInsightsScreen` or "Export Report" option on `LoanDetailsScreen`.
 - **100% Offline**: Renders on-device via `pdfReportService` and shares via system native share sheet without cloud uploads.
+
+---
+
+## 7. PAYOFF PLANNER & WHAT-IF SCENARIOS (PHASE 16.11)
+
+- **Scenario Expansion**: Loan Insights provides the baseline analytics, while the **Payoff Planner** (`LoanPayoffPlannerScreen.jsx`) extends analysis into hypothetical future scenarios (Extra Monthly Payments, Increased EMI, Multiple Prepayments, Target Payoff Date).
+- **Direct Navigation Entry**: `LoanInsightsScreen` features a direct action button **"Plan Payoff Scenarios"** navigating to `ROUTES.LOAN_PAYOFF_PLANNER`.
+- **Zero Ledger Side Effects**: Both Insights and Payoff Planner operate on temporary in-memory computations without mutating loan profiles, payment histories, or ledger versioning.
+
+---
+
+## 8. SAVED GOALS & PROGRESS TRACKING INTEGRATION (PHASE 16.12)
+
+- **Goal Integration**: Loan Insights features a direct action button **"View Payoff Goals"** navigating to `ROUTES.LOAN_GOALS`.
+- **Read-Only Progress Metrics**: Goal progress shown in Insights or Goals screens consumes `deriveGoalProgress()`, which derives metrics dynamically from authoritative loan state without mutating Redux slices or ledger anchors.

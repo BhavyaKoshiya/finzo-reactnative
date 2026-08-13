@@ -130,4 +130,20 @@ Users may optionally provide actual bank statement figures:
 - **Ledger Fidelity**: PDF statements preserve `calculationSnapshot` values for past payments and display explicit badge tags for Regular EMI, Prepayment, Balance Correction, and Custom Payments.
 - **100% Offline & Private**: Reports are generated on-device and shared via native system share sheet without cloud uploads or external network calls.
 
+---
+
+## 12. PAYOFF PLANNER & WHAT-IF SCENARIO ENGINE (PHASE 16.11)
+
+- **Strict Non-Mutation Guarantee**: `loanScenarioEngine.js` performs temporary in-memory simulations (Extra Monthly Payment, Increased EMI, Lump Sum Prepayment, Multiple Prepayments, Target Payoff Date). It **NEVER** mutates `loanProfilesSlice`, `loanPaymentsSlice`, `ledgerVersion`, or past payment `calculationSnapshot` objects.
+- **Active Balance Anchor Resolution**: All scenario calculations start from `getCurrentLoanBalance(loan, payments)` to respect bank-confirmed balance anchors.
+- **Zero Ledger Side Effects**: Scenario execution generates read-only comparative metrics (`formattedTenureReduction`, `estimatedInterestAvoided`) without writing to AsyncStorage or scheduling local notifications.
+
+---
+
+## 13. LOAN GOALS & PROGRESS TRACKING (PHASE 16.12)
+
+- **Read-Only Ledger Consumer**: `loanGoalUtils.js` derives progress dynamics strictly by reading actual payments recorded in `loanPaymentsSlice` and evaluating balances via `getCurrentLoanBalance(loan, payments)`.
+- **Zero Ledger Side Effects**: Saving, updating, pausing, or deleting a loan goal **NEVER** creates payment records, alters loan balance, or increments `ledgerVersion`.
+- **Baseline Snapshot Fidelity**: Informational `baselineSnapshot` objects preserve historical setup parameters without overriding `getCurrentLoanBalance()` as the single source of truth for active loan balances.
+
 

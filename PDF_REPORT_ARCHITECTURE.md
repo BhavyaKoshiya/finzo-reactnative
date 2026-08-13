@@ -77,3 +77,19 @@ Calculator and Loan business logic is decoupled from HTML rendering using a norm
 - **Repeated Table Headers**: Large installment schedules (up to 360 rows) use CSS `@page` and `thead { display: table-header-group; }` to repeat headers across page breaks cleanly.
 - **Historical Snapshot Preservation**: Loan statement reports consume stored `calculationSnapshot` properties so historical interest/principal splits are preserved even if the loan profile's interest rate changes later.
 - **Estimate Labeling**: All projections (payoff date, remaining interest, SIP returns) are explicitly tagged **(Estimated)**.
+
+---
+
+## 6. PAYOFF PLANNER SCENARIO EXPORT (PHASE 16.11)
+
+- **Hypothetical Scenario Tagging**: Payoff Planner scenario PDFs reuse `generateAndShareReport` and feature explicit header tagging: *"Hypothetical Scenario Report — Not an actual payment record"*.
+- **Comparative Metrics Included**: Exports baseline vs simulated payoff date, potential interest avoided, tenure reduction, and compact simulated schedule summary.
+- **100% Offline & Private**: Compiled locally and shared via native system share sheet.
+
+---
+
+## 7. LOAN GOAL REPORT EXPORT (PHASE 16.12)
+
+- **Personal Goal Tagging**: Loan Goal PDFs reuse `generateAndShareReport` and include explicit header tagging: *"Personal Goal — not an actual payment instruction"*.
+- **Goal Progress Metrics**: Displays goal configuration, baseline snapshot comparison, current progress %, and actual payment contributions.
+- **100% Offline**: Compiled locally and shared via native system share sheet.

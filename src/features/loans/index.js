@@ -7,6 +7,9 @@ export { default as AddPaymentScreen } from './screens/AddPaymentScreen';
 export { default as EditPaymentScreen } from './screens/EditPaymentScreen';
 export { default as LoanPaymentHistoryScreen } from './screens/LoanPaymentHistoryScreen';
 export { default as LoanPrepaymentSimulatorScreen } from './screens/LoanPrepaymentSimulatorScreen';
+export { default as LoanPayoffPlannerScreen } from './screens/LoanPayoffPlannerScreen';
+export { default as LoanGoalsScreen } from './screens/LoanGoalsScreen';
+export { default as LoanGoalDetailsScreen } from './screens/LoanGoalDetailsScreen';
 export { default as ManualBalanceUpdateModal } from './screens/ManualBalanceUpdateModal';
 
 export { default as LoanProfileCard } from './components/LoanProfileCard';
@@ -18,12 +21,15 @@ export { default as UpcomingPaymentCard } from './components/UpcomingPaymentCard
 export { default as LoanReminderSettingsModal } from './components/LoanReminderSettingsModal';
 export { default as LoanInsightsPreviewCard } from './components/LoanInsightsPreviewCard';
 export { default as LoanInsightsTrendChart } from './components/LoanInsightsTrendChart';
+export { default as LoanGoalCard } from './components/LoanGoalCard';
+export { default as SaveGoalModal } from './components/SaveGoalModal';
 
 export { useLoanProfileForm } from './hooks/useLoanProfileForm';
 export { useLoanPaymentForm } from './hooks/useLoanPaymentForm';
 
 export * from './types/loanProfileTypes';
 export * from './types/loanPaymentTypes';
+export * from './types/loanGoalTypes';
 export * from './constants/loanConstants';
 export * from './constants/loanPaymentConstants';
 export * from './utils/loanProfileValidation';
@@ -35,5 +41,7 @@ export * from './utils/loanPresentationAdapters';
 export * from './utils/loanPaymentPresentationAdapters';
 export * from './utils/paymentBalanceUtils';
 export * from './utils/loanPrepaymentSimulation';
+export * from './utils/loanScenarioEngine';
+export * from './utils/loanGoalUtils';
 export * from './utils/loanReminderUtils';
 export { default as loanReminderService } from './services/loanReminderService';

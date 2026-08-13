@@ -167,4 +167,15 @@ Display Text: `"Approx. principal repaid ₹2,57,500 (25.75%)"`
 - **Zero Profile Mutation**: Derived insights are computed on-the-fly during render or selector memoization without storing computed outputs into `loanProfilesSlice`.
 - **Presentation Tags**: Loan profile display adapters (`adaptLoanProfileForDisplay`) expose compact progress strings (`repaymentPercentage% paid (formattedPrincipalRepaid)`).
 
+---
+
+## 11. PROFILE EDITING & DATA INTEGRITY HARDENING (PHASE 16.10)
+
+- **Field Classification**: Differentiates between cosmetic edits (name, lender, notes), material financial edits (rate, EMI, tenure, start date), and reminder preferences (`dueDay`, `reminderTime`).
+- **Review Changes Modal**: Displays explicit diffs (old → new) and warning (*"Previous payment records will remain unchanged. These values will affect future estimates."*) before committing material financial edits.
+- **Current Balance Protection**: Current Outstanding Principal is read-only in `LoanProfileForm` during edits. Balance adjustments MUST be performed via Balance Correction (`ManualBalanceUpdateModal`).
+- **Ledger Version Rule**: Material financial edits increment `ledgerVersion` by +1; cosmetic edits preserve `ledgerVersion`.
+- **Historical Snapshot Protection**: past payment `calculationSnapshot` objects remain 100% immutable.
+- **Unsaved Changes Guard**: Dirty form state tracking alerts users before discarding unsaved edits.
+
 

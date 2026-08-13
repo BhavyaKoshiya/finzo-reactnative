@@ -17,6 +17,8 @@ import {
   Layers,
   PieChart,
   FileText,
+  Compass,
+  Target,
 } from 'lucide-react-native';
 import ScreenContainer from '../../../components/containers/ScreenContainer';
 import AppHeader from '../../../components/navigation/AppHeader';
@@ -440,6 +442,18 @@ export const LoanInsightsScreen = ({ route, navigation }) => {
           title="Simulate Prepayment"
           icon={Sparkles}
           onPress={() => navigation.navigate(ROUTES.LOAN_PREPAYMENT_SIMULATOR, { loanId: loan.id })}
+        />
+
+        <SecondaryButton
+          title="Plan Payoff Scenarios"
+          icon={Compass}
+          onPress={() => navigation.navigate(ROUTES.LOAN_PAYOFF_PLANNER, { loanId: loan.id })}
+        />
+
+        <SecondaryButton
+          title="View Payoff Goals"
+          icon={Target}
+          onPress={() => navigation.navigate(ROUTES.LOAN_GOALS, { loanId: loan.id })}
         />
 
         <SecondaryButton

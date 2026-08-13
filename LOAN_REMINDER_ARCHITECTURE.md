@@ -75,3 +75,11 @@ This document specifies the architectural model, rules, and privacy boundaries f
 
 - **100% Offline**: All due dates, reminder preferences, notification schedules, and payment histories reside strictly in local device storage.
 - **Zero Firebase Exposure**: No loan reminder preferences or financial payloads are written to Cloud messaging or Firebase RTDB. RTDB remains strictly read-only for public application config.
+
+---
+
+## 9. PROFILE EDITING & REMINDER RECONCILIATION (PHASE 16.10)
+
+- **Automatic Reconciliation Trigger**: Editing `dueDay`, `remindersEnabled`, `reminderDaysBefore`, `reminderTime`, `loanStartDate`, or loan status in `EditLoanScreen` automatically invokes `loanReminderService.reconcileLoanReminders()`.
+- **Cancellation on Delete**: Deleting a loan profile invokes `loanReminderService.cancelLoanReminders(loanId)`, clearing all scheduled Notifee notifications for that loan.
+- **Archiving Safety**: Archiving a loan pauses notification triggers; restoring an archived loan reschedules alerts for remaining due dates.

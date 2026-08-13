@@ -48,6 +48,20 @@ export const useLoanProfileForm = (initialProfile = null, onSuccess = null) => {
   const [notes, setNotes] = useState(initialProfile?.notes || '');
   const [isPrimary, setIsPrimary] = useState(Boolean(initialProfile?.isPrimary));
 
+  // Phase 16.10: Due Day & Reminder preferences
+  const [dueDay, setDueDay] = useState(
+    initialProfile?.dueDay ? String(initialProfile.dueDay) : '5'
+  );
+  const [remindersEnabled, setRemindersEnabled] = useState(
+    initialProfile?.remindersEnabled ?? true
+  );
+  const [reminderDaysBefore, setReminderDaysBefore] = useState(
+    initialProfile?.reminderDaysBefore ? String(initialProfile.reminderDaysBefore) : '3'
+  );
+  const [reminderTime, setReminderTime] = useState(
+    initialProfile?.reminderTime || '09:00'
+  );
+
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -68,26 +82,84 @@ export const useLoanProfileForm = (initialProfile = null, onSuccess = null) => {
       setProcessingFee(initialProfile.processingFee ? String(initialProfile.processingFee) : '');
       setNotes(initialProfile.notes || '');
       setIsPrimary(Boolean(initialProfile.isPrimary));
+      setDueDay(initialProfile.dueDay ? String(initialProfile.dueDay) : '5');
+      setRemindersEnabled(initialProfile.remindersEnabled ?? true);
+      setReminderDaysBefore(initialProfile.reminderDaysBefore ? String(initialProfile.reminderDaysBefore) : '3');
+      setReminderTime(initialProfile.reminderTime || '09:00');
     }
   }, [initialProfile]);
 
-  const handleSubmit = useCallback(() => {
-    const rawPayload = {
+  // Phase 16.10: Form Dirty State Tracker
+  const isDirty = Boolean(
+    initialProfile && (
+      name !== (initialProfile.name || '') ||
+      loanType !== (initialProfile.loanType || 'home_loan') ||
+      lenderName !== (initialProfile.lenderName || '') ||
+      originalPrincipal !== (initialProfile.originalPrincipal ? String(initialProfile.originalPrincipal) : '') ||
+      annualInterestRate !== (initialProfile.annualInterestRate ? String(initialProfile.annualInterestRate) : '') ||
+      emiAmount !== (initialProfile.emiAmount ? String(initialProfile.emiAmount) : '') ||
+      originalTenureValue !== (initialProfile.originalTenure?.value ? String(initialProfile.originalTenure.value) : '') ||
+      loanStartDate !== (initialProfile.loanStartDate || '') ||
+      processingFee !== (initialProfile.processingFee ? String(initialProfile.processingFee) : '') ||
+      notes !== (initialProfile.notes || '') ||
+      isPrimary !== Boolean(initialProfile.isPrimary) ||
+      dueDay !== (initialProfile.dueDay ? String(initialProfile.dueDay) : '5') ||
+      remindersEnabled !== (initialProfile.remindersEnabled ?? true) ||
+      reminderDaysBefore !== (initialProfile.reminderDaysBefore ? String(initialProfile.reminderDaysBefore) : '3') ||
+      reminderTime !== (initialProfile.reminderTime || '09:00')
+    )
+  );
+
+  const getRawFormPayload = useCallback(() => {
+    return {
       name,
       loanType,
       lenderName,
-      originalPrincipal,
-      currentOutstandingPrincipal,
-      annualInterestRate,
-      emiAmount,
-      originalTenure: { value: originalTenureValue, unit: originalTenureUnit },
-      remainingTenure: { value: remainingTenureValue, unit: remainingTenureUnit },
+      originalPrincipal: Number(originalPrincipal) || 0,
+      currentOutstandingPrincipal: isEditMode
+        ? Number(initialProfile?.currentOutstandingPrincipal || 0)
+        : (Number(currentOutstandingPrincipal) || Number(originalPrincipal) || 0),
+      annualInterestRate: Number(annualInterestRate) || 0,
+      emiAmount: Number(emiAmount) || 0,
+      originalTenure: { value: Number(originalTenureValue) || 0, unit: originalTenureUnit },
+      remainingTenure: { value: Number(remainingTenureValue) || 0, unit: remainingTenureUnit },
       loanStartDate,
       nextEmiDate,
-      processingFee,
+      processingFee: Number(processingFee) || 0,
       notes,
       isPrimary,
+      dueDay: Math.min(31, Math.max(1, Number(dueDay) || 1)),
+      remindersEnabled,
+      reminderDaysBefore: Number(reminderDaysBefore) || 3,
+      reminderTime,
     };
+  }, [
+    name,
+    loanType,
+    lenderName,
+    originalPrincipal,
+    currentOutstandingPrincipal,
+    annualInterestRate,
+    emiAmount,
+    originalTenureValue,
+    originalTenureUnit,
+    remainingTenureValue,
+    remainingTenureUnit,
+    loanStartDate,
+    nextEmiDate,
+    processingFee,
+    notes,
+    isPrimary,
+    dueDay,
+    remindersEnabled,
+    reminderDaysBefore,
+    reminderTime,
+    isEditMode,
+    initialProfile,
+  ]);
+
+  const handleSubmit = useCallback(() => {
+    const rawPayload = getRawFormPayload();
 
     const validation = validateLoanProfileInput(rawPayload);
     if (!validation.isValid) {
@@ -112,28 +184,7 @@ export const useLoanProfileForm = (initialProfile = null, onSuccess = null) => {
     }
 
     return true;
-  }, [
-    name,
-    loanType,
-    lenderName,
-    originalPrincipal,
-    currentOutstandingPrincipal,
-    annualInterestRate,
-    emiAmount,
-    originalTenureValue,
-    originalTenureUnit,
-    remainingTenureValue,
-    remainingTenureUnit,
-    loanStartDate,
-    nextEmiDate,
-    processingFee,
-    notes,
-    isPrimary,
-    isEditMode,
-    initialProfile,
-    dispatch,
-    onSuccess,
-  ]);
+  }, [getRawFormPayload, isEditMode, initialProfile, dispatch, onSuccess]);
 
   const handleReset = useCallback(() => {
     setName('');
@@ -152,11 +203,16 @@ export const useLoanProfileForm = (initialProfile = null, onSuccess = null) => {
     setProcessingFee('');
     setNotes('');
     setIsPrimary(false);
+    setDueDay('5');
+    setRemindersEnabled(true);
+    setReminderDaysBefore('3');
+    setReminderTime('09:00');
     setErrors({});
   }, []);
 
   return {
     isEditMode,
+    isDirty,
     name,
     setName,
     loanType,
@@ -189,7 +245,16 @@ export const useLoanProfileForm = (initialProfile = null, onSuccess = null) => {
     setNotes,
     isPrimary,
     setIsPrimary,
+    dueDay,
+    setDueDay,
+    remindersEnabled,
+    setRemindersEnabled,
+    reminderDaysBefore,
+    setReminderDaysBefore,
+    reminderTime,
+    setReminderTime,
     errors,
+    getRawFormPayload,
     handleSubmit,
     handleReset,
   };

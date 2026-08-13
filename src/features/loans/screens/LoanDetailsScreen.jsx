@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { ArrowLeft, Edit3, Archive, Trash2, Calendar, Landmark, Star, StarOff, Plus, ReceiptText, ChevronRight, ChevronDown, Scale, ShieldCheck, Calculator, Sparkles, TrendingUp, FileText } from 'lucide-react-native';
+import { ArrowLeft, Edit3, Archive, Trash2, Calendar, Landmark, Star, StarOff, Plus, ReceiptText, ChevronRight, ChevronDown, Scale, ShieldCheck, Calculator, Sparkles, TrendingUp, FileText, Compass, Target } from 'lucide-react-native';
 import ScreenContainer from '../../../components/containers/ScreenContainer';
 import AppHeader from '../../../components/navigation/AppHeader';
 import AppText from '../../../components/common/AppText';
@@ -12,11 +12,13 @@ import SecondaryButton from '../../../components/buttons/SecondaryButton';
 import { useAppTheme } from '../../../hooks/useAppTheme';
 import {
   selectLoanProfileById,
+  selectAllLoanProfiles,
   deleteLoanProfile,
   archiveLoanProfile,
   setPrimaryLoan,
   updateLoanReminderSettings,
 } from '../../../store/slices/loanProfilesSlice';
+import { selectLoanRemindersEnabled } from '../../../store/slices/settingsSlice';
 import {
   selectPaymentsForLoan,
   deletePaymentsForLoan,
@@ -25,6 +27,7 @@ import { adaptLoanProfileForDisplay } from '../utils/loanPresentationAdapters';
 import { getPaymentStats } from '../utils/loanBalanceUtils';
 import { getCurrentLoanBalance } from '../utils/paymentBalanceUtils';
 import { buildLoanInsightSummary } from '../utils/loanInsightUtils';
+import loanReminderService from '../services/loanReminderService';
 import LoanPaymentCard from '../components/LoanPaymentCard';
 import UpcomingPaymentCard from '../components/UpcomingPaymentCard';
 import LoanReminderSettingsModal from '../components/LoanReminderSettingsModal';
@@ -46,6 +49,8 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
   const loanId = route?.params?.loanId;
   const rawProfile = useSelector((state) => selectLoanProfileById(state, loanId));
   const payments = useSelector((state) => selectPaymentsForLoan(state, loanId));
+  const allLoans = useSelector(selectAllLoanProfiles);
+  const globalRemindersEnabled = useSelector(selectLoanRemindersEnabled);
 
   const profile = adaptLoanProfileForDisplay(rawProfile);
   const paymentStats = getPaymentStats(payments, loanId);
@@ -74,17 +79,18 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
 
   const handleDeletePress = () => {
     Alert.alert(
-      `Delete ${profile.name}?`,
-      'Are you sure you want to delete this loan profile? All associated payment history will also be removed.',
+      `Delete "${profile.name}"?`,
+      'This will permanently remove the loan profile, all recorded payment history, and cancel scheduled payment reminders. This action cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete Loan',
           style: 'destructive',
-          onPress: () => {
+          onPress: async () => {
+            await loanReminderService.cancelLoanReminders(profile.id);
             dispatch(deletePaymentsForLoan(profile.id));
             dispatch(deleteLoanProfile(profile.id));
-            Alert.alert('Loan Deleted', `${profile.name} has been removed.`);
+            Alert.alert('Loan Deleted', `"${profile.name}" has been removed.`);
             navigation.goBack();
           },
         },
@@ -95,11 +101,21 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
   const handleArchiveToggle = () => {
     const isArchived = profile.status === 'archived';
     dispatch(archiveLoanProfile({ id: profile.id, archive: !isArchived }));
+
+    const updatedProfile = { ...rawProfile, status: isArchived ? 'active' : 'archived' };
+    const updatedLoans = allLoans.map((l) => (l.id === profile.id ? updatedProfile : l));
+
+    loanReminderService.reconcileLoanReminders({
+      loans: updatedLoans,
+      payments,
+      globalEnabled: globalRemindersEnabled,
+    });
+
     Alert.alert(
       isArchived ? 'Loan Restored' : 'Loan Archived',
       isArchived
-        ? `${profile.name} is now active.`
-        : `${profile.name} has been archived.`
+        ? `"${profile.name}" is now active and reminders have been restored.`
+        : `"${profile.name}" has been archived and payment reminders are paused.`
     );
   };
 
@@ -508,6 +524,18 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
           title="Simulate Prepayment"
           icon={Sparkles}
           onPress={() => navigation.navigate(ROUTES.LOAN_PREPAYMENT_SIMULATOR, { loanId: profile.id })}
+        />
+
+        <SecondaryButton
+          title="Plan Payoff Scenarios"
+          icon={Compass}
+          onPress={() => navigation.navigate(ROUTES.LOAN_PAYOFF_PLANNER, { loanId: profile.id })}
+        />
+
+        <SecondaryButton
+          title="Your Payoff Goals"
+          icon={Target}
+          onPress={() => navigation.navigate(ROUTES.LOAN_GOALS, { loanId: profile.id })}
         />
 
         <SecondaryButton
