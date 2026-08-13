@@ -33,7 +33,7 @@ export const ProfileHeader = () => {
 const styles = StyleSheet.create({
   headerGroup: {
     paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingBottom: 8,
   },
   topRow: {
     flexDirection: 'row',

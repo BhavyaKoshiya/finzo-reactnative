@@ -1,163 +1,62 @@
 /**
  * Default local fallback configuration for Finzo Realtime Config.
  * Serves as the safe fallback when remote Firebase RTDB is offline, unavailable, or invalid.
+ * Authoritative RTDB /config contract compliant.
  */
 export const DEFAULT_REALTIME_CONFIG = {
   version: 1,
 
   rewards: {
+    dailyCheckIn: {
+      enabled: true,
+      rewardSchedule: [5, 7, 9, 12, 15, 17, 20],
+      maxReward: 20,
+      resetOnMissedDay: true,
+    },
+
     rewardedAds: {
-      enabled: false,
-      pointsPerAd: 0,
-      dailyWatchLimit: 0,
+      enabled: true,
+      pointsPerAd: 10,
+      dailyWatchLimit: 5,
       cooldownMinutes: 0,
       milestone: {
-        enabled: false,
+        enabled: true,
         requiredAds: 5,
         adFreeMinutes: 30,
       },
     },
 
-    dailyCheckIn: {
+    catalog: {
+      ad_free_1h: {
+        enabled: true,
+        title: '1 Hour Ad-Free',
+        description: 'Remove ads for 1 hour',
+        durationMinutes: 60,
+        pointsCost: 50,
+        icon: 'clock',
+      },
+      ad_free_6h: {
+        enabled: true,
+        title: '6 Hours Ad-Free',
+        description: 'Remove ads for 6 hours',
+        durationMinutes: 360,
+        pointsCost: 150,
+        icon: 'clock',
+      },
+      ad_free_24h: {
+        enabled: true,
+        title: '24 Hours Ad-Free',
+        description: 'Remove ads for 24 hours',
+        durationMinutes: 1440,
+        pointsCost: 400,
+        icon: 'calendar',
+      },
+    },
+
+    discounts: {
       enabled: true,
-
-      schedule: {
-        day1: 5,
-        day2: 7,
-        day3: 9,
-        day4: 12,
-        day5: 15,
-        day6: 17,
-        day7: 20,
-        day8Plus: 20,
-      },
-
-      rewardSchedule: {
-        1: 5,
-        2: 7,
-        3: 9,
-        4: 12,
-        5: 15,
-        6: 17,
-        7: 20,
-      },
-
-      maxReward: 20,
-      repeatLastReward: true,
-      cycleLength: 7,
-      missedDayResetsStreak: true,
-
-      ui: {
-        enabled: true,
-        title: 'Daily Check-In',
-        subtitle: 'Keep your streak going and earn more Finzo Points.',
-        newUserTitle: 'Start Your Streak',
-        newUserSubtitle: 'Check in every day to unlock bigger rewards.',
-        streakTitle: '{count} Day Streak',
-        todayRewardLabel: "Today's Reward",
-        nextRewardLabel: 'Next Check-In',
-        progressTitle: 'Weekly Progress',
-        claimButtonText: 'Claim {points} Points',
-        claimedButtonText: 'Claimed Today',
-        pointsSuffix: 'Points',
-        missedStreakMessage: 'Start a new streak today.',
-        maxRewardMessage: "You're earning the maximum daily reward!",
-        successMessage: '+{points} Points earned!',
-        dayLabel: 'Day {day}',
-        showProgress: true,
-        showNextReward: true,
-        showStreak: true,
-        showRewardHistory: true,
-      },
+      items: {},
     },
-
-    redeemable: {
-      ad_free_1h: {
-        enabled: true,
-        type: 'ad_free',
-        title: '1 Hour Ad-Free',
-        description: 'Enjoy Finzo completely ad-free for 1 hour.',
-        pointsCost: 100,
-        durationMinutes: 60,
-        order: 1,
-        discount: {
-          enabled: false,
-          type: 'percentage',
-          value: 0,
-          label: '',
-          startsAt: null,
-          endsAt: null,
-        },
-      },
-
-      ad_free_6h: {
-        enabled: true,
-        type: 'ad_free',
-        title: '6 Hours Ad-Free',
-        description: 'Enjoy Finzo completely ad-free for 6 hours.',
-        pointsCost: 300,
-        durationMinutes: 360,
-        order: 2,
-        discount: {
-          enabled: false,
-          type: 'percentage',
-          value: 0,
-          label: '',
-          startsAt: null,
-          endsAt: null,
-        },
-      },
-
-      ad_free_24h: {
-        enabled: true,
-        type: 'ad_free',
-        title: '24 Hours Ad-Free',
-        description: 'Enjoy Finzo completely ad-free for 24 hours.',
-        pointsCost: 750,
-        durationMinutes: 1440,
-        order: 3,
-        discount: {
-          enabled: false,
-          type: 'percentage',
-          value: 0,
-          label: '',
-          startsAt: null,
-          endsAt: null,
-        },
-      },
-    },
-  },
-
-  redemption: {
-    enabled: true,
-    packages: {
-      ad_free_1h: {
-        enabled: true,
-        durationMinutes: 60,
-        pointsCost: 100,
-        title: '1 Hour Ad-Free',
-        description: 'Enjoy Finzo without ads for 1 hour.',
-      },
-      ad_free_6h: {
-        enabled: true,
-        durationMinutes: 360,
-        pointsCost: 300,
-        title: '6 Hours Ad-Free',
-        description: 'Enjoy Finzo without ads for 6 hours.',
-      },
-      ad_free_24h: {
-        enabled: true,
-        durationMinutes: 1440,
-        pointsCost: 750,
-        title: '24 Hours Ad-Free',
-        description: 'Enjoy Finzo without ads for 24 hours.',
-      },
-    },
-  },
-
-  discounts: {
-    enabled: true,
-    packages: {},
   },
 
   ads: {
@@ -165,9 +64,6 @@ export const DEFAULT_REALTIME_CONFIG = {
     rewardedAdsEnabled: false,
     bannerAdsEnabled: false,
     interstitialAdsEnabled: false,
-    rewardedEnabled: false,
-    rewardedPoints: 0,
-    dailyRewardedLimit: 0,
   },
 
   featureFlags: {

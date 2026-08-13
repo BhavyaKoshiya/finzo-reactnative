@@ -11,7 +11,9 @@ import { useAppTheme } from '../../../hooks/useAppTheme';
 import {
   selectActiveLoanProfiles,
   selectArchivedLoanProfiles,
+  selectTotalOriginalLoanAmount,
   selectTotalOutstanding,
+  selectTotalPrincipalPaid,
   selectTotalMonthlyEMI,
   selectActiveLoanCount,
 } from '../../../store/slices/loanProfilesSlice';
@@ -25,7 +27,9 @@ export const LoanDashboardScreen = ({ navigation }) => {
 
   const activeLoans = useSelector(selectActiveLoanProfiles);
   const archivedLoans = useSelector(selectArchivedLoanProfiles);
+  const totalOriginalLoanAmount = useSelector(selectTotalOriginalLoanAmount);
   const totalOutstanding = useSelector(selectTotalOutstanding);
+  const totalPrincipalPaid = useSelector(selectTotalPrincipalPaid);
   const totalMonthlyEMI = useSelector(selectTotalMonthlyEMI);
   const activeCount = useSelector(selectActiveLoanCount);
 
@@ -102,8 +106,10 @@ export const LoanDashboardScreen = ({ navigation }) => {
         ListHeaderComponent={
           tab === 'active' && activeCount > 0 ? (
             <LoanDashboardSummary
+              totalOriginalLoanAmount={totalOriginalLoanAmount}
               totalOutstanding={totalOutstanding}
               totalMonthlyEMI={totalMonthlyEMI}
+              totalPrincipalPaid={totalPrincipalPaid}
               activeCount={activeCount}
             />
           ) : null

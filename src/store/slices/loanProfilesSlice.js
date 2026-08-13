@@ -138,7 +138,6 @@ const loanProfilesSlice = createSlice({
       if (nextPaymentDate !== undefined) target.nextPaymentDate = nextPaymentDate;
 
       target.updatedAt = new Date().toISOString();
-      // DO NOT increment ledgerVersion (reminder preferences leave financial ledger version untouched)
     },
   },
 });
@@ -194,9 +193,21 @@ export const selectActiveLoanCount = createSelector(
   (activeProfiles) => activeProfiles.length
 );
 
-export const selectTotalOutstanding = createSelector(
+export const selectTotalOriginalLoanAmount = createSelector(
+  [selectActiveLoanProfiles],
+  (activeProfiles) => activeProfiles.reduce((sum, p) => sum + (Number(p.originalPrincipal) || 0), 0)
+);
+
+export const selectTotalOutstandingPrincipal = createSelector(
   [selectActiveLoanProfiles],
   (activeProfiles) => activeProfiles.reduce((sum, p) => sum + (Number(p.currentOutstandingPrincipal) || 0), 0)
+);
+
+export const selectTotalOutstanding = selectTotalOutstandingPrincipal;
+
+export const selectTotalPrincipalPaid = createSelector(
+  [selectTotalOriginalLoanAmount, selectTotalOutstandingPrincipal],
+  (totalOriginal, totalOutstanding) => Math.max(0, totalOriginal - totalOutstanding)
 );
 
 export const selectTotalMonthlyEMI = createSelector(

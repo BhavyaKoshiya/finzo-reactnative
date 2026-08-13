@@ -1,7 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity, Share, Alert, Switch } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { Sun, Moon, Monitor, ShieldCheck, Info, Share2, Code, ChevronRight, Star, Flame, Ban, WalletCards, Bell } from 'lucide-react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import {
+  Sun,
+  Moon,
+  Monitor,
+  ShieldCheck,
+  Info,
+  Share2,
+  Code,
+  ChevronRight,
+  Star,
+  Flame,
+  WalletCards,
+  Bell,
+  ShieldAlert,
+} from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
 import AppIcon from '../../components/common/AppIcon';
@@ -16,9 +31,14 @@ import {
   selectRewardPoints,
   selectCurrentStreak,
   selectHasCheckedInToday,
-  selectIsAdFree,
-  selectAdFreeExpiryFormatted,
+  selectAdFreeUntil,
+  selectIsRewardedMilestoneClaimedToday,
 } from '../../store/slices/rewardsSlice';
+import {
+  isAdFreeActive,
+  formatAdFreeExpiry,
+  formatAdFreeRemainingTime,
+} from '../rewards/utils/rewardUtils';
 import {
   selectActiveLoanCount,
   selectTotalOutstanding,
@@ -28,6 +48,8 @@ import {
   setLoanRemindersEnabled,
 } from '../../store/slices/settingsSlice';
 import loanReminderService from '../loans/services/loanReminderService';
+import { realtimeConfigService } from '../../config/realtimeConfigService';
+import { selectRewardedAdsConfig } from '../../config/realtimeConfigSelectors';
 import { formatCurrencyCompact } from '../../utils/financeFormatters';
 import { useAppTheme } from '../../hooks/useAppTheme';
 import { ROUTES } from '../../navigation/routes';
@@ -37,16 +59,44 @@ export const ProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const { currentTheme, themeMode, setThemeMode, isDark } = useAppTheme();
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+  const [now, setNow] = useState(new Date());
+  const [config, setConfig] = useState(realtimeConfigService.getConfig());
+
+  // 1-minute live timer while screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      setNow(new Date());
+      const timer = setInterval(() => {
+        setNow(new Date());
+      }, 60000);
+
+      return () => clearInterval(timer);
+    }, [])
+  );
+
+  // Subscribe to remote configuration
+  useEffect(() => {
+    const unsub = realtimeConfigService.subscribe((cfg) => setConfig(cfg));
+    return () => unsub();
+  }, []);
 
   const points = useSelector(selectRewardPoints);
   const currentStreak = useSelector(selectCurrentStreak);
   const hasCheckedInToday = useSelector(selectHasCheckedInToday);
-  const isAdFree = useSelector(selectIsAdFree);
-  const adFreeExpiryFormatted = useSelector(selectAdFreeExpiryFormatted);
+  const adFreeUntil = useSelector(selectAdFreeUntil);
+  const isClaimedToday = useSelector(selectIsRewardedMilestoneClaimedToday);
 
   const activeLoanCount = useSelector(selectActiveLoanCount);
   const totalOutstanding = useSelector(selectTotalOutstanding);
   const globalRemindersEnabled = useSelector(selectLoanRemindersEnabled);
+
+  const adFreeActive = isAdFreeActive(adFreeUntil, now);
+  const remainingTimeStr = formatAdFreeRemainingTime(adFreeUntil, now);
+  const expiryFormattedStr = formatAdFreeExpiry(adFreeUntil);
+
+  const rewardedConfig = selectRewardedAdsConfig(config);
+  const milestone = rewardedConfig?.milestone || { adFreeMinutes: 30 };
+  const adFreeMinutes = Number(milestone?.adFreeMinutes) || 30;
 
   const themeOptions = [
     { label: 'System Default', value: 'system', icon: Monitor },
@@ -71,10 +121,11 @@ export const ProfileScreen = ({ navigation }) => {
   };
 
   const adFreeColor = isDark ? '#4ADE80' : currentTheme.success;
+  const adFreeBg = isDark ? 'rgba(34, 197, 94, 0.12)' : 'rgba(34, 197, 94, 0.08)';
 
   const loanSummaryText = activeLoanCount > 0
     ? `${activeLoanCount} Active Loan${activeLoanCount > 1 ? 's' : ''} • ${formatCurrencyCompact(totalOutstanding)} Outstanding`
-    : 'Track your real-world loans & EMIs';
+    : 'No active loans • Tap to track loans';
 
   return (
     <ScreenContainer
@@ -85,7 +136,61 @@ export const ProfileScreen = ({ navigation }) => {
       contentContainerStyle={{ paddingBottom: 0 }}
       style={styles.container}
     >
-      {/* 1. My Loans Section */}
+      {/* HIGH PRIORITY: PROMINENT ACTIVE AD-FREE STATUS CARD */}
+      {adFreeActive && (
+        <View style={styles.topStatusContainer}>
+          <AppCard
+            style={[styles.activeAdFreeCard, { backgroundColor: adFreeBg, borderColor: adFreeColor }]}
+            accessibilityRole="summary"
+            accessibilityLabel={`Ad-Free Active. ${remainingTimeStr || 'Active'}. Ads are paused ${expiryFormattedStr ? expiryFormattedStr.toLowerCase() : ''}.`}
+          >
+            <View style={styles.activeHeaderRow}>
+              <View style={styles.activeTitleGroup}>
+                <AppIcon icon={ShieldCheck} size={22} color={adFreeColor} style={{ marginRight: 8 }} />
+                <AppText variant="bodyLarge" style={{ fontWeight: '800', color: adFreeColor }}>
+                  Ad-Free Active
+                </AppText>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => navigation.navigate(ROUTES.REWARDS)}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="View Rewards Store"
+                style={styles.viewRewardsBtn}
+              >
+                <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700', marginRight: 2 }}>
+                  View Rewards
+                </AppText>
+                <AppIcon icon={ChevronRight} size={13} color={currentTheme.primary} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.activeTimeBody}>
+              {remainingTimeStr && (
+                <AppText variant="titleLarge" color={currentTheme.textPrimary} style={styles.remainingTimeText}>
+                  {remainingTimeStr}
+                </AppText>
+              )}
+              {expiryFormattedStr && (
+                <AppText variant="caption" color={currentTheme.textSecondary}>
+                  Ads are paused {expiryFormattedStr.toLowerCase()}
+                </AppText>
+              )}
+
+              {isClaimedToday && (
+                <View style={styles.unlockedSubRow}>
+                  <AppText variant="caption" color={adFreeColor} style={{ fontWeight: '700' }}>
+                    ✓ Today's {adFreeMinutes} min reward unlocked
+                  </AppText>
+                </View>
+              )}
+            </View>
+          </AppCard>
+        </View>
+      )}
+
+      {/* 1. My Accounts Section */}
       <ProfileSection title="My Accounts">
         <ProfileRow
           icon={WalletCards}
@@ -107,44 +212,36 @@ export const ProfileScreen = ({ navigation }) => {
 
         <ProfileAdMilestoneCard />
 
+        {/* Compact Points / Streak / Store Summary Card */}
         <TouchableOpacity
           onPress={() => navigation.navigate(ROUTES.REWARDS)}
           activeOpacity={0.7}
           accessibilityRole="button"
           accessibilityLabel="View rewards history, points store and ad-free entitlements"
         >
-          <AppCard style={styles.statsSummaryCard}>
-            <View style={styles.summaryRow}>
+          <AppCard style={styles.compactStatsCard}>
+            <View style={styles.compactSummaryRow}>
               <View style={styles.statPill}>
-                <AppIcon icon={Star} size={16} color={currentTheme.primary} style={styles.statIcon} />
-                <AppText variant="caption" style={styles.statText}>
+                <AppIcon icon={Star} size={16} color={currentTheme.primary} style={{ marginRight: 6 }} />
+                <AppText variant="caption" style={{ fontWeight: '700' }}>
                   {points.toLocaleString('en-IN')} points
                 </AppText>
               </View>
 
               <View style={styles.statPill}>
-                <AppIcon icon={Flame} size={16} color="#F97316" style={styles.statIcon} />
-                <AppText variant="caption" style={styles.statText}>
+                <AppIcon icon={Flame} size={16} color="#F97316" style={{ marginRight: 6 }} />
+                <AppText variant="caption" style={{ fontWeight: '700' }}>
                   {currentStreak} {currentStreak === 1 ? 'day' : 'days'} streak
                 </AppText>
               </View>
 
-              <View style={styles.viewMoreRow}>
-                <AppText variant="caption" color={currentTheme.primary} style={styles.viewMoreText}>
+              <View style={styles.storeLinkRow}>
+                <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700', marginRight: 2 }}>
                   Store & Details
                 </AppText>
                 <AppIcon icon={ChevronRight} size={14} color={currentTheme.primary} />
               </View>
             </View>
-
-            {isAdFree && (
-              <View style={styles.adFreeSubRow}>
-                <AppIcon icon={Ban} size={14} color={adFreeColor} style={{ marginRight: 6 }} />
-                <AppText variant="caption" color={adFreeColor} style={styles.adFreeSubText}>
-                  Ad-Free Active • {adFreeExpiryFormatted || 'Active'}
-                </AppText>
-              </View>
-            )}
           </AppCard>
         </TouchableOpacity>
       </ProfileSection>
@@ -289,13 +386,51 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  topStatusContainer: {
+    marginBottom: 12,
+    marginTop: 4,
+  },
+  activeAdFreeCard: {
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  activeHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  activeTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  viewRewardsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  activeTimeBody: {
+    marginTop: 2,
+  },
+  remainingTimeText: {
+    fontWeight: '800',
+    fontSize: 20,
+    lineHeight: 26,
+    marginBottom: 2,
+  },
+  unlockedSubRow: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(148, 163, 184, 0.2)',
+  },
   rewardCardMargin: {
     marginBottom: 10,
   },
-  statsSummaryCard: {
-    padding: 12,
+  compactStatsCard: {
+    padding: 14,
   },
-  summaryRow: {
+  compactSummaryRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -304,31 +439,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  statIcon: {
-    marginRight: 6,
-  },
-  statText: {
-    fontWeight: '600',
-  },
-  viewMoreRow: {
+  storeLinkRow: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  viewMoreText: {
-    fontWeight: '600',
-    marginRight: 2,
-  },
-  adFreeSubRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(148, 163, 184, 0.15)',
-  },
-  adFreeSubText: {
-    fontWeight: '600',
-    fontSize: 12,
   },
   cardPadding: {
     padding: 16,

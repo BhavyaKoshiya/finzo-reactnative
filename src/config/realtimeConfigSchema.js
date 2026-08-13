@@ -41,98 +41,95 @@ export const validateRealtimeConfig = (config) => {
         errors.push('dailyCheckIn.enabled must be a boolean');
       }
 
-      // Validate schedule if present
-      if (dci.schedule && isObject(dci.schedule)) {
-        const keys = Object.keys(dci.schedule);
-        if (keys.length === 0) {
-          errors.push('dailyCheckIn.schedule must not be empty');
-        }
-        if (!keys.includes('day1') && !keys.includes('1')) {
-          errors.push('dailyCheckIn.schedule must contain Day 1 reward');
-        }
-        keys.forEach((key) => {
-          if (!isPositiveInteger(dci.schedule[key])) {
-            errors.push(`dailyCheckIn.schedule day ${key} must be a positive integer > 0`);
-          }
-        });
+      if (dci.maxReward !== undefined && !isPositiveInteger(dci.maxReward)) {
+        errors.push('dailyCheckIn.maxReward must be a positive integer');
       }
 
-      // Validate rewardSchedule if present
-      if (dci.rewardSchedule && isObject(dci.rewardSchedule)) {
-        const keys = Object.keys(dci.rewardSchedule);
-        if (keys.length === 0) {
-          errors.push('dailyCheckIn.rewardSchedule must not be empty');
-        }
-        if (!keys.includes('1') && !keys.includes('day1')) {
-          errors.push('dailyCheckIn.rewardSchedule must contain Day 1 reward');
-        }
-        keys.forEach((key) => {
-          if (!isPositiveInteger(dci.rewardSchedule[key])) {
-            errors.push(`dailyCheckIn.rewardSchedule Day ${key} must have positive points value`);
-          }
-        });
+      if (dci.resetOnMissedDay !== undefined && !isBoolean(dci.resetOnMissedDay)) {
+        errors.push('dailyCheckIn.resetOnMissedDay must be a boolean');
       }
 
-      if (!dci.schedule && !dci.rewardSchedule) {
-        errors.push('dailyCheckIn schedule/rewardSchedule must be an object mapping days to positive points');
-      }
+      // Validate all present schedule objects (rewardSchedule and schedule)
+      const schedules = [];
+      if (dci.rewardSchedule) schedules.push(dci.rewardSchedule);
+      if (dci.schedule) schedules.push(dci.schedule);
 
-      // UI Config validation
-      if (dci.ui !== undefined && isObject(dci.ui)) {
-        const ui = dci.ui;
-        if (ui.title !== undefined && !isNonEmptyString(ui.title, 80)) errors.push('ui.title must be a string (1-80 chars)');
-        if (ui.subtitle !== undefined && !isNonEmptyString(ui.subtitle, 200)) errors.push('ui.subtitle must be a string (1-200 chars)');
-        if (ui.claimButtonText !== undefined && !isNonEmptyString(ui.claimButtonText, 60)) errors.push('ui.claimButtonText must be a string (1-60 chars)');
-        if (ui.claimedButtonText !== undefined && !isNonEmptyString(ui.claimedButtonText, 60)) errors.push('ui.claimedButtonText must be a string (1-60 chars)');
-
-        ['showProgress', 'showNextReward', 'showStreak', 'showRewardHistory'].forEach((flag) => {
-          if (ui[flag] !== undefined && !isBoolean(ui[flag])) {
-            errors.push(`ui.${flag} must be a boolean`);
+      if (schedules.length === 0) {
+        errors.push('dailyCheckIn.rewardSchedule must be an array or object mapping of points');
+      } else {
+        schedules.forEach((sch) => {
+          if (Array.isArray(sch)) {
+            if (sch.length === 0) {
+              errors.push('dailyCheckIn.rewardSchedule must not be empty');
+            }
+            sch.forEach((val, idx) => {
+              if (!isPositiveInteger(val)) {
+                errors.push(`dailyCheckIn.rewardSchedule item at index ${idx} must be a positive integer`);
+              }
+            });
+          } else if (isObject(sch)) {
+            const keys = Object.keys(sch);
+            if (keys.length === 0) {
+              errors.push('dailyCheckIn.rewardSchedule must not be empty');
+            }
+            if (!keys.includes('1') && !keys.includes('day1')) {
+              errors.push('dailyCheckIn.rewardSchedule must contain Day 1 reward');
+            }
+            keys.forEach((key) => {
+              if (!isPositiveInteger(sch[key])) {
+                errors.push(`dailyCheckIn.rewardSchedule day ${key} must be a positive integer`);
+              }
+            });
           }
         });
       }
     }
 
-    // 3b. Redeemable Rewards Catalog Validation
-    const redeemable = config.rewards.redeemable || config.redemption?.packages;
-    if (redeemable !== undefined && isObject(redeemable)) {
-      Object.keys(redeemable).forEach((key) => {
-        const pkg = redeemable[key];
-        if (!isObject(pkg)) {
-          errors.push(`redeemable.${key} must be an object`);
+    // 3b. Catalog Validation (validate all present catalog objects)
+    const catalogs = [];
+    if (config.rewards.catalog) catalogs.push(config.rewards.catalog);
+    if (config.rewards.redeemable) catalogs.push(config.rewards.redeemable);
+    if (config.redemption?.packages) catalogs.push(config.redemption.packages);
+
+    if (catalogs.length === 0) {
+      errors.push('rewards.catalog must be an object');
+    } else {
+      catalogs.forEach((cat) => {
+        if (!isObject(cat)) {
+          errors.push('rewards.catalog must be an object');
           return;
         }
+        Object.keys(cat).forEach((key) => {
+          const pkg = cat[key];
+          if (!isObject(pkg)) {
+            errors.push(`catalog.${key} must be an object`);
+            return;
+          }
 
-        if (!isNonEmptyString(pkg.title, 80)) errors.push(`redeemable.${key}.title is invalid (1-80 chars)`);
-        if (!isNonEmptyString(pkg.description, 200)) errors.push(`redeemable.${key}.description is invalid (1-200 chars)`);
-        if (!isPositiveInteger(pkg.pointsCost)) errors.push(`redeemable.${key}.pointsCost must be positive integer >= 1`);
-        if (!isPositiveInteger(pkg.durationMinutes)) errors.push(`redeemable.${key}.durationMinutes must be positive integer >= 1`);
+          if (!isNonEmptyString(pkg.title, 80)) errors.push(`catalog.${key}.title is invalid (1-80 chars)`);
+          if (!isNonEmptyString(pkg.description, 200)) errors.push(`catalog.${key}.description is invalid (1-200 chars)`);
+          if (!isPositiveInteger(pkg.pointsCost)) errors.push(`catalog.${key}.pointsCost must be positive integer >= 1`);
+          if (!isPositiveInteger(pkg.durationMinutes)) errors.push(`catalog.${key}.durationMinutes must be positive integer >= 1`);
 
-        // Discount validation
-        if (pkg.discount !== undefined && isObject(pkg.discount)) {
-          const disc = pkg.discount;
-          if (disc.enabled) {
-            if (!['percentage', 'fixed'].includes(disc.type)) {
-              errors.push(`redeemable.${key}.discount.type must be 'percentage' or 'fixed'`);
-            }
-            if (typeof disc.value !== 'number' || disc.value <= 0 || !Number.isFinite(disc.value)) {
-              errors.push(`redeemable.${key}.discount.value must be positive number > 0`);
-            }
-            if (disc.type === 'percentage' && disc.value > 100) {
-              errors.push(`redeemable.${key}.discount.value percentage cannot exceed 100%`);
-            }
-            if (disc.type === 'fixed' && disc.value >= pkg.pointsCost) {
-              errors.push(`redeemable.${key}.discount.value fixed discount cannot equal or exceed base pointsCost`);
-            }
-            if (disc.startsAt && disc.endsAt) {
-              const start = new Date(disc.startsAt).getTime();
-              const end = new Date(disc.endsAt).getTime();
-              if (isNaN(start) || isNaN(end) || start >= end) {
-                errors.push(`redeemable.${key}.discount startsAt must be before endsAt`);
+          // Discount validation
+          if (pkg.discount !== undefined && isObject(pkg.discount)) {
+            const disc = pkg.discount;
+            if (disc.enabled) {
+              if (!['percentage', 'fixed'].includes(disc.type)) {
+                errors.push(`catalog.${key}.discount.type must be 'percentage' or 'fixed'`);
+              }
+              if (typeof disc.value !== 'number' || disc.value <= 0 || !Number.isFinite(disc.value)) {
+                errors.push(`catalog.${key}.discount.value must be positive number > 0`);
+              }
+              if (disc.type === 'percentage' && disc.value > 100) {
+                errors.push(`catalog.${key}.discount.value percentage cannot exceed 100%`);
+              }
+              if (disc.type === 'fixed' && disc.value >= pkg.pointsCost) {
+                errors.push(`catalog.${key}.discount.value fixed discount cannot equal or exceed base pointsCost`);
               }
             }
           }
-        }
+        });
       });
     }
 
@@ -164,21 +161,23 @@ export const validateRealtimeConfig = (config) => {
           errors.push('rewardedAds.milestone.adFreeMinutes must be integer (1-10080)');
         }
 
-        // IMPOSSIBLE CONFIGURATION CHECK (Section 23 in Phase 16.15 prompt)
+        // IMPOSSIBLE CONFIGURATION CHECK
         if (ms.enabled && ra.enabled && typeof ms.requiredAds === 'number' && typeof ra.dailyWatchLimit === 'number' && ms.requiredAds > ra.dailyWatchLimit) {
           errors.push(`rewardedAds.milestone.requiredAds (${ms.requiredAds}) cannot exceed dailyWatchLimit (${ra.dailyWatchLimit})`);
         }
       }
     }
-  }
 
-  // 4. Ads Section Validation
-  if (config.ads !== undefined && isObject(config.ads)) {
-    ['enabled', 'rewardedAdsEnabled', 'bannerAdsEnabled', 'interstitialAdsEnabled', 'rewardedEnabled'].forEach((flag) => {
-      if (config.ads[flag] !== undefined && !isBoolean(config.ads[flag])) {
-        errors.push(`ads.${flag} must be a boolean`);
+    // 3d. Discounts Validation
+    if (config.rewards.discounts !== undefined && isObject(config.rewards.discounts)) {
+      const disc = config.rewards.discounts;
+      if (disc.enabled !== undefined && !isBoolean(disc.enabled)) {
+        errors.push('discounts.enabled must be a boolean');
       }
-    });
+      if (disc.items !== undefined && !isObject(disc.items)) {
+        errors.push('discounts.items must be an object');
+      }
+    }
   }
 
   return {

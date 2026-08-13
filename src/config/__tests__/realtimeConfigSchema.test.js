@@ -41,9 +41,9 @@ describe('realtimeConfigSchema', () => {
       ...DEFAULT_REALTIME_CONFIG,
       rewards: {
         ...DEFAULT_REALTIME_CONFIG.rewards,
-        redeemable: {
+        catalog: {
           ad_free_1h: {
-            ...DEFAULT_REALTIME_CONFIG.rewards.redeemable.ad_free_1h,
+            ...DEFAULT_REALTIME_CONFIG.rewards.catalog.ad_free_1h,
             discount: {
               enabled: true,
               type: 'percentage',

@@ -20,7 +20,9 @@ import { getCalculatorById } from '../../calculators';
 // Loan Slice & Components
 import {
   selectActiveLoanProfiles,
+  selectTotalOriginalLoanAmount,
   selectTotalOutstanding,
+  selectTotalPrincipalPaid,
   selectTotalMonthlyEMI,
   selectActiveLoanCount,
 } from '../../store/slices/loanProfilesSlice';
@@ -70,7 +72,9 @@ export const MyLoansScreen = ({ route, navigation }) => {
 
   // 1. Real Loans Data
   const activeLoans = useSelector(selectActiveLoanProfiles);
+  const totalOriginalLoanAmount = useSelector(selectTotalOriginalLoanAmount);
   const totalOutstanding = useSelector(selectTotalOutstanding);
+  const totalPrincipalPaid = useSelector(selectTotalPrincipalPaid);
   const totalMonthlyEMI = useSelector(selectTotalMonthlyEMI);
   const activeCount = useSelector(selectActiveLoanCount);
   const allPayments = useSelector((state) => state.loanPayments?.payments || []);
@@ -274,8 +278,10 @@ export const MyLoansScreen = ({ route, navigation }) => {
             activeCount > 0 ? (
               <View>
                 <LoanDashboardSummary
+                  totalOriginalLoanAmount={totalOriginalLoanAmount}
                   totalOutstanding={totalOutstanding}
                   totalMonthlyEMI={totalMonthlyEMI}
+                  totalPrincipalPaid={totalPrincipalPaid}
                   activeCount={activeCount}
                 />
                 {primaryOrUrgentLoan && (

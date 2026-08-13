@@ -6,6 +6,8 @@ import { configureStore } from '@reduxjs/toolkit';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import settingsReducer, { setThemeMode } from '../../../store/slices/settingsSlice';
+import rewardsReducer from '../../../store/slices/rewardsSlice';
+import loanProfilesReducer from '../../../store/slices/loanProfilesSlice';
 import ProfileScreen from '../ProfileScreen';
 import { ROUTES } from '../../../navigation/routes';
 
@@ -33,6 +35,8 @@ describe('ProfileScreen', () => {
     store = configureStore({
       reducer: {
         settings: settingsReducer,
+        rewards: rewardsReducer,
+        loanProfiles: loanProfilesReducer,
       },
     });
   });

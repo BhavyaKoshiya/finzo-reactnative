@@ -35,7 +35,7 @@ describe('rewardUtils', () => {
     const reward = getRewardById('ad_free_6h');
     expect(reward).toBeDefined();
     expect(reward.durationMinutes).toBe(360);
-    expect(reward.pointsCost).toBe(300);
+    expect(reward.pointsCost).toBe(150);
   });
 
   it('should return null for unknown reward ID', () => {
@@ -44,14 +44,14 @@ describe('rewardUtils', () => {
   });
 
   it('should evaluate canRedeemReward correctly', () => {
-    const reward1h = getRewardById('ad_free_1h'); // cost 100 in Phase 15 defaults
+    const reward1h = getRewardById('ad_free_1h'); // cost 50 pts
 
     expect(canRedeemReward(200, reward1h)).toBe(true);
-    expect(canRedeemReward(100, reward1h)).toBe(true);
-    expect(canRedeemReward(99, reward1h)).toBe(false);
+    expect(canRedeemReward(50, reward1h)).toBe(true);
+    expect(canRedeemReward(49, reward1h)).toBe(false);
     expect(canRedeemReward(0, reward1h)).toBe(false);
     expect(canRedeemReward(200, 'ad_free_1h')).toBe(true);
-    expect(canRedeemReward(50, 'ad_free_1h')).toBe(false);
+    expect(canRedeemReward(49, 'ad_free_1h')).toBe(false);
     expect(canRedeemReward(100, 'unknown_id')).toBe(false);
   });
 

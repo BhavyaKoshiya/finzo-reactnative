@@ -48,8 +48,8 @@ describe('RedeemRewardModal', () => {
     expect(allText).toContain('Redeem Reward?');
     expect(allText).toContain('1 Hour Ad-Free');
     expect(allText).toContain('180 pts');
-    expect(allText).toContain('-100 pts');
-    expect(allText).toContain('80 pts');
+    expect(allText).toContain('-50 pts');
+    expect(allText).toContain('130 pts');
   });
 
   it('should return null if reward prop is null', async () => {

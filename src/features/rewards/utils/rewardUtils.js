@@ -71,6 +71,33 @@ export const getAdFreeRemainingMinutes = (adFreeUntil, targetDate = new Date()) 
   return Math.max(0, Math.ceil(diffMs / (60 * 1000)));
 };
 
+/**
+ * Formats remaining ad-free duration into user-friendly text.
+ * e.g., "30 min remaining", "29 min remaining", "1 hr 15 min remaining", "< 1 min remaining"
+ */
+export const formatAdFreeRemainingTime = (adFreeUntil, targetDate = new Date()) => {
+  if (!isAdFreeActive(adFreeUntil, targetDate)) return null;
+  const expiryDate = adFreeUntil instanceof Date ? adFreeUntil : new Date(adFreeUntil);
+  const diffMs = expiryDate.getTime() - targetDate.getTime();
+  if (diffMs <= 0) return null;
+
+  const totalMinutes = Math.floor(diffMs / (60 * 1000));
+  if (totalMinutes < 1) {
+    return '< 1 min remaining';
+  }
+
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+
+  if (hours === 0) {
+    return `${mins} min remaining`;
+  }
+  if (mins === 0) {
+    return `${hours} hr remaining`;
+  }
+  return `${hours} hr ${mins} min remaining`;
+};
+
 export default {
   isAdFreeActive,
   getRedeemableRewards,
@@ -78,4 +105,5 @@ export default {
   canRedeemReward,
   formatAdFreeExpiry,
   getAdFreeRemainingMinutes,
+  formatAdFreeRemainingTime,
 };

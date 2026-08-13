@@ -1,12 +1,14 @@
 /**
  * Calculates current price and active discount metadata for a reward package.
+ * Supports embedded item discount or rewards.discounts.items[rewardId] mapping.
  * Enforces price floor invariant: finalPointsCost >= 1.
  *
  * @param {Object} reward - Reward package configuration object
  * @param {Date|string} targetDate - Reference calculation date
+ * @param {Object} discountsConfig - Optional rewards.discounts config section
  * @returns {Object} Calculated price breakdown
  */
-export const calculateRewardPrice = (reward, targetDate = new Date()) => {
+export const calculateRewardPrice = (reward, targetDate = new Date(), discountsConfig = null) => {
   if (!reward || typeof reward.pointsCost !== 'number') {
     return {
       basePointsCost: 0,
@@ -18,10 +20,18 @@ export const calculateRewardPrice = (reward, targetDate = new Date()) => {
   }
 
   const basePointsCost = reward.pointsCost;
-  const discount = reward.discount;
   const now = targetDate instanceof Date ? targetDate : new Date(targetDate);
 
-  if (!discount || !discount.enabled || typeof discount.value !== 'number' || discount.value <= 0) {
+  // Check embedded discount vs discountsConfig.items[reward.id]
+  let discount = reward.discount;
+  if (discountsConfig && discountsConfig.enabled && discountsConfig.items) {
+    const itemDiscount = discountsConfig.items[reward.id];
+    if (itemDiscount) {
+      discount = itemDiscount;
+    }
+  }
+
+  if (!discount || discount.enabled === false || typeof discount.value !== 'number' || discount.value <= 0) {
     return {
       basePointsCost,
       discountAmount: 0,
@@ -31,7 +41,7 @@ export const calculateRewardPrice = (reward, targetDate = new Date()) => {
     };
   }
 
-  // Check discount date window
+  // Check discount date window if present
   if (discount.startsAt && new Date(discount.startsAt).getTime() > now.getTime()) {
     return { basePointsCost, discountAmount: 0, finalPointsCost: basePointsCost, discountActive: false, discountLabel: '' };
   }

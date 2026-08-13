@@ -1,13 +1,38 @@
 /**
+ * Calculates sum of original loan principal for active loans.
+ * @param {Array} loans
+ * @returns {number}
+ */
+export const getTotalOriginalLoanAmount = (loans = []) => {
+  if (!Array.isArray(loans)) return 0;
+  return loans
+    .filter((l) => l && l.status === 'active')
+    .reduce((sum, l) => sum + (Number(l.originalPrincipal) || 0), 0);
+};
+
+/**
  * Calculates sum of current outstanding principal for active loans.
  * @param {Array} loans
  * @returns {number}
  */
-export const getTotalOutstanding = (loans = []) => {
+export const getTotalOutstandingPrincipal = (loans = []) => {
   if (!Array.isArray(loans)) return 0;
   return loans
     .filter((l) => l && l.status === 'active')
     .reduce((sum, l) => sum + (Number(l.currentOutstandingPrincipal) || 0), 0);
+};
+
+export const getTotalOutstanding = getTotalOutstandingPrincipal;
+
+/**
+ * Calculates total principal paid across active loans.
+ * @param {Array} loans
+ * @returns {number}
+ */
+export const getTotalPrincipalPaid = (loans = []) => {
+  const orig = getTotalOriginalLoanAmount(loans);
+  const out = getTotalOutstandingPrincipal(loans);
+  return Math.max(0, orig - out);
 };
 
 /**
@@ -60,4 +85,14 @@ export const calculatePrincipalRepaymentProgress = (originalPrincipal, currentOu
     ratio: clampedRatio,
     percentage,
   };
+};
+
+export default {
+  getTotalOriginalLoanAmount,
+  getTotalOutstandingPrincipal,
+  getTotalOutstanding,
+  getTotalPrincipalPaid,
+  getTotalMonthlyEMI,
+  getActiveLoanCount,
+  calculatePrincipalRepaymentProgress,
 };
