@@ -70,3 +70,10 @@ All calculations are encapsulated as pure, deterministic JavaScript functions wi
 ## 5. Local Privacy & Security
 - All analytics calculations run 100% locally on the device.
 - No loan balances, payment histories, interest amounts, or payoff estimates are uploaded or logged to Firebase or external servers.
+
+---
+
+## 6. PDF Insights Report Export (Phase 16.9)
+- **`buildLoanInsightsReport`**: Formats all loan analytics (principal progress, remaining interest/tenure, payoff date, prepayment impact, and latest payment breakdown) into print-friendly PDF reports.
+- **Export Action**: Accessible via "Export Insights (PDF)" on `LoanInsightsScreen` or "Export Report" option on `LoanDetailsScreen`.
+- **100% Offline**: Renders on-device via `pdfReportService` and shares via system native share sheet without cloud uploads.

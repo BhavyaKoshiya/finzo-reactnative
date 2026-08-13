@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { ArrowLeft, Edit3, Archive, Trash2, Calendar, Landmark, Star, StarOff, Plus, ReceiptText, ChevronRight, ChevronDown, Scale, ShieldCheck, Calculator, Sparkles, TrendingUp } from 'lucide-react-native';
+import { ArrowLeft, Edit3, Archive, Trash2, Calendar, Landmark, Star, StarOff, Plus, ReceiptText, ChevronRight, ChevronDown, Scale, ShieldCheck, Calculator, Sparkles, TrendingUp, FileText } from 'lucide-react-native';
 import ScreenContainer from '../../../components/containers/ScreenContainer';
 import AppHeader from '../../../components/navigation/AppHeader';
 import AppText from '../../../components/common/AppText';
@@ -30,6 +30,7 @@ import UpcomingPaymentCard from '../components/UpcomingPaymentCard';
 import LoanReminderSettingsModal from '../components/LoanReminderSettingsModal';
 import LoanInsightsPreviewCard from '../components/LoanInsightsPreviewCard';
 import ManualBalanceUpdateModal from './ManualBalanceUpdateModal';
+import { ExportOptionsModal, getLoanReportAdapter, generateAndShareReport } from '../../reports';
 import { formatCurrency } from '../../../utils/financeFormatters';
 import { PAYMENT_TYPES } from '../constants/loanPaymentConstants';
 import { ROUTES } from '../../../navigation/routes';
@@ -40,6 +41,7 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
   const [balanceModalVisible, setBalanceModalVisible] = useState(false);
   const [reminderModalVisible, setReminderModalVisible] = useState(false);
   const [showAssumptions, setShowAssumptions] = useState(false);
+  const [exportModalVisible, setExportModalVisible] = useState(false);
 
   const loanId = route?.params?.loanId;
   const rawProfile = useSelector((state) => selectLoanProfileById(state, loanId));
@@ -515,6 +517,12 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
         />
 
         <SecondaryButton
+          title="Export Report (PDF)"
+          icon={FileText}
+          onPress={() => setExportModalVisible(true)}
+        />
+
+        <SecondaryButton
           title="Edit Loan Profile"
           icon={Edit3}
           onPress={() => navigation.navigate(ROUTES.EDIT_LOAN, { loanId: profile.id })}
@@ -548,6 +556,17 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
         loan={rawProfile}
         onClose={() => setReminderModalVisible(false)}
         onSave={(settings) => dispatch(updateLoanReminderSettings(settings))}
+      />
+
+      {/* PDF Export Options Modal */}
+      <ExportOptionsModal
+        visible={exportModalVisible}
+        onClose={() => setExportModalVisible(false)}
+        loanName={profile.name}
+        onExport={async (reportType) => {
+          const model = getLoanReportAdapter(reportType, rawProfile, payments);
+          await generateAndShareReport(model);
+        }}
       />
     </ScreenContainer>
   );

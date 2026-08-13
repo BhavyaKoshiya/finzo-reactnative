@@ -225,28 +225,24 @@ To add a new calculator in future phases:
 
 ---
 
-## 12. Share & PDF Export Architecture
-Location: `src/features/share/`
+## 12. Reports & PDF Export Architecture (Phase 16.9)
+Location: `src/features/reports/`
 
 ```text
-Existing Calculation Engine / Snapshot
+Existing Calculation Engine / Saved Snapshot / Loan Ledger
         ↓
-Export Adapter (getExportModelForCalculator)
+Report Adapters (getCalculatorReportAdapter / getLoanReportAdapter)
         ↓
-Normalized Export Model (createCalculationExportModel)
+Normalized Internal Report Model (createReportModel)
         ↓
-┌─────────────────────────────────┬─────────────────────────────────┐
-│ Share Text Builder              │ PDF HTML Builder                │
-│ (buildShareText)                │ (buildCalculationPdfHtml)       │
-│        ↓                        │        ↓                        │
-│ React Native Share API          │ RNHTMLtoPDF (convert)           │
-│ (shareCalculationText)          │ (generateCalculationPdf)        │
-└─────────────────────────────────┴─────────────────────────────────┘
+PDF HTML Renderer (buildReportPdfHtml & pdfStyles.js)
+        ↓
+RNHTMLtoPDF (generateReportPdf) → Local PDF File
+        ↓
+Native System Share Sheet (shareReportPdf)
 ```
 
-- **Export Model Abstraction**: Standardized serializable contract (`calculationExportModel.js`) containing inputs, primary hero result, secondary summary metrics, and optional detailed data tables.
-- **Quick PDF vs Detailed PDF**:
-  - **Quick PDF**: Concise 1-page A4 report featuring Finzo branding, header, custom snapshot title, key inputs, hero result card, secondary metrics, and print footer.
-  - **Detailed PDF**: Multi-page report containing full calculator-specific schedules (360-month loan amortization tables, yearly SIP growth projections, compounding FD schedules, RD deposit schedules, CAGR trajectories, GST tax breakdowns).
-- **Offline HTML-to-PDF Engine**: Utilizes `react-native-html-to-pdf@1.3.0` converting print-friendly CSS/HTML templates into local PDF documents.
-- **Built-in Share Integration**: Employs React Native's native `Share.share` API for text summaries (WhatsApp, SMS, Email) and PDF document file sharing.
+- **Calculator Report Coverage**: Adapters cover all 10 calculators (EMI with 360-month amortization schedule, SIP with growth table, FD, RD, CAGR, ROI with positive/negative indicators, GST inclusive/exclusive, Simple Interest, Compound Interest, Percentage).
+- **Loan Report Coverage**: Loan Summary, Loan Statement (with full payment ledger & snapshot preservation), and Loan Insights.
+- **100% Offline & Private**: All PDFs are generated on-device. No cloud upload, no network calls, no external server dependency.
+

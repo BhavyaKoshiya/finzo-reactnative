@@ -122,4 +122,12 @@ Users may optionally provide actual bank statement figures:
 - **Snapshot Fidelity**: Cumulative principal and interest analytics consume stored `calculationSnapshot` values and bank-confirmed actual figures without recalculating historical records at current interest rates.
 - **Zero Mutation**: Insight calculations do not alter `ledgerVersion`, balance anchors, or recorded payment structures.
 
+---
+
+## 11. FINANCIAL REPORTS & PDF STATEMENT EXPORT (PHASE 16.9)
+
+- **Statement Generation**: `buildLoanStatementReport` formats full payment ledgers into print-friendly PDF reports.
+- **Ledger Fidelity**: PDF statements preserve `calculationSnapshot` values for past payments and display explicit badge tags for Regular EMI, Prepayment, Balance Correction, and Custom Payments.
+- **100% Offline & Private**: Reports are generated on-device and shared via native system share sheet without cloud uploads or external network calls.
+
 

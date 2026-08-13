@@ -16,6 +16,7 @@ import {
   Calendar,
   Layers,
   PieChart,
+  FileText,
 } from 'lucide-react-native';
 import ScreenContainer from '../../../components/containers/ScreenContainer';
 import AppHeader from '../../../components/navigation/AppHeader';
@@ -29,16 +30,31 @@ import { selectLoanProfileById } from '../../../store/slices/loanProfilesSlice';
 import { selectPaymentsForLoan } from '../../../store/slices/loanPaymentsSlice';
 import { buildLoanInsightSummary } from '../utils/loanInsightUtils';
 import LoanInsightsTrendChart from '../components/LoanInsightsTrendChart';
+import { getLoanReportAdapter, generateAndShareReport } from '../../reports';
 import { formatCurrency } from '../../../utils/financeFormatters';
 import { ROUTES } from '../../../navigation/routes';
 
 export const LoanInsightsScreen = ({ route, navigation }) => {
   const { currentTheme } = useAppTheme();
   const [showAssumptions, setShowAssumptions] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const loanId = route?.params?.loanId;
   const loan = useSelector((state) => selectLoanProfileById(state, loanId));
   const payments = useSelector((state) => selectPaymentsForLoan(state, loanId));
+
+  const handleExportInsightsPdf = async () => {
+    if (!loan) return;
+    setIsExporting(true);
+    try {
+      const model = getLoanReportAdapter('insights', loan, payments);
+      await generateAndShareReport(model);
+    } catch (err) {
+      // Error logged by service
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const insights = buildLoanInsightSummary(loan, payments);
 
@@ -430,6 +446,13 @@ export const LoanInsightsScreen = ({ route, navigation }) => {
           title="View Payment History"
           icon={Layers}
           onPress={() => navigation.navigate(ROUTES.LOAN_PAYMENT_HISTORY, { loanId: loan.id })}
+        />
+
+        <SecondaryButton
+          title={isExporting ? 'Preparing Report...' : 'Export Insights (PDF)'}
+          icon={FileText}
+          onPress={handleExportInsightsPdf}
+          disabled={isExporting}
         />
       </View>
     </ScreenContainer>

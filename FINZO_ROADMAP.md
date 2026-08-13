@@ -28,6 +28,7 @@
 - [x] Phase 16.6 — Loan Payment Reminders & Payment Due Tracking
 - [x] Phase 16.6.1 — Real Local Notifications with @notifee/react-native
 - [x] Phase 16.8 — Loan Insights, Payoff Progress & Financial Health
+- [x] Phase 16.9 — Professional Financial Reports, PDF Export & Sharing
 - [ ] Phase 18 — Prepayment Simulator
 - [ ] Phase 19 — Monetization & Rewarded Ads SDK
 - [ ] Phase 20 — Final QA + Store Preparation

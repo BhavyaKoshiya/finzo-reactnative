@@ -4,6 +4,7 @@ export const PAYMENT_TYPES = {
   REGULAR_EMI: 'regular_emi',
   CUSTOM_PAYMENT: 'custom_payment',
   PREPAYMENT: 'prepayment',
+  BALANCE_CORRECTION: 'balance_correction',
   // Backward compatibility aliases
   EMI: 'regular_emi',
   PART_PREPAYMENT: 'prepayment',
