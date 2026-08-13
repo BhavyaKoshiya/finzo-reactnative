@@ -2,13 +2,16 @@ import { formatCurrency, formatCurrencyCompact, formatPercentage } from '../../.
 import { formatLoanDate, getNextEmiInfo } from './loanDateUtils';
 import { calculatePrincipalRepaymentProgress } from './loanDashboardUtils';
 import { LOAN_TYPE_CONFIG, DEFAULT_LOAN_ICON } from '../constants/loanConstants';
+import { getPaymentStatus } from './loanReminderUtils';
+import { calculateRemainingInterestAndPayoff } from './loanInsightUtils';
 
 /**
  * Prepares presentation-ready view model for a LoanProfile.
  * @param {Object} profile
+ * @param {Array} [payments=[]]
  * @returns {Object}
  */
-export const adaptLoanProfileForDisplay = (profile) => {
+export const adaptLoanProfileForDisplay = (profile, payments = []) => {
   if (!profile) return null;
 
   const typeConfig = LOAN_TYPE_CONFIG[profile.loanType] || {
@@ -22,10 +25,29 @@ export const adaptLoanProfileForDisplay = (profile) => {
     profile.currentOutstandingPrincipal
   );
 
-  const emiInfo = getNextEmiInfo(profile.nextEmiDate);
+  const paymentStatus = getPaymentStatus(profile, payments);
+  const targetDueDate = paymentStatus.nextDueDate || profile.nextEmiDate;
+  const emiInfo = getNextEmiInfo(targetDueDate);
 
-  const tenureVal = profile.remainingTenure?.value || 0;
-  const tenureUnitStr = profile.remainingTenure?.unit || 'months';
+  let tenureVal = profile.remainingTenure?.value || 0;
+  let tenureUnitStr = profile.remainingTenure?.unit || 'months';
+
+  if (tenureVal === 0 && Number(profile.currentOutstandingPrincipal) > 0) {
+    const payoffCalc = calculateRemainingInterestAndPayoff(profile);
+    if (payoffCalc.remainingTenureMonths > 0) {
+      if (payoffCalc.remainingTenureMonths >= 12 && payoffCalc.remainingTenureMonths % 12 === 0) {
+        tenureVal = Math.floor(payoffCalc.remainingTenureMonths / 12);
+        tenureUnitStr = tenureVal === 1 ? 'year' : 'years';
+      } else {
+        tenureVal = payoffCalc.remainingTenureMonths;
+        tenureUnitStr = 'months';
+      }
+    } else if (profile.originalTenure?.value > 0) {
+      tenureVal = profile.originalTenure.value;
+      tenureUnitStr = profile.originalTenure.unit || 'months';
+    }
+  }
+
   const remainingTenureText = `${tenureVal} ${tenureUnitStr}`;
 
   const origTenureVal = profile.originalTenure?.value || 0;

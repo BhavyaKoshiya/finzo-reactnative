@@ -7,15 +7,17 @@ export const MAX_REWARD_HISTORY = 100;
 export const REWARD_TYPES = {
   DAILY_CHECKIN: 'daily_checkin',
   REDEMPTION: 'reward_redemption',
-  REWARDED_AD: 'rewarded_ad', // Prepared for future phase
-  ACHIEVEMENT: 'achievement', // Prepared for future phase
-  PROMOTIONAL: 'promotional', // Prepared for future phase
+  REWARDED_AD: 'rewarded_ad',
+  REWARDED_AD_MILESTONE: 'rewarded_ad_milestone',
+  ACHIEVEMENT: 'achievement',
+  PROMOTIONAL: 'promotional',
 };
 
 export const REWARD_TITLES = {
   [REWARD_TYPES.DAILY_CHECKIN]: 'Daily Check-in',
   [REWARD_TYPES.REDEMPTION]: 'Reward Redemption',
   [REWARD_TYPES.REWARDED_AD]: 'Rewarded Ad',
+  [REWARD_TYPES.REWARDED_AD_MILESTONE]: 'Ad-Free Milestone',
   [REWARD_TYPES.ACHIEVEMENT]: 'Achievement',
   [REWARD_TYPES.PROMOTIONAL]: 'Bonus Reward',
 };

@@ -6,6 +6,14 @@ import { isAdFreeActive, formatAdFreeExpiry } from '../../features/rewards/utils
 import { calculateRewardPrice } from '../../features/rewards/utils/discountUtils';
 import logger from '../../services/logger';
 
+const getLocalDateKey = (d = new Date()) => {
+  const date = typeof d === 'string' ? new Date(d) : d;
+  const yr = date.getFullYear();
+  const mo = String(date.getMonth() + 1).padStart(2, '0');
+  const da = String(date.getDate()).padStart(2, '0');
+  return `${yr}-${mo}-${da}`;
+};
+
 const initialState = {
   points: 0,
   currentStreak: 0,
@@ -14,7 +22,19 @@ const initialState = {
   totalCheckIns: 0,
   adFreeUntil: null,
   rewardHistory: [],
+  rewardedAdsWatchedToday: 0,
+  rewardedAdsWatchDate: null,
+  rewardedAdMilestoneClaimedDate: null,
+  lastRewardedAdCompletedAt: null,
   schemaVersion: 1,
+};
+
+const ensureDailyReset = (state, now = new Date()) => {
+  const todayKey = getLocalDateKey(now);
+  if (state.rewardedAdsWatchDate !== todayKey) {
+    state.rewardedAdsWatchedToday = 0;
+    state.rewardedAdsWatchDate = todayKey;
+  }
 };
 
 export const rewardsSlice = createSlice({
@@ -118,11 +138,105 @@ export const rewardsSlice = createSlice({
         newExpiryIso,
       });
     },
+    recordRewardedAdCompletion: (state, action) => {
+      const payload = action.payload || {};
+      const now = payload.date ? new Date(payload.date) : new Date();
+      const nowIso = now.toISOString();
+
+      ensureDailyReset(state, now);
+
+      const pointsAwarded = typeof payload.pointsAwarded === 'number' ? payload.pointsAwarded : 10;
+      const transactionId = payload.transactionId || `tx_${Date.now()}`;
+      const provider = payload.provider || 'simulated';
+
+      state.rewardedAdsWatchedToday += 1;
+      state.points += pointsAwarded;
+      state.lastRewardedAdCompletedAt = nowIso;
+
+      const transaction = {
+        id: `rewarded_ad_${transactionId}_${Date.now()}`,
+        type: REWARD_TYPES.REWARDED_AD,
+        points: pointsAwarded,
+        createdAt: nowIso,
+        metadata: {
+          provider,
+          transactionId,
+          pointsAwarded,
+          completedAt: nowIso,
+        },
+      };
+
+      state.rewardHistory = [transaction, ...state.rewardHistory].slice(0, MAX_REWARD_HISTORY);
+      logger.info('Rewarded ad completion recorded', {
+        pointsAwarded,
+        totalWatchedToday: state.rewardedAdsWatchedToday,
+        totalPoints: state.points,
+      });
+    },
+
+    claimRewardedAdMilestone: (state, action) => {
+      const payload = action.payload || {};
+      const now = payload.date ? new Date(payload.date) : new Date();
+      const nowIso = now.toISOString();
+      const todayKey = payload.dateKey || getLocalDateKey(now);
+
+      // Idempotency check: prevent duplicate milestone claims on same calendar day
+      if (state.rewardedAdMilestoneClaimedDate === todayKey) {
+        logger.info('Rewarded ad milestone claim skipped: already claimed for date', { todayKey });
+        return;
+      }
+
+      const adFreeMinutes = typeof payload.adFreeMinutes === 'number' ? payload.adFreeMinutes : 30;
+      const requiredAds = typeof payload.requiredAds === 'number' ? payload.requiredAds : 5;
+
+      // Entitlement stacking calculation:
+      const isCurrentlyActive = isAdFreeActive(state.adFreeUntil, now);
+      const baseTime = isCurrentlyActive && state.adFreeUntil ? new Date(state.adFreeUntil) : now;
+      const newExpiryDate = new Date(baseTime.getTime() + adFreeMinutes * 60 * 1000);
+      const newExpiryIso = newExpiryDate.toISOString();
+
+      state.adFreeUntil = newExpiryIso;
+      state.rewardedAdMilestoneClaimedDate = todayKey;
+
+      const transaction = {
+        id: `milestone_${todayKey}_${Date.now()}`,
+        type: REWARD_TYPES.REWARDED_AD_MILESTONE,
+        points: 0,
+        createdAt: nowIso,
+        metadata: {
+          dateKey: todayKey,
+          completedAds: requiredAds,
+          requiredAds,
+          adFreeMinutes,
+        },
+      };
+
+      state.rewardHistory = [transaction, ...state.rewardHistory].slice(0, MAX_REWARD_HISTORY);
+      logger.info('Rewarded ad milestone claimed successfully', {
+        todayKey,
+        adFreeMinutes,
+        newExpiryIso,
+      });
+    },
+
+    resetDailyRewardedAdsLimit: (state) => {
+      state.rewardedAdsWatchedToday = 0;
+      state.rewardedAdMilestoneClaimedDate = null;
+      state.lastRewardedAdCompletedAt = null;
+    },
+
     resetRewards: () => initialState,
   },
 });
 
-export const { claimDailyCheckIn, redeemReward, resetRewards } = rewardsSlice.actions;
+export const {
+  claimDailyCheckIn,
+  redeemReward,
+  recordRewardedAdCompletion,
+  claimRewardedAdMilestone,
+  resetDailyRewardedAdsLimit,
+  resetRewards,
+} = rewardsSlice.actions;
 
 // Selectors
 export const selectRewardsState = (state) => state.rewards || initialState;
@@ -133,6 +247,26 @@ export const selectLastCheckInDate = (state) => selectRewardsState(state).lastCh
 export const selectTotalCheckIns = (state) => selectRewardsState(state).totalCheckIns;
 export const selectAdFreeUntil = (state) => selectRewardsState(state).adFreeUntil;
 export const selectRewardHistory = (state) => selectRewardsState(state).rewardHistory || [];
+
+export const selectRewardedAdsWatchedToday = (state) => {
+  const rewards = selectRewardsState(state);
+  const todayKey = getLocalDateKey();
+  if (rewards.rewardedAdsWatchDate !== todayKey) {
+    return 0;
+  }
+  return rewards.rewardedAdsWatchedToday || 0;
+};
+
+export const selectRewardedAdMilestoneClaimedDate = (state) =>
+  selectRewardsState(state).rewardedAdMilestoneClaimedDate;
+
+export const selectLastRewardedAdCompletedAt = (state) =>
+  selectRewardsState(state).lastRewardedAdCompletedAt;
+
+export const selectIsRewardedMilestoneClaimedToday = (state) => {
+  const claimedDate = selectRewardedAdMilestoneClaimedDate(state);
+  return claimedDate === getLocalDateKey();
+};
 
 export const selectHasCheckedInToday = (state) =>
   hasCheckedInToday(selectLastCheckInDate(state));

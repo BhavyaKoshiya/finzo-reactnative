@@ -23,7 +23,7 @@ export const LoanProfileForm = ({
   hasPayments = false,
   onOpenBalanceCorrection = null,
 }) => {
-  const { currentTheme } = useAppTheme();
+  const { currentTheme, isDark } = useAppTheme();
 
   return (
     <View style={styles.container}>
@@ -84,13 +84,13 @@ export const LoanProfileForm = ({
         )}
 
         {form.isEditMode ? (
-          <View style={[styles.protectedBalanceCard, { backgroundColor: currentTheme.surfaceSubtle || '#F8FAFC', borderColor: currentTheme.border }]}>
+          <View style={[styles.protectedBalanceCard, { backgroundColor: isDark ? currentTheme.surfaceSubtle : '#F8FAFC', borderColor: currentTheme.border }]}>
             <View style={styles.protectedHeader}>
-              <AppText variant="bodySmall" color={currentTheme.textMuted} style={{ fontWeight: '600' }}>
+              <AppText variant="bodySmall" color={currentTheme.textMuted} style={{ fontWeight: '600', flex: 1, marginRight: 6 }}>
                 CURRENT OUTSTANDING PRINCIPAL
               </AppText>
-              <View style={[styles.protectedBadge, { backgroundColor: '#DBEAFE' }]}>
-                <AppText variant="bodySmall" color="#1E40AF" style={{ fontSize: 11, fontWeight: '700' }}>
+              <View style={[styles.protectedBadge, { backgroundColor: isDark ? 'rgba(59, 130, 246, 0.2)' : '#DBEAFE' }]}>
+                <AppText variant="bodySmall" color={isDark ? '#60A5FA' : '#1E40AF'} style={{ fontSize: 11, fontWeight: '700' }}>
                   Ledger Protected
                 </AppText>
               </View>
@@ -347,6 +347,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
     marginBottom: 4,
   },
   protectedBadge: {

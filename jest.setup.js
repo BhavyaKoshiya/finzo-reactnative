@@ -2,6 +2,27 @@
 jest.mock('react-native-worklets', () => ({}));
 jest.mock('react-native-worklets-core', () => ({}));
 
+jest.mock('react-native-linear-gradient', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return (props) => React.createElement(View, props, props.children);
+});
+
+jest.mock('@react-native-community/netinfo', () => ({
+  fetch: jest.fn().mockResolvedValue({
+    isConnected: true,
+    isInternetReachable: true,
+    type: 'wifi',
+  }),
+  addEventListener: jest.fn(() => jest.fn()),
+}));
+
+jest.mock('react-native-bootsplash', () => ({
+  hide: jest.fn().mockResolvedValue(true),
+  isVisible: jest.fn().mockResolvedValue(false),
+  useHideAnimation: jest.fn(),
+}));
+
 jest.mock('react-native-html-to-pdf', () => ({
   convert: jest.fn().mockResolvedValue({
     filePath: '/mock/path/to/Finzo_Report.pdf',

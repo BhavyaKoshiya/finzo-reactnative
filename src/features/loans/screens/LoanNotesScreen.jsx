@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, TextInput } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   ArrowLeft,
@@ -42,7 +42,7 @@ const CATEGORY_OPTIONS = Object.values(NOTE_CATEGORIES).map((cat) => ({
 
 export const LoanNotesScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
-  const { currentTheme } = useAppTheme();
+  const { currentTheme, isDark } = useAppTheme();
 
   const loanId = route?.params?.loanId;
   const loan = useSelector((state) => selectLoanProfileById(state, loanId));
@@ -158,16 +158,38 @@ export const LoanNotesScreen = ({ route, navigation }) => {
       <View style={styles.container}>
         {/* Search & Add Bar */}
         <View style={styles.topControlRow}>
-          <View style={[styles.searchBox, { borderColor: currentTheme.border }]}>
-            <AppIcon icon={Search} size={18} color={currentTheme.textMuted} style={{ marginRight: 6 }} />
-            <TextInputField
+          <View
+            style={[
+              styles.searchContainer,
+              {
+                backgroundColor: isDark ? currentTheme.surface : '#FFFFFF',
+                borderColor: currentTheme.border,
+              },
+            ]}
+          >
+            <AppIcon icon={Search} size={18} color={currentTheme.textMuted} style={styles.searchIcon} />
+            <TextInput
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholder="Search notes..."
-              style={styles.searchInput}
+              placeholderTextColor={currentTheme.textMuted}
+              style={[styles.searchInputText, { color: currentTheme.textPrimary }]}
             />
+            {searchQuery ? (
+              <TouchableOpacity
+                onPress={() => setSearchQuery('')}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <AppIcon icon={X} size={16} color={currentTheme.textMuted} />
+              </TouchableOpacity>
+            ) : null}
           </View>
-          <PrimaryButton title="Add Note" icon={Plus} onPress={handleOpenAddModal} />
+          <PrimaryButton
+            title="Add Note"
+            icon={Plus}
+            onPress={handleOpenAddModal}
+            style={styles.addBtnInline}
+          />
         </View>
 
         {/* Category Filters */}
@@ -327,20 +349,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  searchBox: {
+  searchContainer: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    height: 44,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 46,
   },
-  searchInput: {
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInputText: {
     flex: 1,
+    fontSize: 14,
     height: '100%',
-    borderWidth: 0,
     paddingVertical: 0,
+  },
+  addBtnInline: {
+    height: 46,
+    paddingHorizontal: 14,
   },
   categoryScroll: {
     flexDirection: 'row',

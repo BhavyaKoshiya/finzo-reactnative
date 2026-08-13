@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Gift, Award } from 'lucide-react-native';
+import { Gift, Award, PlayCircle, ShieldCheck } from 'lucide-react-native';
 import AppCard from '../../../components/cards/AppCard';
 import AppText from '../../../components/common/AppText';
 import AppIcon from '../../../components/common/AppIcon';
@@ -18,7 +18,21 @@ export const RewardHistoryItem = ({ item, style }) => {
   const iconColor = isDark ? '#60A5FA' : currentTheme.primary;
   const pointsColor = isDark ? '#4ADE80' : currentTheme.success;
 
-  const icon = item.type === REWARD_TYPES.DAILY_CHECKIN ? Gift : Award;
+  let icon = Award;
+  let pointsDisplay = `+${item.points} Points`;
+
+  if (item.type === REWARD_TYPES.DAILY_CHECKIN) {
+    icon = Gift;
+  } else if (item.type === REWARD_TYPES.REWARDED_AD) {
+    icon = PlayCircle;
+    pointsDisplay = `+${item.points} Points`;
+  } else if (item.type === REWARD_TYPES.REWARDED_AD_MILESTONE) {
+    icon = ShieldCheck;
+    const minutes = item.metadata?.adFreeMinutes || 30;
+    pointsDisplay = `+${minutes} min Ad-Free`;
+  } else if (item.type === REWARD_TYPES.REDEMPTION) {
+    pointsDisplay = `${item.points} Points`;
+  }
 
   return (
     <AppCard style={[styles.card, style]}>
@@ -34,8 +48,8 @@ export const RewardHistoryItem = ({ item, style }) => {
             {formattedDate} {item.metadata?.streakDay ? `• Day ${item.metadata.streakDay} streak` : ''}
           </AppText>
         </View>
-        <AppText variant="bodyMedium" color={pointsColor} style={styles.pointsText}>
-          +{item.points}
+        <AppText variant="bodyMedium" color={item.points < 0 ? currentTheme.textSecondary : pointsColor} style={styles.pointsText}>
+          {pointsDisplay}
         </AppText>
       </View>
     </AppCard>

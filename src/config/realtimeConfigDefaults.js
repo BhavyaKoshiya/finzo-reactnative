@@ -6,6 +6,18 @@ export const DEFAULT_REALTIME_CONFIG = {
   version: 1,
 
   rewards: {
+    rewardedAds: {
+      enabled: false,
+      pointsPerAd: 0,
+      dailyWatchLimit: 0,
+      cooldownMinutes: 0,
+      milestone: {
+        enabled: false,
+        requiredAds: 5,
+        adFreeMinutes: 30,
+      },
+    },
+
     dailyCheckIn: {
       enabled: true,
 

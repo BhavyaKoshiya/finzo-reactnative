@@ -1,7 +1,12 @@
-import { claimDailyCheckIn, redeemReward } from '../../../store/slices/rewardsSlice';
+import {
+  claimDailyCheckIn,
+  redeemReward,
+  recordRewardedAdCompletion,
+  claimRewardedAdMilestone,
+} from '../../../store/slices/rewardsSlice';
 import { realtimeConfigService } from '../../../config/realtimeConfigService';
 import { getDailyCheckInReward, getRewardScheduleDay } from '../utils/dailyCheckInUtils';
-import { selectRewardById } from '../../../config/realtimeConfigSelectors';
+import { selectRewardById, selectRewardedAdsConfig } from '../../../config/realtimeConfigSelectors';
 import logger from '../../../services/logger';
 
 /**
@@ -43,6 +48,61 @@ export const rewardService = {
     }
 
     dispatch(redeemReward({ reward, rewardId: reward.id }));
+  },
+
+  /**
+   * Processes a successful rewarded ad completion using active configuration.
+   * Atomically awards points per ad and checks/claims ad-free milestone if target reached.
+   */
+  processRewardedAdCompletion: (dispatch, adCompletionResult, currentState = {}) => {
+    if (!dispatch) {
+      logger.warn('rewardService.processRewardedAdCompletion: dispatch function missing');
+      return { success: false, reason: 'Dispatch missing' };
+    }
+
+    if (!adCompletionResult || adCompletionResult.status !== 'COMPLETED') {
+      logger.info('rewardService.processRewardedAdCompletion: ad not completed', { adCompletionResult });
+      return { success: false, reason: 'Ad not completed' };
+    }
+
+    const config = realtimeConfigService.getConfig();
+    const rewardedConfig = selectRewardedAdsConfig(config);
+
+    if (!rewardedConfig.enabled) {
+      logger.warn('rewardService.processRewardedAdCompletion: rewarded ads feature disabled in RTDB config');
+      return { success: false, reason: 'Feature disabled' };
+    }
+
+    const pointsToAward = Number(rewardedConfig.pointsPerAd) || 0;
+
+    // Dispatch point completion
+    dispatch(
+      recordRewardedAdCompletion({
+        pointsAwarded: pointsToAward,
+        transactionId: adCompletionResult.transactionId,
+        provider: adCompletionResult.provider,
+      })
+    );
+
+    // Milestone check:
+    const milestone = rewardedConfig.milestone;
+    if (milestone && milestone.enabled) {
+      const watchedCount = (currentState.rewardedAdsWatchedToday || 0) + 1;
+      const todayKey = new Date().toISOString().substring(0, 10);
+      const isAlreadyClaimedToday = currentState.rewardedAdMilestoneClaimedDate === todayKey;
+
+      if (watchedCount >= milestone.requiredAds && !isAlreadyClaimedToday) {
+        dispatch(
+          claimRewardedAdMilestone({
+            dateKey: todayKey,
+            requiredAds: milestone.requiredAds,
+            adFreeMinutes: milestone.adFreeMinutes,
+          })
+        );
+      }
+    }
+
+    return { success: true, pointsAwarded: pointsToAward };
   },
 };
 

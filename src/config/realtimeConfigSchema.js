@@ -135,6 +135,41 @@ export const validateRealtimeConfig = (config) => {
         }
       });
     }
+
+    // 3c. Rewarded Ads Config Validation
+    if (config.rewards.rewardedAds !== undefined && isObject(config.rewards.rewardedAds)) {
+      const ra = config.rewards.rewardedAds;
+      if (ra.enabled !== undefined && !isBoolean(ra.enabled)) {
+        errors.push('rewardedAds.enabled must be a boolean');
+      }
+      if (ra.pointsPerAd !== undefined && (typeof ra.pointsPerAd !== 'number' || ra.pointsPerAd < 0 || ra.pointsPerAd > 1000)) {
+        errors.push('rewardedAds.pointsPerAd must be an integer (0-1000)');
+      }
+      if (ra.dailyWatchLimit !== undefined && (typeof ra.dailyWatchLimit !== 'number' || ra.dailyWatchLimit < 0 || ra.dailyWatchLimit > 100)) {
+        errors.push('rewardedAds.dailyWatchLimit must be an integer (0-100)');
+      }
+      if (ra.cooldownMinutes !== undefined && (typeof ra.cooldownMinutes !== 'number' || ra.cooldownMinutes < 0 || ra.cooldownMinutes > 1440)) {
+        errors.push('rewardedAds.cooldownMinutes must be an integer (0-1440)');
+      }
+
+      if (ra.milestone !== undefined && isObject(ra.milestone)) {
+        const ms = ra.milestone;
+        if (ms.enabled !== undefined && !isBoolean(ms.enabled)) {
+          errors.push('rewardedAds.milestone.enabled must be a boolean');
+        }
+        if (ms.requiredAds !== undefined && (typeof ms.requiredAds !== 'number' || ms.requiredAds < 1 || ms.requiredAds > 100)) {
+          errors.push('rewardedAds.milestone.requiredAds must be integer (1-100)');
+        }
+        if (ms.adFreeMinutes !== undefined && (typeof ms.adFreeMinutes !== 'number' || ms.adFreeMinutes < 1 || ms.adFreeMinutes > 10080)) {
+          errors.push('rewardedAds.milestone.adFreeMinutes must be integer (1-10080)');
+        }
+
+        // IMPOSSIBLE CONFIGURATION CHECK (Section 23 in Phase 16.15 prompt)
+        if (ms.enabled && ra.enabled && typeof ms.requiredAds === 'number' && typeof ra.dailyWatchLimit === 'number' && ms.requiredAds > ra.dailyWatchLimit) {
+          errors.push(`rewardedAds.milestone.requiredAds (${ms.requiredAds}) cannot exceed dailyWatchLimit (${ra.dailyWatchLimit})`);
+        }
+      }
+    }
   }
 
   // 4. Ads Section Validation

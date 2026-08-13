@@ -11,6 +11,7 @@ import ProfileSection from './components/ProfileSection';
 import ProfileRow from './components/ProfileRow';
 import PrivacyInfoModal from './components/PrivacyInfoModal';
 import { RewardCard, rewardService } from '../rewards';
+import ProfileAdMilestoneCard from '../rewards/components/ProfileAdMilestoneCard';
 import {
   selectRewardPoints,
   selectCurrentStreak,
@@ -103,6 +104,8 @@ export const ProfileScreen = ({ navigation }) => {
           onClaim={handleClaimDailyCheckIn}
           style={styles.rewardCardMargin}
         />
+
+        <ProfileAdMilestoneCard />
 
         <TouchableOpacity
           onPress={() => navigation.navigate(ROUTES.REWARDS)}

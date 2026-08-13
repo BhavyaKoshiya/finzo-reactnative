@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { useSelector } from 'react-redux';
 import {
   ArrowLeft,
@@ -14,11 +15,10 @@ import {
   Info,
   CheckCircle2,
   Calendar,
-  Layers,
   PieChart,
   FileText,
-  Compass,
   Target,
+  Layers,
 } from 'lucide-react-native';
 import ScreenContainer from '../../../components/containers/ScreenContainer';
 import AppHeader from '../../../components/navigation/AppHeader';
@@ -30,20 +30,26 @@ import SecondaryButton from '../../../components/buttons/SecondaryButton';
 import { useAppTheme } from '../../../hooks/useAppTheme';
 import { selectLoanProfileById } from '../../../store/slices/loanProfilesSlice';
 import { selectPaymentsForLoan } from '../../../store/slices/loanPaymentsSlice';
+import { selectActiveLoanGoalsByLoanId } from '../../../store/slices/loanGoalsSlice';
 import { buildLoanInsightSummary } from '../utils/loanInsightUtils';
-import LoanInsightsTrendChart from '../components/LoanInsightsTrendChart';
+import LoanGoalPreviewCard from '../components/LoanGoalPreviewCard';
 import { getLoanReportAdapter, generateAndShareReport } from '../../reports';
 import { formatCurrency } from '../../../utils/financeFormatters';
 import { ROUTES } from '../../../navigation/routes';
 
 export const LoanInsightsScreen = ({ route, navigation }) => {
-  const { currentTheme } = useAppTheme();
+  const { currentTheme, isDark } = useAppTheme();
   const [showAssumptions, setShowAssumptions] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
   const loanId = route?.params?.loanId;
-  const loan = useSelector((state) => selectLoanProfileById(state, loanId));
-  const payments = useSelector((state) => selectPaymentsForLoan(state, loanId));
+  const loan = useSelector(state => selectLoanProfileById(state, loanId));
+  const payments = useSelector(state => selectPaymentsForLoan(state, loanId));
+  const activeGoals = useSelector(state =>
+    selectActiveLoanGoalsByLoanId(state, loanId),
+  );
+  const primaryGoal =
+    activeGoals && activeGoals.length > 0 ? activeGoals[0] : null;
 
   const handleExportInsightsPdf = async () => {
     if (!loan) return;
@@ -52,7 +58,7 @@ export const LoanInsightsScreen = ({ route, navigation }) => {
       const model = getLoanReportAdapter('insights', loan, payments);
       await generateAndShareReport(model);
     } catch (err) {
-      // Error logged by service
+      // Error logged by report service
     } finally {
       setIsExporting(false);
     }
@@ -79,26 +85,17 @@ export const LoanInsightsScreen = ({ route, navigation }) => {
 
   const {
     loanName,
-    originalPrincipal,
     currentBalance,
     principalReduced,
     progressPercentage,
     isBankConfirmed,
     totalPaymentsCount,
     regularEmiCount,
-    customPaymentCount,
-    prepaymentCount,
-    totalAmountPaid,
-    cumulativePrincipalPaid,
     cumulativeInterestPaid,
     estimatedRemainingInterest,
     formattedPayoffDate,
     remainingTenureText,
-    originalTenureMonths,
-    remainingTenureMonths,
-    prepaymentImpact,
     latestPaymentInsight,
-    historySeries,
     isPaidOff,
     isArchived,
   } = insights;
@@ -123,283 +120,455 @@ export const LoanInsightsScreen = ({ route, navigation }) => {
       useSafeAreaBottom={true}
       style={styles.container}
     >
-      {/* Hero Progress Card */}
-      <AppCard style={[styles.heroCard, { backgroundColor: currentTheme.primary }]}>
-        <View style={styles.heroTopRow}>
-          <View style={styles.badgeRow}>
-            <View style={styles.heroBadge}>
-              <AppIcon icon={TrendingUp} size={14} color="#FFFFFF" />
-              <AppText variant="caption" color="#FFFFFF" style={{ fontWeight: '700' }}>
-                Payoff Progress
+      {/* 1. LOAN PROGRESS HERO CARD */}
+      <AppCard style={styles.heroCard}>
+        <LinearGradient
+          colors={isDark ? ['#0F172A', '#1E3A8A'] : ['#1D4ED8', '#2563EB']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFillObject}
+        />
+        <View style={styles.heroContent}>
+          <View style={styles.heroTopRow}>
+            <View style={styles.heroTitleGroup}>
+              <AppIcon
+                icon={TrendingUp}
+                size={16}
+                color="#FFFFFF"
+                style={{ marginRight: 6 }}
+              />
+              <AppText
+                variant="caption"
+                color="rgba(255, 255, 255, 0.9)"
+                style={styles.heroTitleText}
+              >
+                LOAN PROGRESS
               </AppText>
             </View>
-            {isPaidOff && (
-              <View style={styles.paidBadge}>
-                <AppIcon icon={CheckCircle2} size={12} color="#FFFFFF" />
-                <AppText variant="caption" color="#FFFFFF" style={{ fontWeight: '700' }}>
-                  Loan Paid Off
-                </AppText>
-              </View>
-            )}
-            {isArchived && (
-              <View style={styles.archivedBadge}>
-                <AppText variant="caption" color="#FFFFFF" style={{ fontWeight: '700' }}>
-                  Archived
-                </AppText>
-              </View>
-            )}
+            <View
+              style={[
+                styles.sourceChip,
+                {
+                  backgroundColor: isBankConfirmed
+                    ? 'rgba(34, 197, 94, 0.25)'
+                    : 'rgba(245, 158, 11, 0.25)',
+                  borderColor: isBankConfirmed
+                    ? 'rgba(134, 239, 172, 0.4)'
+                    : 'rgba(253, 230, 138, 0.4)',
+                },
+              ]}
+            >
+              <AppIcon
+                icon={isBankConfirmed ? ShieldCheck : Calculator}
+                size={11}
+                color={isBankConfirmed ? '#86EFAC' : '#FDE68A'}
+                style={{ marginRight: 4 }}
+              />
+              <AppText
+                variant="caption"
+                color={isBankConfirmed ? '#86EFAC' : '#FDE68A'}
+                style={{ fontWeight: '700', fontSize: 11 }}
+              >
+                {isBankConfirmed ? 'Bank Confirmed' : 'Finzo Estimate'}
+              </AppText>
+            </View>
           </View>
 
-          <View style={styles.sourceChip}>
-            <AppIcon icon={isBankConfirmed ? ShieldCheck : Calculator} size={11} color="#FFFFFF" style={{ marginRight: 3 }} />
-            <AppText variant="caption" color="#FFFFFF" style={{ fontWeight: '700', fontSize: 11 }}>
-              {isBankConfirmed ? 'Bank Confirmed' : 'Finzo Estimate'}
+          <View style={styles.heroMainRow}>
+            <AppText variant="h1" color="#FFFFFF" style={styles.heroPct}>
+              {progressPercentage}%
+            </AppText>
+            <AppText
+              variant="bodyMedium"
+              color="rgba(255, 255, 255, 0.9)"
+              style={styles.heroPctLabel}
+            >
+              Principal Paid
             </AppText>
           </View>
-        </View>
 
-        <View style={styles.heroMainRow}>
-          <AppText variant="h1" color="#FFFFFF" style={styles.heroPct}>
-            {progressPercentage}%
-          </AppText>
-          <AppText variant="bodyMedium" color="rgba(255, 255, 255, 0.9)" style={styles.heroPctLabel}>
-            Principal Paid
-          </AppText>
-        </View>
+          <View style={styles.heroProgressTrack}>
+            <View
+              style={[
+                styles.heroProgressBar,
+                { width: `${Math.min(100, progressPercentage)}%` },
+              ]}
+            />
+          </View>
 
-        <View style={styles.heroProgressTrack}>
-          <View
-            style={[
-              styles.heroProgressBar,
-              { width: `${Math.min(100, progressPercentage)}%` },
-            ]}
-          />
-        </View>
+          <View style={styles.heroSubGrid}>
+            <View>
+              <AppText variant="caption" color="rgba(255, 255, 255, 0.8)">
+                Principal Paid
+              </AppText>
+              <AppText
+                variant="bodyMedium"
+                color="#FFFFFF"
+                style={{ fontWeight: '800', marginTop: 2 }}
+              >
+                {formatCurrency(principalReduced)}
+              </AppText>
+            </View>
 
-        <View style={styles.heroSubGrid}>
-          <View>
-            <AppText variant="caption" color="rgba(255, 255, 255, 0.8)">
-              Principal Reduced
+            <View style={{ alignItems: 'flex-end' }}>
+              <AppText variant="caption" color="rgba(255, 255, 255, 0.8)">
+                Outstanding Principal
+              </AppText>
+              <AppText
+                variant="bodyMedium"
+                color="#FFFFFF"
+                style={{ fontWeight: '800', marginTop: 2 }}
+              >
+                {formatCurrency(currentBalance)}
+              </AppText>
+            </View>
+          </View>
+        </View>
+      </AppCard>
+
+      {/* 2. KEY METRICS GRID (2x2) */}
+      <View style={styles.metricsGridContainer}>
+        <View style={styles.metricsRow}>
+          <AppCard style={styles.metricCard}>
+            <AppText variant="caption" color={currentTheme.textSecondary}>
+              Principal Paid
             </AppText>
-            <AppText variant="bodyMedium" color="#FFFFFF" style={{ fontWeight: '800', marginTop: 2 }}>
+            <AppText
+              variant="titleMedium"
+              color={currentTheme.success || '#16A34A'}
+              style={styles.metricVal}
+            >
               {formatCurrency(principalReduced)}
             </AppText>
-          </View>
+          </AppCard>
 
-          <View style={{ alignItems: 'flex-end' }}>
-            <AppText variant="caption" color="rgba(255, 255, 255, 0.8)">
-              Remaining Principal
+          <AppCard style={styles.metricCard}>
+            <AppText variant="caption" color={currentTheme.textSecondary}>
+              Interest Paid
             </AppText>
-            <AppText variant="bodyMedium" color="#FFFFFF" style={{ fontWeight: '800', marginTop: 2 }}>
-              {formatCurrency(currentBalance)}
-            </AppText>
-          </View>
-        </View>
-      </AppCard>
-
-      {/* Original vs Current Card */}
-      <AppCard style={styles.card}>
-        <AppText variant="cardTitle" style={styles.cardTitle}>
-          Principal Comparison
-        </AppText>
-
-        <View style={styles.detailRow}>
-          <AppText variant="bodyMedium" color={currentTheme.textSecondary}>Original Principal</AppText>
-          <AppText variant="bodyMedium" style={styles.boldVal}>{formatCurrency(originalPrincipal)}</AppText>
-        </View>
-
-        <View style={styles.detailRow}>
-          <AppText variant="bodyMedium" color={currentTheme.textSecondary}>Current Outstanding</AppText>
-          <AppText variant="bodyMedium" style={[styles.boldVal, { color: currentTheme.primary }]}>
-            {formatCurrency(currentBalance)}
-          </AppText>
-        </View>
-
-        <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
-          <AppText variant="bodyMedium" color={currentTheme.textSecondary}>Total Principal Reduced</AppText>
-          <AppText variant="bodyMedium" style={[styles.boldVal, { color: currentTheme.success }]}>
-            {formatCurrency(principalReduced)}
-          </AppText>
-        </View>
-      </AppCard>
-
-      {/* Cumulative Interest & Principal Paid Card */}
-      <AppCard style={styles.card}>
-        <View style={styles.cardTitleRow}>
-          <AppIcon icon={PieChart} size={18} color={currentTheme.primary} style={{ marginRight: 8 }} />
-          <AppText variant="cardTitle" style={{ fontWeight: '700' }}>
-            Payments & Interest Paid
-          </AppText>
-        </View>
-
-        <View style={styles.statsGrid}>
-          <View style={styles.statCol}>
-            <AppText variant="caption" color={currentTheme.textSecondary}>Recorded Payments</AppText>
-            <AppText variant="titleMedium" color={currentTheme.primary} style={{ fontWeight: '800', marginTop: 2 }}>
-              {formatCurrency(totalAmountPaid)}
-            </AppText>
-            <AppText variant="caption" color={currentTheme.textMuted} style={{ marginTop: 2 }}>
-              {totalPaymentsCount} payment{totalPaymentsCount === 1 ? '' : 's'} logged
-            </AppText>
-          </View>
-
-          <View style={styles.statDivider} />
-
-          <View style={styles.statCol}>
-            <AppText variant="caption" color={currentTheme.textSecondary}>Cumulative Interest Paid</AppText>
-            <AppText variant="titleMedium" color={currentTheme.secondary || '#F59E0B'} style={{ fontWeight: '800', marginTop: 2 }}>
+            <AppText
+              variant="titleMedium"
+              color={currentTheme.warning || '#F59E0B'}
+              style={styles.metricVal}
+            >
               {formatCurrency(cumulativeInterestPaid)}
             </AppText>
-            <AppText variant="caption" color={currentTheme.textMuted} style={{ marginTop: 2 }}>
-              {cumulativePrincipalPaid > 0 ? `${formatCurrency(cumulativePrincipalPaid)} principal` : 'Historical estimate'}
+          </AppCard>
+        </View>
+
+        <View style={styles.metricsRow}>
+          <AppCard style={styles.metricCard}>
+            <AppText variant="caption" color={currentTheme.textSecondary}>
+              Remaining Interest
             </AppText>
-          </View>
-        </View>
+            <AppText
+              variant="titleMedium"
+              color={currentTheme.textPrimary}
+              style={styles.metricVal}
+            >
+              {formatCurrency(estimatedRemainingInterest)}
+            </AppText>
+          </AppCard>
 
-        {/* Payment counts breakdown */}
-        <View style={styles.countsRow}>
-          <View style={styles.countBadge}>
-            <AppText variant="caption" color={currentTheme.textSecondary}>Regular EMIs: <AppText variant="caption" style={{ fontWeight: '700' }}>{regularEmiCount}</AppText></AppText>
-          </View>
-          {customPaymentCount > 0 && (
-            <View style={styles.countBadge}>
-              <AppText variant="caption" color={currentTheme.textSecondary}>Custom: <AppText variant="caption" style={{ fontWeight: '700' }}>{customPaymentCount}</AppText></AppText>
-            </View>
-          )}
-          {prepaymentCount > 0 && (
-            <View style={styles.countBadge}>
-              <AppText variant="caption" color={currentTheme.textSecondary}>Prepayments: <AppText variant="caption" style={{ fontWeight: '700' }}>{prepaymentCount}</AppText></AppText>
-            </View>
-          )}
+          <AppCard style={styles.metricCard}>
+            <AppText variant="caption" color={currentTheme.textSecondary}>
+              Remaining Tenure
+            </AppText>
+            <AppText
+              variant="titleMedium"
+              color={currentTheme.primary}
+              style={styles.metricVal}
+            >
+              {remainingTenureText}
+            </AppText>
+          </AppCard>
         </View>
-      </AppCard>
+      </View>
 
-      {/* Estimated Payoff & Remaining Interest Card */}
+      {/* 3. PAYOFF PROJECTION */}
       <AppCard style={styles.card}>
         <View style={styles.cardTitleRow}>
-          <AppIcon icon={Calendar} size={18} color={currentTheme.primary} style={{ marginRight: 8 }} />
+          <AppIcon
+            icon={Calendar}
+            size={18}
+            color={currentTheme.primary}
+            style={{ marginRight: 8 }}
+          />
           <AppText variant="cardTitle" style={{ fontWeight: '700' }}>
             Payoff Projection
           </AppText>
         </View>
 
-        <View style={styles.detailRow}>
-          <AppText variant="bodyMedium" color={currentTheme.textSecondary}>Estimated Payoff Date</AppText>
-          <AppText variant="bodyMedium" style={[styles.boldVal, { color: isPaidOff ? currentTheme.success : currentTheme.primary }]}>
-            {formattedPayoffDate}
+        <View style={styles.projectionGrid}>
+          <View style={styles.projectionCol}>
+            <AppText variant="caption" color={currentTheme.textSecondary}>
+              Estimated Payoff
+            </AppText>
+            <AppText
+              variant="titleMedium"
+              color={isPaidOff ? currentTheme.success : currentTheme.primary}
+              style={{ fontWeight: '800', marginTop: 2 }}
+            >
+              {formattedPayoffDate}
+            </AppText>
+          </View>
+
+          <View style={styles.projectionDivider} />
+
+          <View style={styles.projectionCol}>
+            <AppText variant="caption" color={currentTheme.textSecondary}>
+              Remaining Tenure
+            </AppText>
+            <AppText
+              variant="bodyLarge"
+              style={{ fontWeight: '700', marginTop: 2 }}
+            >
+              {remainingTenureText}
+            </AppText>
+          </View>
+
+          <View style={styles.projectionDivider} />
+
+          <View style={styles.projectionCol}>
+            <AppText variant="caption" color={currentTheme.textSecondary}>
+              Remaining Interest
+            </AppText>
+            <AppText
+              variant="bodyLarge"
+              style={{ fontWeight: '700', marginTop: 2 }}
+            >
+              {formatCurrency(estimatedRemainingInterest)}
+            </AppText>
+          </View>
+        </View>
+
+        {/* Visual Timeline Bar */}
+        <View style={styles.timelineContainer}>
+          <View style={styles.timelineHeaderRow}>
+            <AppText
+              variant="caption"
+              color={currentTheme.textMuted}
+              style={{ fontWeight: '600' }}
+            >
+              Today
+            </AppText>
+            <AppText
+              variant="caption"
+              color={currentTheme.primary}
+              style={{ fontWeight: '700' }}
+            >
+              Payoff: {formattedPayoffDate}
+            </AppText>
+          </View>
+          <View
+            style={[
+              styles.timelineTrack,
+              { backgroundColor: isDark ? '#334155' : '#E2E8F0' },
+            ]}
+          >
+            <View
+              style={[
+                styles.timelineProgress,
+                {
+                  width: `${Math.min(100, Math.max(10, progressPercentage))}%`,
+                  backgroundColor: currentTheme.primary,
+                },
+              ]}
+            >
+              <View style={styles.timelineDot} />
+            </View>
+          </View>
+        </View>
+
+        {/* Audit & Disclaimer Notes */}
+        <View style={styles.projectionNoteBox}>
+          {regularEmiCount === 0 && (
+            <AppText
+              variant="caption"
+              color={currentTheme.textSecondary}
+              style={{ marginBottom: 4 }}
+            >
+              • Your payoff projection uses your configured EMI and current loan
+              details.
+            </AppText>
+          )}
+          <AppText
+            variant="caption"
+            color={currentTheme.textMuted}
+            style={{ fontStyle: 'italic' }}
+          >
+            Projection based on your current balance, EMI and interest rate.
+            Actual lender calculations may differ.
+          </AppText>
+        </View>
+      </AppCard>
+
+      {/* 4. INTEREST OUTLOOK & BREAKDOWN */}
+      <AppCard style={styles.card}>
+        <View style={styles.cardTitleRow}>
+          <AppIcon
+            icon={PieChart}
+            size={18}
+            color={currentTheme.primary}
+            style={{ marginRight: 8 }}
+          />
+          <AppText variant="cardTitle" style={{ fontWeight: '700' }}>
+            Interest Outlook
           </AppText>
         </View>
 
         <View style={styles.detailRow}>
-          <AppText variant="bodyMedium" color={currentTheme.textSecondary}>Estimated Remaining Interest</AppText>
-          <AppText variant="bodyMedium" style={styles.boldVal}>
+          <AppText variant="bodyMedium" color={currentTheme.textSecondary}>
+            Interest Paid to Date
+          </AppText>
+          <AppText
+            variant="bodyMedium"
+            style={[
+              styles.boldVal,
+              { color: currentTheme.warning || '#F59E0B' },
+            ]}
+          >
+            {formatCurrency(cumulativeInterestPaid)}
+          </AppText>
+        </View>
+
+        <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
+          <AppText variant="bodyMedium" color={currentTheme.textSecondary}>
+            Estimated Remaining Interest
+          </AppText>
+          <AppText
+            variant="bodyMedium"
+            style={[styles.boldVal, { color: currentTheme.textPrimary }]}
+          >
             {formatCurrency(estimatedRemainingInterest)}
           </AppText>
         </View>
 
-        <View style={styles.detailRow}>
-          <AppText variant="bodyMedium" color={currentTheme.textSecondary} style={styles.detailLabelFlex}>
-            Estimated Remaining Tenure
+        <View style={styles.explanatoryBox}>
+          <AppText variant="caption" color={currentTheme.textMuted}>
+            Based on your current balance, interest rate (
+            {loan.annualInterestRate}%) and scheduled EMI (
+            {formatCurrency(loan.emiAmount)}).
           </AppText>
-          <AppText variant="bodyMedium" style={[styles.boldVal, styles.detailValRight]}>
-            {remainingTenureText}
+        </View>
+      </AppCard>
+
+      {/* 5. PAYMENT ACTIVITY SUMMARY */}
+      <AppCard style={styles.card}>
+        <View style={styles.cardTitleRow}>
+          <AppIcon
+            icon={ReceiptText}
+            size={18}
+            color={currentTheme.primary}
+            style={{ marginRight: 8 }}
+          />
+          <AppText variant="cardTitle" style={{ fontWeight: '700' }}>
+            Payment Activity
           </AppText>
         </View>
 
-        {originalTenureMonths > 0 && (
-          <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
-            <AppText variant="bodyMedium" color={currentTheme.textSecondary} style={styles.detailLabelFlex}>Original Loan Tenure</AppText>
-            <AppText variant="bodyMedium" style={[styles.boldVal, styles.detailValRight]}>
-              {originalTenureMonths} months
+        {totalPaymentsCount > 0 ? (
+          <>
+            <AppText
+              variant="bodyMedium"
+              style={{ fontWeight: '700', marginBottom: 8 }}
+            >
+              {totalPaymentsCount} payment{totalPaymentsCount === 1 ? '' : 's'}{' '}
+              recorded
             </AppText>
+
+            {latestPaymentInsight && (
+              <View style={styles.latestPaymentBox}>
+                <View style={styles.latestHeaderRow}>
+                  <AppText variant="caption" color={currentTheme.textSecondary}>
+                    Last Payment
+                  </AppText>
+                  <AppText variant="caption" color={currentTheme.textMuted}>
+                    {latestPaymentInsight.formattedDate}
+                  </AppText>
+                </View>
+                <AppText
+                  variant="titleMedium"
+                  color={currentTheme.primary}
+                  style={{ fontWeight: '800', marginVertical: 2 }}
+                >
+                  {formatCurrency(latestPaymentInsight.amount)}
+                </AppText>
+                <AppText variant="caption" color={currentTheme.textSecondary}>
+                  Principal: {formatCurrency(latestPaymentInsight.principal)} |
+                  Interest: {formatCurrency(latestPaymentInsight.interest)}
+                </AppText>
+              </View>
+            )}
+
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate(ROUTES.LOAN_PAYMENT_HISTORY, {
+                  loanId: loan.id,
+                })
+              }
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="View Payment History"
+              style={styles.historyBtnLink}
+            >
+              <AppText
+                variant="bodyMedium"
+                color={currentTheme.primary}
+                style={{ fontWeight: '700' }}
+              >
+                View Payment History →
+              </AppText>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <View style={styles.emptyPaymentContainer}>
+            <AppText
+              variant="bodyMedium"
+              style={{ fontWeight: '700', marginBottom: 4 }}
+            >
+              No payments recorded yet.
+            </AppText>
+            <AppText
+              variant="caption"
+              color={currentTheme.textMuted}
+              style={{ marginBottom: 12, textAlign: 'center' }}
+            >
+              Your payoff projection uses your configured EMI and current loan
+              details.
+            </AppText>
+            <SecondaryButton
+              title="Record First Payment"
+              icon={Plus}
+              onPress={() =>
+                navigation.navigate(ROUTES.ADD_PAYMENT, { loanId: loan.id })
+              }
+              style={{ paddingHorizontal: 16 }}
+            />
           </View>
         )}
       </AppCard>
 
-      {/* Prepayment Impact Card */}
-      {prepaymentCount > 0 && (
-        <AppCard style={[styles.card, { backgroundColor: 'rgba(16, 185, 129, 0.05)', borderColor: 'rgba(16, 185, 129, 0.2)' }]}>
-          <View style={styles.cardTitleRow}>
-            <AppIcon icon={Sparkles} size={18} color={currentTheme.success} style={{ marginRight: 8 }} />
-            <AppText variant="cardTitle" color={currentTheme.success} style={{ fontWeight: '700' }}>
-              Prepayment Impact
-            </AppText>
-          </View>
-
-          <View style={styles.detailRow}>
-            <AppText variant="bodyMedium" color={currentTheme.textSecondary} style={styles.detailLabelFlex}>Total Prepayments Made</AppText>
-            <AppText variant="bodyMedium" style={[styles.boldVal, { color: currentTheme.success }]}>
-              {formatCurrency(prepaymentImpact.totalPrepaymentsMade)} ({prepaymentCount})
-            </AppText>
-          </View>
-
-          <View style={styles.detailRow}>
-            <AppText variant="bodyMedium" color={currentTheme.textSecondary} style={styles.detailLabelFlex}>Additional Principal Reduced</AppText>
-            <AppText variant="bodyMedium" style={styles.boldVal}>
-              {formatCurrency(prepaymentImpact.additionalPrincipalReduced)}
-            </AppText>
-          </View>
-
-          <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
-            <AppText variant="bodyMedium" color={currentTheme.textSecondary} style={styles.detailLabelFlex}>Estimated Interest Avoided</AppText>
-            <AppText variant="bodyMedium" style={[styles.boldVal, { color: currentTheme.success }]}>
-              {formatCurrency(prepaymentImpact.estimatedInterestAvoided)}
-            </AppText>
-          </View>
-        </AppCard>
-      )}
-
-      {/* Latest Payment Insight Card */}
-      {latestPaymentInsight && (
-        <AppCard style={styles.card}>
-          <View style={styles.cardTitleRow}>
-            <AppIcon icon={ReceiptText} size={18} color={currentTheme.primary} style={{ marginRight: 8 }} />
-            <AppText variant="cardTitle" style={{ fontWeight: '700' }}>
-              Latest Payment Insight
-            </AppText>
-          </View>
-
-          <View style={styles.detailRow}>
-            <AppText variant="bodyMedium" color={currentTheme.textSecondary} style={styles.detailLabelFlex}>Payment Date</AppText>
-            <AppText variant="bodyMedium" style={styles.boldVal}>{latestPaymentInsight.formattedDate}</AppText>
-          </View>
-
-          <View style={styles.detailRow}>
-            <AppText variant="bodyMedium" color={currentTheme.textSecondary} style={styles.detailLabelFlex}>Amount Recorded</AppText>
-            <AppText variant="bodyMedium" style={[styles.boldVal, { color: currentTheme.primary }]}>
-              {formatCurrency(latestPaymentInsight.amount)}
-            </AppText>
-          </View>
-
-          <View style={styles.detailRow}>
-            <AppText variant="bodyMedium" color={currentTheme.textSecondary} style={styles.detailLabelFlex}>Principal Portion</AppText>
-            <AppText variant="bodyMedium" style={styles.boldVal}>
-              {formatCurrency(latestPaymentInsight.principal)}
-            </AppText>
-          </View>
-
-          <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
-            <AppText variant="bodyMedium" color={currentTheme.textSecondary} style={styles.detailLabelFlex}>Interest Portion</AppText>
-            <AppText variant="bodyMedium" style={[styles.boldVal, { color: currentTheme.secondary || '#F59E0B' }]}>
-              {formatCurrency(latestPaymentInsight.interest)}
-            </AppText>
-          </View>
-        </AppCard>
-      )}
-
-      {/* Historical Trend Chart */}
-      <LoanInsightsTrendChart historySeries={historySeries} />
-
-      {/* How Finzo calculates this Expandable Accordion */}
+      {/* 6. HOW FINZO CALCULATES INSIGHTS (ACCORDION) */}
       <AppCard style={styles.assumptionsCard}>
         <TouchableOpacity
           onPress={() => setShowAssumptions(!showAssumptions)}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Toggle how Finzo calculates these insights explanation"
           style={styles.assumptionsHeader}
         >
           <View style={styles.accordionHeaderTitle}>
-            <AppIcon icon={Info} size={16} color={currentTheme.primary} style={{ marginRight: 8 }} />
-            <AppText variant="bodyMedium" style={{ fontWeight: '700', flex: 1 }}>
+            <AppIcon
+              icon={Info}
+              size={16}
+              color={currentTheme.primary}
+              style={{ marginRight: 8 }}
+            />
+            <AppText
+              variant="bodyMedium"
+              style={{ fontWeight: '700', flex: 1 }}
+            >
               How Finzo calculates these insights
             </AppText>
           </View>
@@ -412,61 +581,217 @@ export const LoanInsightsScreen = ({ route, navigation }) => {
 
         {showAssumptions && (
           <View style={styles.assumptionsBody}>
-            <AppText variant="caption" color={currentTheme.textSecondary} style={styles.assumptionParagraph}>
-              • Interest calculation uses standard monthly reducing balance math based on your annual interest rate ({loan.annualInterestRate}%).
+            <AppText
+              variant="caption"
+              color={currentTheme.textSecondary}
+              style={styles.assumptionParagraph}
+            >
+              • Balance source:{' '}
+              {isBankConfirmed
+                ? 'Bank Confirmed balance'
+                : 'Finzo estimated balance'}{' '}
+              (principal reduced: {formatCurrency(principalReduced)}).
             </AppText>
-            <AppText variant="caption" color={currentTheme.textSecondary} style={styles.assumptionParagraph}>
-              • Historical payment snapshots preserve interest/principal values recorded at the time of each payment.
+            <AppText
+              variant="caption"
+              color={currentTheme.textSecondary}
+              style={styles.assumptionParagraph}
+            >
+              • Interest calculation: Uses standard monthly reducing balance
+              math based on your annual rate ({loan.annualInterestRate}%).
             </AppText>
-            <AppText variant="caption" color={currentTheme.textSecondary} style={styles.assumptionParagraph}>
-              • Future remaining interest and estimated payoff dates assume your current EMI ({formatCurrency(loan.emiAmount)}) continues unchanged.
+            <AppText
+              variant="caption"
+              color={currentTheme.textSecondary}
+              style={styles.assumptionParagraph}
+            >
+              • Payoff projection: Assumes your current monthly EMI (
+              {formatCurrency(loan.emiAmount)}) continues on schedule without
+              interruption.
+            </AppText>
+            <AppText
+              variant="caption"
+              color={currentTheme.textSecondary}
+              style={styles.assumptionParagraph}
+            >
+              • Historical payment snapshots: Preserves principal and interest
+              breakdown values recorded at the time of each transaction.
             </AppText>
             <View style={styles.disclaimerBox}>
-              <AppText variant="caption" color={currentTheme.textMuted} style={styles.disclaimerText}>
-                Disclaimer: Finzo estimates are based on the information you provide. Your lender's actual calculations, dates, and charges may differ.
+              <AppText
+                variant="caption"
+                color={currentTheme.textMuted}
+                style={styles.disclaimerText}
+              >
+                Disclaimer: Finzo estimates are for informational planning
+                purposes. Actual lender statements and calculations may vary.
               </AppText>
             </View>
           </View>
         )}
       </AppCard>
 
-      {/* Action Buttons */}
-      <View style={styles.actionsGroup}>
-        <PrimaryButton
-          title="Record Payment"
-          icon={Plus}
-          onPress={() => navigation.navigate(ROUTES.ADD_PAYMENT, { loanId: loan.id })}
-        />
+      {/* 7. PAYOFF GOAL PREVIEW CARD */}
+      <LoanGoalPreviewCard
+        goal={primaryGoal}
+        onViewGoals={() =>
+          navigation.navigate(ROUTES.LOAN_GOALS, { loanId: loan.id })
+        }
+      />
 
-        <SecondaryButton
-          title="Simulate Prepayment"
-          icon={Sparkles}
-          onPress={() => navigation.navigate(ROUTES.LOAN_PREPAYMENT_SIMULATOR, { loanId: loan.id })}
-        />
+      {/* 8. ACTIONS SECTION */}
+      <View style={styles.actionsSection}>
+        <AppText variant="cardTitle" style={styles.actionsSectionTitle}>
+          What would you like to do?
+        </AppText>
 
-        <SecondaryButton
-          title="Plan Payoff Scenarios"
-          icon={Compass}
-          onPress={() => navigation.navigate(ROUTES.LOAN_PAYOFF_PLANNER, { loanId: loan.id })}
-        />
+        <View style={styles.actionsGrid}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate(ROUTES.LOAN_PREPAYMENT_SIMULATOR, {
+                loanId: loan.id,
+              })
+            }
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Simulate Prepayment"
+            style={[
+              styles.actionTile,
+              {
+                backgroundColor: currentTheme.surface,
+                borderColor: currentTheme.border,
+              },
+            ]}
+          >
+            <AppIcon
+              icon={Sparkles}
+              size={20}
+              color={currentTheme.primary}
+              style={{ marginBottom: 6 }}
+            />
+            <AppText variant="bodyMedium" style={{ fontWeight: '700' }}>
+              Simulate Prepayment
+            </AppText>
+            <AppText
+              variant="caption"
+              color={currentTheme.textMuted}
+              style={{ marginTop: 2 }}
+            >
+              Calculate savings
+            </AppText>
+          </TouchableOpacity>
 
-        <SecondaryButton
-          title="View Payoff Goals"
-          icon={Target}
-          onPress={() => navigation.navigate(ROUTES.LOAN_GOALS, { loanId: loan.id })}
-        />
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate(ROUTES.LOAN_GOALS, { loanId: loan.id })
+            }
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="View Payoff Goals"
+            style={[
+              styles.actionTile,
+              {
+                backgroundColor: currentTheme.surface,
+                borderColor: currentTheme.border,
+              },
+            ]}
+          >
+            <AppIcon
+              icon={Target}
+              size={20}
+              color={currentTheme.primary}
+              style={{ marginBottom: 6 }}
+            />
+            <AppText variant="bodyMedium" style={{ fontWeight: '700' }}>
+              Payoff Goals
+            </AppText>
+            <AppText
+              variant="caption"
+              color={currentTheme.textMuted}
+              style={{ marginTop: 2 }}
+            >
+              Track payoff target
+            </AppText>
+          </TouchableOpacity>
 
-        <SecondaryButton
-          title="View Payment History"
-          icon={Layers}
-          onPress={() => navigation.navigate(ROUTES.LOAN_PAYMENT_HISTORY, { loanId: loan.id })}
-        />
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate(ROUTES.ADD_PAYMENT, { loanId: loan.id })
+            }
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Record Payment"
+            style={[
+              styles.actionTile,
+              {
+                backgroundColor: currentTheme.surface,
+                borderColor: currentTheme.border,
+              },
+            ]}
+          >
+            <AppIcon
+              icon={Plus}
+              size={20}
+              color={currentTheme.primary}
+              style={{ marginBottom: 6 }}
+            />
+            <AppText variant="bodyMedium" style={{ fontWeight: '700' }}>
+              Record Payment
+            </AppText>
+            <AppText
+              variant="caption"
+              color={currentTheme.textMuted}
+              style={{ marginTop: 2 }}
+            >
+              Log EMI / Prepayment
+            </AppText>
+          </TouchableOpacity>
 
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate(ROUTES.LOAN_PAYMENT_HISTORY, {
+                loanId: loan.id,
+              })
+            }
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="View Payment History"
+            style={[
+              styles.actionTile,
+              {
+                backgroundColor: currentTheme.surface,
+                borderColor: currentTheme.border,
+              },
+            ]}
+          >
+            <AppIcon
+              icon={Layers}
+              size={20}
+              color={currentTheme.primary}
+              style={{ marginBottom: 6 }}
+            />
+            <AppText variant="bodyMedium" style={{ fontWeight: '700' }}>
+              Payment History →
+            </AppText>
+            <AppText
+              variant="caption"
+              color={currentTheme.textMuted}
+              style={{ marginTop: 2 }}
+            >
+              Full payment ledger
+            </AppText>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* 9. PDF EXPORT */}
+      <View style={styles.exportSection}>
         <SecondaryButton
           title={isExporting ? 'Preparing Report...' : 'Export Insights (PDF)'}
           icon={FileText}
           onPress={handleExportInsightsPdf}
           disabled={isExporting}
+          accessibilityLabel="Export Insights PDF"
         />
       </View>
     </ScreenContainer>
@@ -484,52 +809,36 @@ const styles = StyleSheet.create({
     padding: 32,
   },
   heroCard: {
-    padding: 20,
-    borderRadius: 20,
+    padding: 0,
     marginBottom: 16,
+    borderWidth: 0,
+    overflow: 'hidden',
+  },
+  heroContent: {
+    padding: 16,
   },
   heroTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 8,
   },
-  badgeRow: {
+  heroTitleGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
   },
-  heroBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 6,
-  },
-  paidBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#10B981',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 4,
-  },
-  archivedBadge: {
-    backgroundColor: 'rgba(0, 0, 0, 0.25)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+  heroTitleText: {
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    fontSize: 11,
   },
   sourceChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 10,
+    borderRadius: 12,
+    borderWidth: 1,
   },
   heroMainRow: {
     flexDirection: 'row',
@@ -537,8 +846,8 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   heroPct: {
-    fontSize: 36,
-    lineHeight: 44,
+    fontSize: 34,
+    lineHeight: 40,
     fontWeight: '900',
     marginRight: 8,
   },
@@ -550,16 +859,32 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
     borderRadius: 4,
     overflow: 'hidden',
-    marginVertical: 12,
+    marginVertical: 10,
   },
   heroProgressBar: {
     height: '100%',
-    backgroundColor: '#10B981',
+    backgroundColor: '#86EFAC',
     borderRadius: 4,
   },
   heroSubGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: 4,
+  },
+  metricsGridContainer: {
+    marginBottom: 16,
+    gap: 10,
+  },
+  metricsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  metricCard: {
+    flex: 1,
+    padding: 12,
+  },
+  metricVal: {
+    fontWeight: '800',
     marginTop: 4,
   },
   card: {
@@ -571,9 +896,56 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  cardTitle: {
+  projectionGrid: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: 12,
+  },
+  projectionCol: {
+    flex: 1,
+  },
+  projectionDivider: {
+    width: 1,
+    height: 32,
+    backgroundColor: 'rgba(0, 0, 0, 0.08)',
+    marginHorizontal: 8,
+  },
+  timelineContainer: {
+    marginTop: 8,
     marginBottom: 12,
-    fontWeight: '700',
+  },
+  timelineHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  timelineTrack: {
+    height: 8,
+    borderRadius: 4,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  timelineProgress: {
+    height: '100%',
+    borderRadius: 4,
+    position: 'relative',
+    justifyContent: 'center',
+  },
+  timelineDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#FFFFFF',
+    position: 'absolute',
+    right: 0,
+    borderWidth: 2,
+    borderColor: '#2563EB',
+  },
+  projectionNoteBox: {
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0, 0, 0, 0.06)',
   },
   detailRow: {
     flexDirection: 'row',
@@ -581,50 +953,36 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: 'rgba(0, 0, 0, 0.06)',
   },
   boldVal: {
     fontWeight: '700',
   },
-  statsGrid: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  statCol: {
-    flex: 1,
-  },
-  statDivider: {
-    width: 1,
-    height: 36,
-    backgroundColor: '#E5E7EB',
-    marginHorizontal: 12,
-  },
-  countsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 12,
-  },
-  countBadge: {
-    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+  explanatoryBox: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.03)',
     borderRadius: 8,
   },
-  detailLabelFlex: {
-    flex: 1,
-    marginRight: 12,
+  latestPaymentBox: {
+    padding: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+    borderRadius: 10,
+    marginBottom: 10,
   },
-  detailValRight: {
-    textAlign: 'right',
-    flexShrink: 1,
+  latestHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  historyBtnLink: {
+    paddingVertical: 6,
+  },
+  emptyPaymentContainer: {
+    alignItems: 'center',
+    paddingVertical: 12,
   },
   assumptionsCard: {
-    padding: 16,
+    padding: 14,
     marginBottom: 16,
   },
   assumptionsHeader: {
@@ -640,9 +998,9 @@ const styles = StyleSheet.create({
   },
   assumptionsBody: {
     marginTop: 12,
-    paddingTop: 12,
+    paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
+    borderTopColor: 'rgba(0, 0, 0, 0.06)',
     gap: 8,
   },
   assumptionParagraph: {
@@ -658,8 +1016,26 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     fontStyle: 'italic',
   },
-  actionsGroup: {
-    gap: 12,
+  actionsSection: {
+    marginBottom: 16,
+  },
+  actionsSectionTitle: {
+    fontWeight: '700',
+    marginBottom: 12,
+  },
+  actionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  actionTile: {
+    width: '48.5%',
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  exportSection: {
+    marginTop: 4,
   },
 });
 

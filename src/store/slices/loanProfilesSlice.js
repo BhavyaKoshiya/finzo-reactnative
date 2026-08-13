@@ -162,6 +162,8 @@ export const selectLoanProfiles = createSelector(
   (profiles) => (Array.isArray(profiles) ? profiles : []).filter(isValidLoanProfile)
 );
 
+export const selectAllLoanProfiles = selectLoanProfiles;
+
 export const selectActiveLoanProfiles = createSelector(
   [selectLoanProfiles],
   (profiles) => profiles.filter((p) => p.status === 'active')

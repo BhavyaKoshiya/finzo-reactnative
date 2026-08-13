@@ -23,6 +23,10 @@ describe('rewardsSlice & Selectors', () => {
       totalCheckIns: 0,
       adFreeUntil: null,
       rewardHistory: [],
+      rewardedAdsWatchedToday: 0,
+      rewardedAdsWatchDate: null,
+      rewardedAdMilestoneClaimedDate: null,
+      lastRewardedAdCompletedAt: null,
       schemaVersion: 1,
     });
   });

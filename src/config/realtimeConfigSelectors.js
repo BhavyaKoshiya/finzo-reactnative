@@ -39,6 +39,11 @@ export const selectRewardById = (config, rewardId) => {
   return { id: rewardId, ...rawPkg };
 };
 
+export const selectRewardedAdsConfig = (config) => {
+  const active = config || DEFAULT_REALTIME_CONFIG;
+  return active.rewards?.rewardedAds || DEFAULT_REALTIME_CONFIG.rewards.rewardedAds;
+};
+
 export const selectAdConfig = (config) => {
   const active = config || DEFAULT_REALTIME_CONFIG;
   return active.ads || DEFAULT_REALTIME_CONFIG.ads;
@@ -56,6 +61,7 @@ export default {
   selectRedeemableRewards,
   selectEnabledRewards,
   selectRewardById,
+  selectRewardedAdsConfig,
   selectAdConfig,
   selectFeatureFlags,
 };

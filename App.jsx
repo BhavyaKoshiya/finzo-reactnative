@@ -10,6 +10,8 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { navigate } from './src/navigation/navigationRef';
 import ROUTES from './src/navigation/routes';
 import loanReminderService from './src/features/loans/services/loanReminderService';
+import AppStartupGate from './src/components/containers/AppStartupGate';
+import ConnectivityGate from './src/components/containers/ConnectivityGate';
 
 function AppContent() {
   useEffect(() => {
@@ -75,7 +77,9 @@ function AppContent() {
   return (
     <SafeAreaProvider>
       <StatusBar barStyle="dark-content" />
-      <AppNavigator />
+      <ConnectivityGate>
+        <AppNavigator />
+      </ConnectivityGate>
     </SafeAreaProvider>
   );
 }
@@ -85,7 +89,9 @@ export default function App() {
     <GestureHandlerRootView style={styles.root}>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
-          <AppContent />
+          <AppStartupGate>
+            <AppContent />
+          </AppStartupGate>
         </PersistGate>
       </Provider>
     </GestureHandlerRootView>
