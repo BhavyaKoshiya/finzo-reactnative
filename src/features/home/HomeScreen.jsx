@@ -30,6 +30,8 @@ import { adaptLoanProfileForDisplay } from '../loans/utils/loanPresentationAdapt
 import { getPaymentStatus } from '../loans/utils/loanReminderUtils';
 import loanReminderService from '../loans/services/loanReminderService';
 import { selectLoanRemindersEnabled } from '../../store/slices/settingsSlice';
+import AdPlacement from '../../components/ads/AdPlacement';
+import { AD_PLACEMENTS } from '../../services/ads/adPlacementConstants';
 
 import {
   getExportModelForCalculator,
@@ -328,6 +330,13 @@ export const HomeScreen = ({ navigation }) => {
           ))}
         </View>
       </View>
+
+      {/* Moderate Home Ad Placement */}
+      <AdPlacement
+        screen="home"
+        placementId={AD_PLACEMENTS.HOME_BANNER}
+        adType="banner"
+      />
 
       <ExportPdfModal
         visible={pdfModalVisible}

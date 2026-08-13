@@ -3,6 +3,60 @@
  * Serves as the safe fallback when remote Firebase RTDB is offline, unavailable, or invalid.
  * Authoritative RTDB /config contract compliant.
  */
+export const DEFAULT_ADS_CONFIG = {
+  enabled: true,
+  rewardedAdsEnabled: true,
+  bannerAdsEnabled: true,
+  interstitialAdsEnabled: true,
+  banner: {
+    enabled: true,
+  },
+  native: {
+    enabled: true,
+  },
+  interstitial: {
+    enabled: true,
+    cooldownMinutes: 10,
+    maxPerSession: 1,
+  },
+  rewarded: {
+    enabled: true,
+  },
+  placements: {
+    home: {
+      banner: true,
+      native: false,
+      interstitial: false,
+    },
+    calculators: {
+      banner: true,
+      native: true,
+      interstitial: true,
+    },
+    myLoans: {
+      banner: true,
+      native: false,
+      interstitial: false,
+    },
+    loanDetails: {
+      banner: false,
+      native: true,
+      interstitial: false,
+    },
+    profile: {
+      banner: true,
+      native: false,
+      interstitial: false,
+    },
+    rewards: {
+      banner: true,
+      native: true,
+      interstitial: false,
+      rewarded: true,
+    },
+  },
+};
+
 export const DEFAULT_REALTIME_CONFIG = {
   version: 1,
 
@@ -59,12 +113,7 @@ export const DEFAULT_REALTIME_CONFIG = {
     },
   },
 
-  ads: {
-    enabled: false,
-    rewardedAdsEnabled: false,
-    bannerAdsEnabled: false,
-    interstitialAdsEnabled: false,
-  },
+  ads: DEFAULT_ADS_CONFIG,
 
   featureFlags: {
     rewardsEnabled: true,

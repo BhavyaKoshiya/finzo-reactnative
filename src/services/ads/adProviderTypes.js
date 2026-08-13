@@ -9,6 +9,13 @@ export const AD_PROVIDER_TYPES = {
   APPROVED_REAL: 'approved_real',
 };
 
+export const AD_TYPES = {
+  BANNER: 'banner',
+  NATIVE: 'native',
+  INTERSTITIAL: 'interstitial',
+  REWARDED: 'rewarded',
+};
+
 export const AD_STATES = {
   NOT_AVAILABLE: 'NOT_AVAILABLE',
   LOADING: 'LOADING',
@@ -21,5 +28,6 @@ export const AD_STATES = {
 
 export default {
   AD_PROVIDER_TYPES,
+  AD_TYPES,
   AD_STATES,
 };

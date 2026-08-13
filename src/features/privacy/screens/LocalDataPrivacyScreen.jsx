@@ -83,6 +83,7 @@ export const LocalDataPrivacyScreen = ({ navigation }) => {
             <AppText variant="bodySmall">• Public app configuration (`/config`)</AppText>
             <AppText variant="bodySmall">• Reward point store rules & daily check-in streaks</AppText>
             <AppText variant="bodySmall">• Non-personal app release announcements & version flags</AppText>
+            <AppText variant="bodySmall">• Advertising infrastructure does NOT receive loan, payment, or private financial data</AppText>
           </View>
         </AppCard>
       </View>

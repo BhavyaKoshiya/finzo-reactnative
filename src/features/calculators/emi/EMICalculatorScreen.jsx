@@ -21,6 +21,8 @@ import AmortizationSection from './components/AmortizationSection';
 import { createCalculationSnapshot } from '../../saved/types/savedTypes';
 import { restoreSavedCalculationInputs } from '../../saved/utils/calculationRestoreAdapters';
 import { addSavedCalculation, updateSavedCalculation } from '../../../store/slices/savedCalculationsSlice';
+import AdPlacement from '../../../components/ads/AdPlacement';
+import { AD_PLACEMENTS } from '../../../services/ads/adPlacementConstants';
 
 export const EMICalculatorScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -171,6 +173,13 @@ export const EMICalculatorScreen = ({ route, navigation }) => {
               onToggleViewMode={setScheduleViewMode}
               onViewModeChange={setScheduleViewMode}
               style={styles.cardMargin}
+            />
+
+            <AdPlacement
+              screen="calculators"
+              placementId={AD_PLACEMENTS.CALCULATOR_BANNER}
+              adType="banner"
+              style={{ marginTop: 12 }}
             />
           </CalculatorResultSection>
         </View>

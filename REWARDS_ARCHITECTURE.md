@@ -1,31 +1,49 @@
-# Finzo Rewards & Entitlements Architecture (Phase 16.15 Update)
+# Finzo — Rewards Architecture & Engine Specification
 
-## 1. Summary
-The Finzo Rewards system provides habit-forming incentives (Daily Check-In, Rewarded Ads, Ad-Free Milestones, and Points Redemptions) while upholding Finzo's offline-first privacy standards.
-
----
-
-## 2. Remote Configuration vs Local User State
-- **Firebase RTDB (`/config`)**:
-  - Remote control over feature flags, points per ad, daily watch limits, cooldowns, and milestone targets.
-  - NEVER receives or stores user points, transaction history, check-in dates, or ad-free expiration dates.
-- **Redux Persistence (`rewardsSlice.js`)**:
-  - All user balances, streaks, history transactions, daily watch counts, and ad-free expiry dates reside 100% locally on the device using `@react-native-async-storage/async-storage`.
+This document defines the offline-first reward point engine, daily check-in streaks, daily rewarded ad milestones, store catalog, and ad-free entitlement lifecycle.
 
 ---
 
-## 3. Rewarded-Ad Milestone & Points Specification
-- **Points per Ad**: Firebase RTDB configurable (`rewardedAds.pointsPerAd`, default `10`).
-- **Daily Watch Limit**: Firebase RTDB configurable (`rewardedAds.dailyWatchLimit`, default `5`).
-- **Cooldown**: Firebase RTDB configurable (`rewardedAds.cooldownMinutes`, default `0`).
-- **Daily Milestone**:
-  - Target: Firebase RTDB configurable (`rewardedAds.milestone.requiredAds`, default `5`).
-  - Reward: Firebase RTDB configurable (`rewardedAds.milestone.adFreeMinutes`, default `30`).
-  - Idempotency: Identity `milestone_YYYY-MM-DD` guarantees the milestone reward can only be claimed ONCE per calendar day.
-  - Entitlement Stacking: Ad-free duration stacks onto unexpired `adFreeUntil` timestamps.
+## 1. Core Architecture
+
+```
+User Action (Check-In / Rewarded Ad)
+         ↓
+  rewardService
+         ↓
+    Redux Store (rewardsSlice)
+         ↓
+AsyncStorage Persistence (redux-persist)
+```
 
 ---
 
-## 4. Schema & Validation Safety
-Validation in `realtimeConfigSchema.js` rejects impossible configurations:
-- `milestone.requiredAds > dailyWatchLimit` (e.g. required 5 ads but limit is 3) $\rightarrow$ Validation fails, falling back to safe local defaults.
+## 2. Daily Check-In Schedule
+
+Points rewarded follow a 7-day schedule (`rewardSchedule: [5, 7, 9, 12, 15, 17, 20]`):
+- **Day 1**: 5 points
+- **Day 2**: 7 points
+- **Day 3**: 9 points
+- **Day 4**: 12 points
+- **Day 5**: 15 points
+- **Day 6**: 17 points
+- **Day 7**: 20 points (Max Reward)
+
+Missing a day resets the streak back to Day 1.
+
+---
+
+## 3. Daily Rewarded Ad Milestone & Ad-Free Entitlement
+
+- **Points per Ad**: 10 points default
+- **Daily Watch Limit**: 5 ads max per calendar day
+- **Milestone Requirement**: Watching 5 ads in a single day unlocks 30 minutes of ad-free access.
+- **Stacking Policy**: If an ad-free entitlement is already active (`adFreeUntil > now`), claiming another entitlement extends the duration from `adFreeUntil + durationMinutes`. If expired, it starts from `now + durationMinutes`.
+
+---
+
+## 4. Security & Replay Protection
+
+1. **Session ID Requirement**: `rewardedAdSessionManager` issues a unique `sessionId` per attempt.
+2. **Single Claim Lock**: A session ID can ONLY transition from `COMPLETED` to `REWARDED` once.
+3. **Daily Cap Enforcement**: Attempt #6 in a calendar day is rejected by the reward engine with zero points.

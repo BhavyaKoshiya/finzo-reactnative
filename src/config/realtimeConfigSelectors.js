@@ -1,4 +1,4 @@
-import { DEFAULT_REALTIME_CONFIG } from './realtimeConfigDefaults';
+import { DEFAULT_REALTIME_CONFIG, DEFAULT_ADS_CONFIG } from './realtimeConfigDefaults';
 
 /**
  * Pure selector helpers for extracting typed sections from Realtime Configuration object.
@@ -80,9 +80,74 @@ export const selectDiscountConfig = (config) => {
   return active.rewards?.discounts || DEFAULT_REALTIME_CONFIG.rewards.discounts;
 };
 
+// ==========================================
+// Ads Infrastructure Selectors (Phase 16.16)
+// ==========================================
+
 export const selectAdConfig = (config) => {
   const active = config || DEFAULT_REALTIME_CONFIG;
-  return active.ads || DEFAULT_REALTIME_CONFIG.ads;
+  return active.ads || DEFAULT_ADS_CONFIG;
+};
+
+export const selectAdsGlobalEnabled = (config) => {
+  const adConfig = selectAdConfig(config);
+  return Boolean(adConfig?.enabled);
+};
+
+export const selectBannerAdsEnabled = (config) => {
+  const adConfig = selectAdConfig(config);
+  return Boolean(adConfig?.enabled && (adConfig?.banner?.enabled ?? true));
+};
+
+export const selectNativeAdsEnabled = (config) => {
+  const adConfig = selectAdConfig(config);
+  return Boolean(adConfig?.enabled && (adConfig?.native?.enabled ?? true));
+};
+
+export const selectInterstitialAdsConfig = (config) => {
+  const adConfig = selectAdConfig(config);
+  return adConfig?.interstitial || DEFAULT_ADS_CONFIG.interstitial;
+};
+
+export const selectInterstitialAdsEnabled = (config) => {
+  const adConfig = selectAdConfig(config);
+  const inter = selectInterstitialAdsConfig(config);
+  return Boolean(adConfig?.enabled && (inter?.enabled ?? true));
+};
+
+export const selectInterstitialCooldownMinutes = (config) => {
+  const inter = selectInterstitialAdsConfig(config);
+  return Number(inter?.cooldownMinutes) ?? 10;
+};
+
+export const selectInterstitialMaxPerSession = (config) => {
+  const inter = selectInterstitialAdsConfig(config);
+  return Number(inter?.maxPerSession) ?? 1;
+};
+
+export const selectRewardedAdsPlacementEnabled = (config) => {
+  const adConfig = selectAdConfig(config);
+  return Boolean(adConfig?.enabled && (adConfig?.rewarded?.enabled ?? true));
+};
+
+export const selectPlacementAdConfig = (config, screen) => {
+  const adConfig = selectAdConfig(config);
+  const placements = adConfig?.placements || DEFAULT_ADS_CONFIG.placements;
+  return placements[screen] || { banner: false, native: false, interstitial: false };
+};
+
+export const isAdAllowedForPlacement = (config, screen, adType) => {
+  if (!selectAdsGlobalEnabled(config)) return false;
+
+  if (adType === 'banner' && !selectBannerAdsEnabled(config)) return false;
+  if (adType === 'native' && !selectNativeAdsEnabled(config)) return false;
+  if (adType === 'interstitial' && !selectInterstitialAdsEnabled(config)) return false;
+  if (adType === 'rewarded' && !selectRewardedAdsPlacementEnabled(config)) return false;
+
+  if (!screen) return true;
+
+  const placementConfig = selectPlacementAdConfig(config, screen);
+  return Boolean(placementConfig[adType]);
 };
 
 export const selectFeatureFlags = (config) => {
@@ -108,5 +173,15 @@ export default {
   selectRewardedAdFreeMinutes,
   selectDiscountConfig,
   selectAdConfig,
+  selectAdsGlobalEnabled,
+  selectBannerAdsEnabled,
+  selectNativeAdsEnabled,
+  selectInterstitialAdsConfig,
+  selectInterstitialAdsEnabled,
+  selectInterstitialCooldownMinutes,
+  selectInterstitialMaxPerSession,
+  selectRewardedAdsPlacementEnabled,
+  selectPlacementAdConfig,
+  isAdAllowedForPlacement,
   selectFeatureFlags,
 };

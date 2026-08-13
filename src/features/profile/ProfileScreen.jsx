@@ -54,6 +54,8 @@ import { formatCurrencyCompact } from '../../utils/financeFormatters';
 import { useAppTheme } from '../../hooks/useAppTheme';
 import { ROUTES } from '../../navigation/routes';
 import { navigateToMyLoans } from '../../navigation/navigationHelpers';
+import AdPlacement from '../../components/ads/AdPlacement';
+import { AD_PLACEMENTS } from '../../services/ads/adPlacementConstants';
 
 export const ProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -244,6 +246,13 @@ export const ProfileScreen = ({ navigation }) => {
             </View>
           </AppCard>
         </TouchableOpacity>
+
+        <AdPlacement
+          screen="profile"
+          placementId={AD_PLACEMENTS.PROFILE_BANNER}
+          adType="banner"
+          style={{ marginTop: 12 }}
+        />
       </ProfileSection>
 
       {/* 3. Preferences Section */}

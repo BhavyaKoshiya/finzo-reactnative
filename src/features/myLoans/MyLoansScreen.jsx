@@ -13,8 +13,11 @@ import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
 import PrimaryButton from '../../components/buttons/PrimaryButton';
 import EmptyState from '../../components/feedback/EmptyState';
+import { formatCurrencyCompact } from '../../utils/financeFormatters';
 import { useAppTheme } from '../../hooks/useAppTheme';
 import { ROUTES } from '../../navigation/routes';
+import AdPlacement from '../../components/ads/AdPlacement';
+import { AD_PLACEMENTS } from '../../services/ads/adPlacementConstants';
 import { getCalculatorById } from '../../calculators';
 
 // Loan Slice & Components
@@ -321,6 +324,12 @@ export const MyLoansScreen = ({ route, navigation }) => {
                   icon={Plus}
                   onPress={() => navigation.navigate(ROUTES.ADD_LOAN)}
                   accessibilityLabel="Add another loan"
+                />
+                <AdPlacement
+                  screen="myLoans"
+                  placementId={AD_PLACEMENTS.MY_LOANS_BANNER}
+                  adType="banner"
+                  style={{ marginTop: 12 }}
                 />
               </View>
             ) : null

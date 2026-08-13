@@ -8,6 +8,7 @@ const isObject = (val) => val !== null && typeof val === 'object' && !Array.isAr
 const isNonEmptyString = (val, maxLen = 200) =>
   typeof val === 'string' && val.trim().length > 0 && val.length <= maxLen;
 const isPositiveInteger = (val) => typeof val === 'number' && Number.isInteger(val) && Number.isFinite(val) && val > 0;
+const isNonNegativeInteger = (val) => typeof val === 'number' && Number.isInteger(val) && Number.isFinite(val) && val >= 0;
 const isBoolean = (val) => typeof val === 'boolean';
 
 export const validateRealtimeConfig = (config) => {
@@ -49,7 +50,6 @@ export const validateRealtimeConfig = (config) => {
         errors.push('dailyCheckIn.resetOnMissedDay must be a boolean');
       }
 
-      // Validate all present schedule objects (rewardSchedule and schedule)
       const schedules = [];
       if (dci.rewardSchedule) schedules.push(dci.rewardSchedule);
       if (dci.schedule) schedules.push(dci.schedule);
@@ -85,7 +85,7 @@ export const validateRealtimeConfig = (config) => {
       }
     }
 
-    // 3b. Catalog Validation (validate all present catalog objects)
+    // 3b. Catalog Validation
     const catalogs = [];
     if (config.rewards.catalog) catalogs.push(config.rewards.catalog);
     if (config.rewards.redeemable) catalogs.push(config.rewards.redeemable);
@@ -111,7 +111,6 @@ export const validateRealtimeConfig = (config) => {
           if (!isPositiveInteger(pkg.pointsCost)) errors.push(`catalog.${key}.pointsCost must be positive integer >= 1`);
           if (!isPositiveInteger(pkg.durationMinutes)) errors.push(`catalog.${key}.durationMinutes must be positive integer >= 1`);
 
-          // Discount validation
           if (pkg.discount !== undefined && isObject(pkg.discount)) {
             const disc = pkg.discount;
             if (disc.enabled) {
@@ -161,7 +160,6 @@ export const validateRealtimeConfig = (config) => {
           errors.push('rewardedAds.milestone.adFreeMinutes must be integer (1-10080)');
         }
 
-        // IMPOSSIBLE CONFIGURATION CHECK
         if (ms.enabled && ra.enabled && typeof ms.requiredAds === 'number' && typeof ra.dailyWatchLimit === 'number' && ms.requiredAds > ra.dailyWatchLimit) {
           errors.push(`rewardedAds.milestone.requiredAds (${ms.requiredAds}) cannot exceed dailyWatchLimit (${ra.dailyWatchLimit})`);
         }
@@ -176,6 +174,47 @@ export const validateRealtimeConfig = (config) => {
       }
       if (disc.items !== undefined && !isObject(disc.items)) {
         errors.push('discounts.items must be an object');
+      }
+    }
+  }
+
+  // 4. Ads Infrastructure Validation
+  if (config.ads !== undefined) {
+    if (!isObject(config.ads)) {
+      errors.push('ads field must be an object');
+    } else {
+      const ads = config.ads;
+      if (ads.enabled !== undefined && !isBoolean(ads.enabled)) {
+        errors.push('ads.enabled must be a boolean');
+      }
+      if (ads.banner !== undefined && isObject(ads.banner)) {
+        if (ads.banner.enabled !== undefined && !isBoolean(ads.banner.enabled)) {
+          errors.push('ads.banner.enabled must be a boolean');
+        }
+      }
+      if (ads.native !== undefined && isObject(ads.native)) {
+        if (ads.native.enabled !== undefined && !isBoolean(ads.native.enabled)) {
+          errors.push('ads.native.enabled must be a boolean');
+        }
+      }
+      if (ads.interstitial !== undefined && isObject(ads.interstitial)) {
+        if (ads.interstitial.enabled !== undefined && !isBoolean(ads.interstitial.enabled)) {
+          errors.push('ads.interstitial.enabled must be a boolean');
+        }
+        if (ads.interstitial.cooldownMinutes !== undefined && !isNonNegativeInteger(ads.interstitial.cooldownMinutes)) {
+          errors.push('ads.interstitial.cooldownMinutes must be a non-negative integer');
+        }
+        if (ads.interstitial.maxPerSession !== undefined && !isNonNegativeInteger(ads.interstitial.maxPerSession)) {
+          errors.push('ads.interstitial.maxPerSession must be a non-negative integer');
+        }
+      }
+      if (ads.rewarded !== undefined && isObject(ads.rewarded)) {
+        if (ads.rewarded.enabled !== undefined && !isBoolean(ads.rewarded.enabled)) {
+          errors.push('ads.rewarded.enabled must be a boolean');
+        }
+      }
+      if (ads.placements !== undefined && !isObject(ads.placements)) {
+        errors.push('ads.placements must be an object');
       }
     }
   }

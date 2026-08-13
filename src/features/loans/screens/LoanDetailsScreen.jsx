@@ -63,6 +63,8 @@ import { ExportOptionsModal, getLoanReportAdapter, generateAndShareReport } from
 import { formatCurrency } from '../../../utils/financeFormatters';
 import { PAYMENT_TYPES } from '../constants/loanPaymentConstants';
 import { ROUTES } from '../../../navigation/routes';
+import AdPlacement from '../../../components/ads/AdPlacement';
+import { AD_PLACEMENTS } from '../../../services/ads/adPlacementConstants';
 
 export const LoanDetailsScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -503,6 +505,12 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
           onEditProfile={() => navigation.navigate(ROUTES.EDIT_LOAN, { loanId: profile.id })}
           onArchiveToggle={handleArchiveToggle}
           onDeletePress={handleDeletePress}
+        />
+
+        <AdPlacement
+          screen="loanDetails"
+          placementId={AD_PLACEMENTS.LOAN_DETAILS_NATIVE}
+          adType="native"
         />
       </View>
 

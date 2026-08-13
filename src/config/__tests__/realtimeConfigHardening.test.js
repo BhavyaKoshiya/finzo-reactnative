@@ -84,11 +84,11 @@ describe('Finzo Realtime Config Hardening & Provisioning Tests', () => {
   });
 
   // 6. Ads disabled by default
-  test('6. Ads configuration is disabled by default in schema and defaults', () => {
-    expect(DEFAULT_REALTIME_CONFIG.ads.enabled).toBe(false);
-    expect(DEFAULT_REALTIME_CONFIG.ads.rewardedAdsEnabled).toBe(false);
-    expect(DEFAULT_REALTIME_CONFIG.ads.bannerAdsEnabled).toBe(false);
-    expect(DEFAULT_REALTIME_CONFIG.ads.interstitialAdsEnabled).toBe(false);
+  test('6. Ads configuration is enabled by default in schema and defaults', () => {
+    expect(DEFAULT_REALTIME_CONFIG.ads.enabled).toBe(true);
+    expect(DEFAULT_REALTIME_CONFIG.ads.rewardedAdsEnabled).toBe(true);
+    expect(DEFAULT_REALTIME_CONFIG.ads.bannerAdsEnabled).toBe(true);
+    expect(DEFAULT_REALTIME_CONFIG.ads.interstitialAdsEnabled).toBe(true);
   });
 
   // 7. Non-object or empty payload handling

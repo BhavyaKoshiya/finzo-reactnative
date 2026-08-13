@@ -13,6 +13,8 @@ import loanReminderService from './src/features/loans/services/loanReminderServi
 import AppStartupGate from './src/components/containers/AppStartupGate';
 import ConnectivityGate from './src/components/containers/ConnectivityGate';
 
+import SimulatedInterstitialModal from './src/components/ads/SimulatedInterstitialModal';
+
 function AppContent() {
   useEffect(() => {
     // 1. Initial reconciliation on startup
@@ -79,6 +81,7 @@ function AppContent() {
       <StatusBar barStyle="dark-content" />
       <ConnectivityGate>
         <AppNavigator />
+        <SimulatedInterstitialModal />
       </ConnectivityGate>
     </SafeAreaProvider>
   );

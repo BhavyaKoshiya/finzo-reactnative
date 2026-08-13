@@ -3,6 +3,7 @@ import { AD_PROVIDER_TYPES, AD_STATES } from './adProviderTypes';
 /**
  * Base Ad Provider Contract Interface.
  * Defines the provider-agnostic contract implemented by SimulatedAdProvider, NoAdProvider, and ApprovedAdProvider.
+ * Supports 4 Ad Types: BANNER, NATIVE, INTERSTITIAL, REWARDED.
  */
 export class BaseAdProvider {
   getType() {
@@ -13,6 +14,7 @@ export class BaseAdProvider {
     return false;
   }
 
+  // 1. BANNER AD API
   isBannerAvailable(_placementId) {
     return false;
   }
@@ -25,6 +27,41 @@ export class BaseAdProvider {
     return { success: true };
   }
 
+  // 2. NATIVE AD API
+  isNativeAvailable(_placementId) {
+    return false;
+  }
+
+  async loadNative(_placementId) {
+    return { success: false, reason: 'Provider not configured' };
+  }
+
+  async destroyNative(_placementId) {
+    return { success: true };
+  }
+
+  // 3. INTERSTITIAL AD API
+  isInterstitialAvailable(_placementId) {
+    return false;
+  }
+
+  async loadInterstitial(_placementId) {
+    return { success: false, reason: 'Provider not configured' };
+  }
+
+  async showInterstitial(_placementId, _options = {}) {
+    return {
+      status: AD_STATES.FAILED,
+      provider: this.getType(),
+      reason: 'Provider not configured',
+    };
+  }
+
+  async destroyInterstitial(_placementId) {
+    return { success: true };
+  }
+
+  // 4. REWARDED AD API
   isRewardedAvailable(_placementId) {
     return false;
   }

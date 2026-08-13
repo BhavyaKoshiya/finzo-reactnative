@@ -27,6 +27,8 @@ import rewardService from './services/rewardService';
 import { realtimeConfigService } from '../../config/realtimeConfigService';
 import { selectEnabledRewards, selectFeatureFlags } from '../../config/realtimeConfigSelectors';
 import { useAppTheme } from '../../hooks/useAppTheme';
+import AdPlacement from '../../components/ads/AdPlacement';
+import { AD_PLACEMENTS } from '../../services/ads/adPlacementConstants';
 
 export const RewardsScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -194,6 +196,12 @@ export const RewardsScreen = ({ navigation }) => {
                     />
                   ))}
                 </View>
+                <AdPlacement
+                  screen="rewards"
+                  placementId={AD_PLACEMENTS.REWARDS_NATIVE}
+                  adType="native"
+                  style={{ marginBottom: 16 }}
+                />
               </>
             )}
 
