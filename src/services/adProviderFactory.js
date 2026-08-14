@@ -21,17 +21,23 @@ export class AdProviderFactory {
       return providerOverride;
     }
 
-    // 1. PRODUCTION SAFETY GUARD
-    if (!isDev) {
+    // HARD PRODUCTION SAFETY: SimulatedAdProvider can NEVER be created
+    // in a production binary, regardless of options passed.
+    if ((typeof __DEV__ !== 'undefined' && __DEV__ === false) || isDev === false) {
+      // In production: only approved SDK or no ads
       if (approvedSdkConfig && approvedSdkConfig.appId) {
         return new ApprovedAdProvider(approvedSdkConfig);
       }
-      // Production fallback when no approved SDK is configured
       return new NoAdProvider();
     }
 
-    // 2. DEVELOPMENT ENVIRONMENT
-    if (devSimulationEnabled) {
+    // 1. Approved SDK (when configured)
+    if (approvedSdkConfig && approvedSdkConfig.appId) {
+      return new ApprovedAdProvider(approvedSdkConfig);
+    }
+
+    // 2. Simulated Ad Provider (enabled for testing and evaluation)
+    if (isDev && devSimulationEnabled) {
       return new SimulatedAdProvider({ simulationEnabled: true });
     }
 

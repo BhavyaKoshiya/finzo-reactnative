@@ -10,6 +10,7 @@ import { useLoanPaymentForm } from '../hooks/useLoanPaymentForm';
 import LoanPaymentForm from '../components/LoanPaymentForm';
 import { PAYMENT_TYPES } from '../constants/loanPaymentConstants';
 import { recalculateLoanBalanceFromPayments } from '../utils/paymentBalanceUtils';
+import { formatCurrency } from '../../../utils/financeFormatters';
 
 export const AddPaymentScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -106,8 +107,18 @@ export const AddPaymentScreen = ({ route, navigation }) => {
         ]
       );
     } else {
-      Alert.alert('Payment Recorded', 'Payment has been added to loan history.');
-      navigation.goBack();
+      const formattedPaid = formatCurrency(payload.paymentAmount);
+      const newBal = payload.balanceSource === 'bank_confirmed' && payload.actualClosingBalance !== null
+        ? payload.actualClosingBalance
+        : finalEstimatedBalance;
+      const formattedBal = formatCurrency(newBal);
+      const sourceText = payload.balanceSource === 'bank_confirmed' ? 'Bank Confirmed' : 'Finzo Estimate';
+
+      Alert.alert(
+        'Payment Recorded',
+        `${formattedPaid} recorded successfully.\nNew Balance: ${formattedBal} (${sourceText}).`,
+        [{ text: 'OK', onPress: () => navigation.goBack() }]
+      );
     }
   };
 

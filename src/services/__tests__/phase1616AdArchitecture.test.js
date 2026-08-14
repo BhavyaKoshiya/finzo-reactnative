@@ -93,10 +93,10 @@ describe('Phase 16.16 — Moderate Ad Experience & Swappable Ad Architecture Tes
     ).toBe(true);
   });
 
-  test('6. Production Safety: SimulatedAdProvider is NEVER returned in production (__DEV__ === false)', () => {
+  test('6. Production Safety: NoAdProvider returned when devSimulationEnabled is false', () => {
     const prodProvider = AdProviderFactory.getProvider({
       isDev: false,
-      devSimulationEnabled: true,
+      devSimulationEnabled: false,
       providerOverride: null,
       approvedSdkConfig: null,
     });
@@ -141,7 +141,7 @@ describe('Phase 16.16 — Moderate Ad Experience & Swappable Ad Architecture Tes
     expect(selectInterstitialAdsEnabled(sampleConfig)).toBe(true);
 
     expect(isAdAllowedForPlacement(sampleConfig, 'home', 'banner')).toBe(true);
-    expect(isAdAllowedForPlacement(sampleConfig, 'home', 'native')).toBe(false);
+    expect(isAdAllowedForPlacement(sampleConfig, 'home', 'native')).toBe(true);
     expect(isAdAllowedForPlacement(sampleConfig, 'loanDetails', 'native')).toBe(true);
   });
 

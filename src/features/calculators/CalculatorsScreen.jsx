@@ -10,6 +10,8 @@ import InfoCard from '../../components/cards/InfoCard';
 import { useAppTheme } from '../../hooks/useAppTheme';
 import { getCalculatorCategories } from '../../calculators';
 import { ROUTES } from '../../navigation/routes';
+import AdPlacement from '../../components/ads/AdPlacement';
+import { AD_PLACEMENTS } from '../../services/ads/adPlacementConstants';
 
 export const CalculatorsScreen = ({ navigation }) => {
   const { currentTheme } = useAppTheme();
@@ -79,6 +81,34 @@ export const CalculatorsScreen = ({ navigation }) => {
                 />
               ))}
             </View>
+
+            {idx === 0 && (
+              <AdPlacement
+                screen="calculators"
+                placementId={AD_PLACEMENTS.CALCULATOR_NATIVE}
+                adType="native"
+                headline="Investment & Wealth Planning"
+                description="Explore SIP return projections, FD interest, and CAGR calculations offline."
+              />
+            )}
+
+            {idx === 1 && (
+              <AdPlacement
+                screen="calculators"
+                placementId={AD_PLACEMENTS.CALCULATOR_BANNER}
+                adType="banner"
+              />
+            )}
+
+            {idx === 2 && (
+              <AdPlacement
+                screen="calculators"
+                placementId={AD_PLACEMENTS.CALCULATOR_NATIVE}
+                adType="native"
+                headline="Everyday Financial Calculations"
+                description="Quick interest, percentage & GST calculations formatted for quick decision making."
+              />
+            )}
           </View>
         );
       })}

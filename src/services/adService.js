@@ -1,9 +1,10 @@
 import { AdProviderFactory } from './adProviderFactory';
 import { AD_PLACEMENTS } from './ads/adPlacementConstants';
 import { AD_STATES } from './ads/adProviderTypes';
-import adDecisionEngine, { AD_DECISION_REASONS } from './ads/adDecisionEngine';
+import adDecisionEngine from './ads/adDecisionEngine';
 import { adFrequencyService } from './ads/adFrequencyService';
 import { rewardedAdSessionManager } from './ads/rewardedAdSessionManager';
+import { adMetricsService } from './ads/adMetricsService';
 import { realtimeConfigService } from '../config/realtimeConfigService';
 import logger from './logger';
 
@@ -19,14 +20,17 @@ class AdService {
     this.devSimulationEnabled = true;
     this.modalHandler = null;
     this.interstitialModalHandler = null;
+    this.cachedProvider = null;
   }
 
   setProviderOverride(provider) {
     this.providerOverride = provider;
+    this.cachedProvider = null;
   }
 
   setDevSimulationEnabled(enabled) {
     this.devSimulationEnabled = Boolean(enabled);
+    this.cachedProvider = null;
   }
 
   setModalHandler(handler) {
@@ -46,10 +50,17 @@ class AdService {
   }
 
   getProvider() {
-    const provider = AdProviderFactory.getProvider({
-      providerOverride: this.providerOverride,
-      devSimulationEnabled: this.devSimulationEnabled,
-    });
+    if (this.providerOverride) {
+      return this.providerOverride;
+    }
+
+    if (!this.cachedProvider) {
+      this.cachedProvider = AdProviderFactory.getProvider({
+        devSimulationEnabled: this.devSimulationEnabled,
+      });
+    }
+
+    const provider = this.cachedProvider;
 
     if (this.modalHandler && typeof provider.setModalHandler === 'function') {
       provider.setModalHandler(this.modalHandler);
@@ -82,12 +93,27 @@ class AdService {
       }).allowed,
     };
 
-    return adDecisionEngine.canShowAd({
+    const decision = adDecisionEngine.canShowAd({
       ...params,
       config,
       frequencyStatus,
       provider: this.getProvider(),
     });
+
+    if (__DEV__) {
+      adMetricsService.logDecision({
+        placementId: params.placementId,
+        adType: params.adType,
+        screen: params.screen,
+        allowed: decision.allowed,
+        reason: decision.reason,
+      });
+      if (!decision.allowed) {
+        adMetricsService.recordSuppression(decision.reason);
+      }
+    }
+
+    return decision;
   }
 
   // 1. BANNER AD API

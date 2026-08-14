@@ -23,12 +23,17 @@ import { restoreSavedCalculationInputs } from '../../saved/utils/calculationRest
 import { addSavedCalculation, updateSavedCalculation } from '../../../store/slices/savedCalculationsSlice';
 import AdPlacement from '../../../components/ads/AdPlacement';
 import { AD_PLACEMENTS } from '../../../services/ads/adPlacementConstants';
+import useInterstitialAd from '../../../hooks/useInterstitialAd';
 
 export const EMICalculatorScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const scrollViewRef = useRef(null);
   const resultsYRef = useRef(0);
   const [saveModalVisible, setSaveModalVisible] = useState(false);
+
+  const { handleBackWithAd } = useInterstitialAd({
+    screen: 'calculators',
+  });
 
   const restoredInputs = route?.params?.savedCalculation
     ? restoreSavedCalculationInputs(route.params.savedCalculation)
@@ -100,7 +105,7 @@ export const EMICalculatorScreen = ({ route, navigation }) => {
       subtitle="Estimate monthly EMI payments, total interest & schedule"
       leftAction={{
         icon: ArrowLeft,
-        onPress: () => navigation.goBack(),
+        onPress: handleBackWithAd,
         accessibilityLabel: 'Go back',
       }}
     />

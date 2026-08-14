@@ -16,8 +16,8 @@ export const DEFAULT_ADS_CONFIG = {
   },
   interstitial: {
     enabled: true,
-    cooldownMinutes: 10,
-    maxPerSession: 1,
+    cooldownMinutes: 3,
+    maxPerSession: 3,
   },
   rewarded: {
     enabled: true,
@@ -25,7 +25,7 @@ export const DEFAULT_ADS_CONFIG = {
   placements: {
     home: {
       banner: true,
-      native: false,
+      native: true,
       interstitial: false,
     },
     calculators: {
@@ -35,17 +35,17 @@ export const DEFAULT_ADS_CONFIG = {
     },
     myLoans: {
       banner: true,
-      native: false,
+      native: true,
       interstitial: false,
     },
     loanDetails: {
-      banner: false,
+      banner: true,
       native: true,
       interstitial: false,
     },
     profile: {
       banner: true,
-      native: false,
+      native: true,
       interstitial: false,
     },
     rewards: {
@@ -53,6 +53,11 @@ export const DEFAULT_ADS_CONFIG = {
       native: true,
       interstitial: false,
       rewarded: true,
+    },
+    tabs: {
+      banner: true,
+      native: false,
+      interstitial: false,
     },
   },
 };

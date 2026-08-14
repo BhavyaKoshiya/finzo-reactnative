@@ -174,6 +174,13 @@ export const loanReminderService = {
   },
 
   /**
+   * Alias for cancelLoanReminder for plural/singular call compatibility.
+   */
+  async cancelLoanReminders(loanId, periodKey, reminderType) {
+    return await this.cancelLoanReminder(loanId, periodKey, reminderType);
+  },
+
+  /**
    * Cancels all scheduled loan reminders globally.
    */
   async cancelAllLoanReminders() {

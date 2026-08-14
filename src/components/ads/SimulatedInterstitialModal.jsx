@@ -43,7 +43,7 @@ export const SimulatedInterstitialModal = () => {
     }
   };
 
-  if (!visible) return null;
+  if (!visible || (typeof __DEV__ !== 'undefined' && __DEV__ === false)) return null;
 
   return (
     <Modal

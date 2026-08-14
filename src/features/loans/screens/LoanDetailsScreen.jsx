@@ -35,12 +35,13 @@ import {
   selectPaymentsForLoan,
   deletePaymentsForLoan,
 } from '../../../store/slices/loanPaymentsSlice';
-import { selectActiveLoanGoalsByLoanId } from '../../../store/slices/loanGoalsSlice';
+import { selectActiveLoanGoalsByLoanId, deleteGoalsForLoan } from '../../../store/slices/loanGoalsSlice';
 import { selectLoanNotesByLoanId, deleteNotesForLoan } from '../../../store/slices/loanNotesSlice';
 import {
   selectPrivateDetailsByLoanId,
   deleteLoanPrivateDetails,
 } from '../../../store/slices/loanPrivateDetailsSlice';
+import securePrivateStorageService from '../../../services/securePrivateStorageService';
 import { adaptLoanProfileForDisplay } from '../utils/loanPresentationAdapters';
 import { getPaymentStats } from '../utils/loanBalanceUtils';
 import { getCurrentLoanBalance } from '../utils/paymentBalanceUtils';
@@ -125,7 +126,11 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
             await loanReminderService.cancelLoanReminders(profile.id);
             dispatch(deletePaymentsForLoan(profile.id));
             dispatch(deleteNotesForLoan(profile.id));
+            dispatch(deleteGoalsForLoan(profile.id));
             dispatch(deleteLoanPrivateDetails(profile.id));
+            await securePrivateStorageService
+              .deleteSecureValue(`finzo.loan.${profile.id}.sensitive.credential`)
+              .catch(() => {});
             dispatch(deleteLoanProfile(profile.id));
             Alert.alert('Loan Deleted', `"${profile.name}" has been removed.`);
             navigation.goBack();
@@ -353,6 +358,15 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
             </View>
           )}
         </AppCard>
+
+        {/* In-Between Native Ad Placement */}
+        <AdPlacement
+          screen="loanDetails"
+          placementId={AD_PLACEMENTS.LOAN_DETAILS_NATIVE}
+          adType="native"
+          headline="Financial Planning & Prepayments"
+          description="Simulate early loan pay-offs and evaluate interest savings offline with Finzo tools."
+        />
 
         {/* 7. LOAN OVERVIEW */}
         <AppCard style={styles.overviewCard}>

@@ -29,6 +29,7 @@ import {
   shareCalculationPdfFile,
   ExportPdfModal,
 } from '../../share';
+import useInterstitialAd from '../../../hooks/useInterstitialAd';
 
 export const LoanCalculatorScreen = ({ config, route, navigation }) => {
   const dispatch = useDispatch();
@@ -37,6 +38,10 @@ export const LoanCalculatorScreen = ({ config, route, navigation }) => {
   const [saveModalVisible, setSaveModalVisible] = useState(false);
   const [pdfModalVisible, setPdfModalVisible] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  const { handleBackWithAd } = useInterstitialAd({
+    screen: 'calculators',
+  });
 
   const restoredInputs = route?.params?.savedCalculation
     ? restoreSavedCalculationInputs(route.params.savedCalculation)
@@ -150,7 +155,7 @@ export const LoanCalculatorScreen = ({ config, route, navigation }) => {
       subtitle={config.description || 'Calculate EMI and repayment details'}
       leftAction={{
         icon: ArrowLeft,
-        onPress: () => navigation.goBack(),
+        onPress: handleBackWithAd,
         accessibilityLabel: 'Go back',
       }}
     />
@@ -248,6 +253,7 @@ export const LoanCalculatorScreen = ({ config, route, navigation }) => {
         onClose={() => setPdfModalVisible(false)}
         onExport={handlePdfExportConfirm}
       />
+
     </ScreenContainer>
   );
 };

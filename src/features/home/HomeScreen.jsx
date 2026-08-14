@@ -291,6 +291,15 @@ export const HomeScreen = ({ navigation }) => {
         </View>
       )}
 
+      {/* In-Between Native Ad Placement */}
+      <AdPlacement
+        screen="home"
+        placementId={AD_PLACEMENTS.HOME_NATIVE}
+        adType="native"
+        headline="Finzo Calculators & Insights"
+        description="Calculate loan EMIs, interest savings, prepayments & investment returns offline."
+      />
+
       {/* Popular Calculators Section */}
       <View style={styles.section}>
         <AppText variant="sectionTitle" style={styles.sectionTitle}>

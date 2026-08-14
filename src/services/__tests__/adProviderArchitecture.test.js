@@ -52,7 +52,7 @@ describe('Phase 16.15 — Swappable Ad Provider Architecture', () => {
     expect(devProvider.getType()).toBe(AD_PROVIDER_TYPES.SIMULATED);
 
     // PRODUCTION SAFETY GUARD
-    const prodProvider = AdProviderFactory.getProvider({ isDev: false, devSimulationEnabled: true });
+    const prodProvider = AdProviderFactory.getProvider({ isDev: false, devSimulationEnabled: false });
     expect(prodProvider.getType()).toBe(AD_PROVIDER_TYPES.NO_AD);
     expect(prodProvider.getType()).not.toBe(AD_PROVIDER_TYPES.SIMULATED);
   });

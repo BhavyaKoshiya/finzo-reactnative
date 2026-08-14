@@ -305,6 +305,13 @@ export const MyLoansScreen = ({ route, navigation }) => {
                     }
                   />
                 )}
+                <AdPlacement
+                  screen="myLoans"
+                  placementId={AD_PLACEMENTS.HOME_NATIVE}
+                  adType="native"
+                  headline="Smart Loan Insights"
+                  description="Track EMIs, principal reduction & interest allocations offline with Finzo."
+                />
               </View>
             ) : null
           }

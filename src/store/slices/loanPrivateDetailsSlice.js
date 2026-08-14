@@ -41,12 +41,16 @@ export const {
   deletePrivateDetailsForLoan,
 } = loanPrivateDetailsSlice.actions;
 
-// Selectors
-export const selectAllPrivateDetails = (state) => state.loanPrivateDetails?.detailsByLoanId || {};
+// Aliases for consistent naming across screens and services
+export const deleteLoanPrivateDetails = deletePrivateDetailsForLoan;
+
+// Selectors with defensive fallbacks against malformed state
+export const selectAllPrivateDetails = (state) =>
+  state.loanPrivateDetails?.detailsByLoanId || {};
 
 export const selectPrivateDetailsByLoanId = createSelector(
   [selectAllPrivateDetails, (state, loanId) => loanId],
-  (detailsMap, loanId) => detailsMap[loanId] || null
+  (detailsMap, loanId) => (detailsMap && typeof detailsMap === 'object' ? detailsMap[loanId] || null : null)
 );
 
 export default loanPrivateDetailsSlice.reducer;

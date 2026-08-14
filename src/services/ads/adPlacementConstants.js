@@ -6,6 +6,7 @@
 export const AD_PLACEMENTS = {
   HOME_BANNER: 'home_banner',
   HOME_NATIVE: 'home_native',
+  TAB_BOTTOM_BANNER: 'tab_bottom_banner',
 
   CALCULATOR_BANNER: 'calculator_banner',
   CALCULATOR_NATIVE: 'calculator_native',

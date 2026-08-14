@@ -1,35 +1,116 @@
-# Finzo — Advertising Experience Manual QA Checklist (Phase 16.17)
+# Finzo — Ad QA Checklist (Phase 18.2)
 
-This manual QA matrix validates all 17 critical test scenarios for Finzo's advertising architecture before real SDK integration.
-
----
-
-## Manual QA Test Matrix
-
-| # | Test Scenario | Steps | Expected Result | Pass / Fail |
-|---|---|---|---|---|
-| 1 | **Online + Ads Enabled** | Launch app connected to internet with `ads.enabled = true` | Banners & Native cards render on allowed placements (`home`, `calculators`, `myLoans`, `loanDetails`, `profile`, `rewards`). | [ PASS ] |
-| 2 | **Online + Ads Disabled** | Set `ads.enabled = false` in RTDB `/config` | All ad placements cleanly collapse without blank gaps or error placeholders. | [ PASS ] |
-| 3 | **Offline Behavior** | Turn off Wi-Fi/cellular connection (`isOnline = false`) | Ad loading is silently bypassed. Zero error toasts, zero broken UI cards. | [ PASS ] |
-| 4 | **Ad-Free Active** | Claim/Redeem 30-min ad-free reward | Banners, Native cards, and Interstitials disappear across all screens. | [ PASS ] |
-| 5 | **Ad-Free Expired** | Wait for timer expiry / fast-forward local time | Ordinary ads reappear naturally without app restart. | [ PASS ] |
-| 6 | **Rewarded Ads Available** | Tap `[ Watch Ad ]` on Rewards/Profile screen | Simulated Rewarded Ad modal opens with 5s countdown timer. | [ PASS ] |
-| 7 | **Rewarded Daily Limit Reached** | Watch 5 rewarded ads in a single calendar day | Attempt #6 shows `Today's limit completed (5/5)`. CTA changes to `[ Watch again tomorrow ]`. | [ PASS ] |
-| 8 | **Interstitial Cooldown Active** | Trigger 1st interstitial on calculator exit | Interstitial displays. Triggering a 2nd interstitial within 10 minutes is blocked. | [ PASS ] |
-| 9 | **Interstitial Session Limit Reached** | Complete 1 interstitial in active app session | Subsequent calculator exits in the same session return `SESSION_LIMIT_REACHED`. | [ PASS ] |
-| 10 | **Invalid RTDB Config** | Inject malformed JSON (`ads: { cooldownMinutes: -5 }`) | App falls back safely to `DEFAULT_ADS_CONFIG` without crashing or throwing errors. | [ PASS ] |
-| 11 | **RTDB Unavailable** | Disconnect Firebase network socket | App uses last-known-good cached config or local safe defaults. | [ PASS ] |
-| 12 | **App Backgrounded During Ad** | Minimise app while video ad is playing, then resume | Ad resumes or resets cleanly. Zero duplicate reward claims. | [ PASS ] |
-| 13 | **App Killed During Rewarded Ad** | Force close app while rewarded ad is showing | Reopening app preserves exact reward points and ad-free entitlement state. | [ PASS ] |
-| 14 | **Payment Recording Protection** | Open `AddPaymentScreen` or `EditPaymentScreen` | **100% AD-FREE**. Zero banners, native cards, or interstitials permitted. | [ PASS ] |
-| 15 | **Private Details Protection** | View `LoanPrivateDetailsScreen` or edit credentials | **100% AD-FREE**. Zero ads permitted. | [ PASS ] |
-| 16 | **Private Notes Protection** | View or edit confidential loan notes | **100% AD-FREE**. Zero ads permitted. | [ PASS ] |
-| 17 | **PDF Export Protection** | Generate and preview loan PDF report | **100% AD-FREE**. Zero interstitials or banners interrupt export flow. | [ PASS ] |
+Verify each item before marking a phase complete.
 
 ---
 
-## Key QA Verification Rules
+## 1. Placement Map Verification
 
-1. **User Trust Over Monetization**: Financial task screens (`AddPayment`, `EditPayment`, `PrivateDetails`, `Notes`, `PDF Export`) MUST ALWAYS remain 100% ad-free.
-2. **Zero Duplicate Rewards**: Replaying or double-tapping completion callbacks will NEVER grant duplicate points or entitlement time.
-3. **Clean Layout Collapse**: When ads are disabled or ad-free is active, ad slots collapse to 0 height without blank boxes.
+- [ ] **15 placements** exist (no more, no fewer)
+- [ ] Home: Native (`home_native`) between loan summary & popular calculators
+- [ ] Home: Banner (`home_banner`) after explore categories
+- [ ] Tabs: Banner (`tab_bottom_banner`) above bottom tab bar
+- [ ] Calculators (cat 1): Native (`calculator_native`) after Loan & Repayment
+- [ ] Calculators (cat 2): Banner (`calculator_banner`) after Investment & Wealth
+- [ ] Calculators (cat 3): Native (`calculator_native`) after Tax & Business
+- [ ] EMI Calculator: Banner (`calculator_banner`) after results section
+- [ ] My Loans: Native (`home_native`) after primary loan card
+- [ ] My Loans: Banner (`my_loans_banner`) after "Add Another Loan" button
+- [ ] Loan Details: Native (`loan_details_native`) between payment history & overview
+- [ ] Loan Details: Native (`loan_details_native`) after settings/actions
+- [ ] Profile: Banner (`profile_banner`) after rewards card
+- [ ] Rewards: Native (`rewards_native`) after reward catalog items
+- [ ] Loan Calculators: Interstitial (`calculator_interstitial`) on back press
+- [ ] EMI Calculator: Interstitial (`calculator_interstitial`) on back press
+
+---
+
+## 2. Calculator Banner Verification
+
+- [ ] Banner renders correctly on EMI Calculator results
+- [ ] Banner shown only once per screen
+- [ ] Uses centralized `AdPlacement` component
+- [ ] Respects ad-free state (hidden when ad-free)
+- [ ] Respects connectivity (hidden when offline)
+- [ ] Respects RTDB `placements.calculators.banner` config
+- [ ] Does not block calculator interaction
+- [ ] Does not overlap inputs/results/buttons
+- [ ] Does not receive financial data
+
+---
+
+## 3. Calculator Exit Interstitial
+
+- [ ] Shows on back button press from LoanCalculatorScreen
+- [ ] Shows on back button press from EMICalculatorScreen
+- [ ] Uses `useInterstitialAd` → `adService.showInterstitial()` → `SimulatedInterstitialModal`
+- [ ] All 5 loan calculators (Home, Personal, Car, Education, Business) use shared behavior
+- [ ] Respects ad-free suppression
+- [ ] Respects offline suppression
+- [ ] Respects cooldown (3 min default)
+- [ ] Respects session limit (3/session default)
+- [ ] Back navigation works when interstitial blocked → immediate `goBack()`
+- [ ] Back navigation works when provider fails → immediate `goBack()`
+- [ ] Double-tap protection prevents duplicate modals
+- [ ] Close callback executes exactly once
+
+---
+
+## 4. Ad-Free / Offline Suppression
+
+- [ ] `adFreeUntil > now` suppresses banners, natives, interstitials
+- [ ] `adFreeUntil > now` does NOT suppress rewarded ads
+- [ ] `isInternetReachable !== true` suppresses all ad types
+- [ ] No error toasts or broken UI when suppressed
+- [ ] Placements return normally when ad-free expires or connectivity returns
+
+---
+
+## 5. Financial Workflow Protection
+
+All these screens return `FINANCIAL_WORKFLOW` reason (100% ad-free):
+
+- [ ] `add_payment` / `edit_payment` / `delete_payment`
+- [ ] `correct_balance`
+- [ ] `add_loan` / `edit_loan`
+- [ ] `loan_private_details` / `loan_notes`
+- [ ] `loan_prepayment_simulator` / `loan_payoff_planner`
+- [ ] `loan_goals` / `loan_goal_details`
+- [ ] `pdf_export` / `pdf_generation`
+- [ ] `local_data_privacy`
+- [ ] RTDB config **cannot** override these protections
+
+---
+
+## 6. RTDB Configuration
+
+- [ ] `ads.enabled = false` disables all placements
+- [ ] Per-screen placement toggling works (`placements.home.banner = false`)
+- [ ] Cooldown minutes and max-per-session are remotely configurable
+- [ ] Invalid config falls back to local defaults (3 min / 3 per session)
+- [ ] `config.ads = null` fails safely (no crash)
+
+---
+
+## 7. Financial Data Firewall
+
+- [ ] `canShowAd()` params do not include financial fields
+- [ ] Provider methods receive only `placementId` and generic options
+- [ ] No loan amounts, EMIs, interest rates, balances, account numbers in ad layer
+
+---
+
+## 8. Production Safety
+
+- [ ] `__DEV__ = false` → `AdProviderFactory` returns `NoAdProvider`
+- [ ] Hard `__DEV__` gate cannot be bypassed by `isDev` option override
+- [ ] Real advertising SDKs installed: **0**
+- [ ] `SimulatedAdProvider` cannot be created in production
+
+---
+
+## 9. Test Suite
+
+- [ ] `yarn test` → 0 failures
+- [ ] `npx eslint --quiet src/` → 0 errors, 0 warnings
+- [ ] Phase 18.2 test file: `phase182PlacementPreservation.test.js` passes

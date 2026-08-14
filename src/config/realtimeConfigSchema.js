@@ -201,11 +201,11 @@ export const validateRealtimeConfig = (config) => {
         if (ads.interstitial.enabled !== undefined && !isBoolean(ads.interstitial.enabled)) {
           errors.push('ads.interstitial.enabled must be a boolean');
         }
-        if (ads.interstitial.cooldownMinutes !== undefined && !isNonNegativeInteger(ads.interstitial.cooldownMinutes)) {
-          errors.push('ads.interstitial.cooldownMinutes must be a non-negative integer');
+        if (ads.interstitial.cooldownMinutes !== undefined && (typeof ads.interstitial.cooldownMinutes !== 'number' || !Number.isFinite(ads.interstitial.cooldownMinutes) || ads.interstitial.cooldownMinutes < 1 || ads.interstitial.cooldownMinutes > 1440)) {
+          errors.push('ads.interstitial.cooldownMinutes must be a number between 1 and 1440');
         }
-        if (ads.interstitial.maxPerSession !== undefined && !isNonNegativeInteger(ads.interstitial.maxPerSession)) {
-          errors.push('ads.interstitial.maxPerSession must be a non-negative integer');
+        if (ads.interstitial.maxPerSession !== undefined && (typeof ads.interstitial.maxPerSession !== 'number' || !Number.isInteger(ads.interstitial.maxPerSession) || !Number.isFinite(ads.interstitial.maxPerSession) || ads.interstitial.maxPerSession < 0 || ads.interstitial.maxPerSession > 20)) {
+          errors.push('ads.interstitial.maxPerSession must be an integer between 0 and 20');
         }
       }
       if (ads.rewarded !== undefined && isObject(ads.rewarded)) {

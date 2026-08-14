@@ -22,8 +22,8 @@ class AdFrequencyService {
       return { allowed: false, reason: 'request_active' };
     }
 
-    const cooldownMinutes = Number(options.cooldownMinutes) ?? 10;
-    const maxPerSession = Number(options.maxPerSession) ?? 1;
+    const cooldownMinutes = typeof options.cooldownMinutes === 'number' && options.cooldownMinutes > 0 ? options.cooldownMinutes : 3;
+    const maxPerSession = typeof options.maxPerSession === 'number' && options.maxPerSession >= 0 ? options.maxPerSession : 3;
     const now = options.now instanceof Date ? options.now : new Date();
 
     // 1. Session Count Limit Check
@@ -41,6 +41,34 @@ class AdFrequencyService {
     }
 
     return { allowed: true };
+  }
+
+  /**
+   * Returns remaining cooldown milliseconds.
+   * @param {number} cooldownMinutes
+   * @param {Date} now
+   * @returns {number}
+   */
+  getRemainingCooldownMs(cooldownMinutes = 3, now = new Date()) {
+    if (!this.lastInterstitialTimestamp) return 0;
+    const elapsedMs = (now instanceof Date ? now : new Date()).getTime() - this.lastInterstitialTimestamp.getTime();
+    const requiredMs = cooldownMinutes * 60 * 1000;
+    return Math.max(0, requiredMs - elapsedMs);
+  }
+
+  /**
+   * Returns formatted mm:ss remaining cooldown string for dev debugging.
+   * @param {number} cooldownMinutes
+   * @param {Date} now
+   * @returns {string}
+   */
+  getFormattedRemainingCooldown(cooldownMinutes = 3, now = new Date()) {
+    const remainingMs = this.getRemainingCooldownMs(cooldownMinutes, now);
+    if (remainingMs <= 0) return '0:00';
+    const totalSec = Math.ceil(remainingMs / 1000);
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   }
 
   /**

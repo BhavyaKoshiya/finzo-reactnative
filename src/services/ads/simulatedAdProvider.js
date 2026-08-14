@@ -32,7 +32,7 @@ export class SimulatedAdProvider extends BaseAdProvider {
   }
 
   isConfigured() {
-    return Boolean(__DEV__ && this.simulationEnabled);
+    return Boolean(this.simulationEnabled);
   }
 
   // 1. BANNER AD API
@@ -42,7 +42,7 @@ export class SimulatedAdProvider extends BaseAdProvider {
 
   async loadBanner(_placementId) {
     if (!this.isConfigured()) {
-      return { success: false, reason: 'Simulated ads unavailable in production or disabled' };
+      return { success: false, reason: 'Simulated ads disabled' };
     }
     return { success: true, placementId: _placementId, provider: this.getType() };
   }
@@ -58,7 +58,7 @@ export class SimulatedAdProvider extends BaseAdProvider {
 
   async loadNative(_placementId) {
     if (!this.isConfigured()) {
-      return { success: false, reason: 'Simulated ads unavailable in production or disabled' };
+      return { success: false, reason: 'Simulated ads disabled' };
     }
     return {
       success: true,
@@ -85,7 +85,7 @@ export class SimulatedAdProvider extends BaseAdProvider {
 
   async loadInterstitial(_placementId) {
     if (!this.isConfigured()) {
-      return { success: false, reason: 'Simulated ads unavailable in production or disabled' };
+      return { success: false, reason: 'Simulated ads disabled' };
     }
     return { success: true, state: AD_STATES.READY, placementId: _placementId };
   }
@@ -95,7 +95,7 @@ export class SimulatedAdProvider extends BaseAdProvider {
       return {
         status: AD_STATES.FAILED,
         provider: AD_PROVIDER_TYPES.SIMULATED,
-        reason: 'Simulated ads unavailable in production or disabled',
+        reason: 'Simulated ads disabled',
       };
     }
 

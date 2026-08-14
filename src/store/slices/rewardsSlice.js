@@ -225,6 +225,10 @@ export const rewardsSlice = createSlice({
       state.lastRewardedAdCompletedAt = null;
     },
 
+    clearAdFreeStatus: (state) => {
+      state.adFreeUntil = null;
+    },
+
     resetRewards: () => initialState,
   },
 });
@@ -235,6 +239,7 @@ export const {
   recordRewardedAdCompletion,
   claimRewardedAdMilestone,
   resetDailyRewardedAdsLimit,
+  clearAdFreeStatus,
   resetRewards,
 } = rewardsSlice.actions;
 

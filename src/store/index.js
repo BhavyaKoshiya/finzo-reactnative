@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import {
   persistStore,
   persistReducer,
+  createMigrate,
   FLUSH,
   REHYDRATE,
   PAUSE,
@@ -11,11 +12,13 @@ import {
 } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import rootReducer from './rootReducer';
+import { migrations, PERSIST_VERSION } from './migrations';
 
 const persistConfig = {
   key: 'finzo_root',
-  version: 1,
+  version: PERSIST_VERSION,
   storage: AsyncStorage,
+  migrate: createMigrate(migrations, { debug: false }),
   whitelist: [
     'settings',
     'savedCalculations',
@@ -41,3 +44,8 @@ export const store = configureStore({
 });
 
 export const persistor = persistStore(store);
+
+export default {
+  store,
+  persistor,
+};

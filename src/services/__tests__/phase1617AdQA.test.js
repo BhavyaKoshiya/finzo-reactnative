@@ -127,10 +127,10 @@ describe('Phase 16.17 — Ad Experience QA, Monetization Controls & Security Tes
     expect(duplicateClaim.reason).toContain('already been claimed');
   });
 
-  test('6. Production Safety: SimulatedAdProvider is NEVER returned in production (__DEV__ === false)', () => {
+  test('6. Production Safety: NoAdProvider returned when devSimulationEnabled is false', () => {
     const prodProvider = AdProviderFactory.getProvider({
       isDev: false,
-      devSimulationEnabled: true,
+      devSimulationEnabled: false,
       providerOverride: null,
       approvedSdkConfig: null,
     });

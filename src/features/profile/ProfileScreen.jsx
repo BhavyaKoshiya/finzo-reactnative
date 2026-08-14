@@ -25,6 +25,7 @@ import ProfileHeader from './components/ProfileHeader';
 import ProfileSection from './components/ProfileSection';
 import ProfileRow from './components/ProfileRow';
 import PrivacyInfoModal from './components/PrivacyInfoModal';
+import DevAdControlsModal from '../../components/ads/DevAdControlsModal';
 import { RewardCard, rewardService } from '../rewards';
 import ProfileAdMilestoneCard from '../rewards/components/ProfileAdMilestoneCard';
 import {
@@ -61,6 +62,7 @@ export const ProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const { currentTheme, themeMode, setThemeMode, isDark } = useAppTheme();
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+  const [devAdModalVisible, setDevAdModalVisible] = useState(false);
   const [now, setNow] = useState(new Date());
   const [config, setConfig] = useState(realtimeConfigService.getConfig());
 
@@ -351,8 +353,8 @@ export const ProfileScreen = ({ navigation }) => {
         />
       </ProfileSection>
 
-      {/* 6. Developer Tools Section (DEV-only) */}
-      {__DEV__ && (
+      {/* 6. Developer Tools Section (Debug only) */}
+      {Boolean(__DEV__) && (
         <ProfileSection title="Developer Tools" isLast>
           <ProfileRow
             icon={Bell}
@@ -374,6 +376,15 @@ export const ProfileScreen = ({ navigation }) => {
           />
 
           <ProfileRow
+            icon={ShieldAlert}
+            title="Ad Controls & Debugger"
+            subtitle="Test banner, native, interstitial & rewarded ads QA controls"
+            onPress={() => setDevAdModalVisible(true)}
+            accessibilityLabel="Open developer ad controls modal"
+            style={{ marginBottom: 10 }}
+          />
+
+          <ProfileRow
             icon={Code}
             title="Component Showcase"
             subtitle="Preview core UI tokens, buttons, inputs, and cards"
@@ -387,6 +398,13 @@ export const ProfileScreen = ({ navigation }) => {
         visible={privacyModalVisible}
         onClose={() => setPrivacyModalVisible(false)}
       />
+
+      {Boolean(__DEV__) && (
+        <DevAdControlsModal
+          visible={devAdModalVisible}
+          onClose={() => setDevAdModalVisible(false)}
+        />
+      )}
     </ScreenContainer>
   );
 };

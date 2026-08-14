@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator, BottomTabBar } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Home, Calculator, WalletCards, UserRound } from 'lucide-react-native';
 import HomeScreen from '../features/home/HomeScreen';
@@ -10,6 +10,9 @@ import ProfileScreen from '../features/profile/ProfileScreen';
 import AppIcon from '../components/common/AppIcon';
 import { useAppTheme } from '../hooks/useAppTheme';
 import { ROUTES } from './routes';
+import AdPlacement from '../components/ads/AdPlacement';
+import { AD_PLACEMENTS } from '../services/ads/adPlacementConstants';
+import { View } from 'react-native';
 
 const Tab = createBottomTabNavigator();
 
@@ -38,6 +41,17 @@ export const MainTabNavigator = () => {
   return (
     <Tab.Navigator
       initialRouteName={ROUTES.HOME}
+      tabBar={(props) => (
+        <View style={{ backgroundColor: currentTheme.surface }}>
+          <AdPlacement
+            screen="tabs"
+            placementId={AD_PLACEMENTS.TAB_BOTTOM_BANNER}
+            adType="banner"
+            style={styles.bottomTabBanner}
+          />
+          <BottomTabBar {...props} />
+        </View>
+      )}
       screenOptions={{
         headerShown: false,
         tabBarHideOnKeyboard: true,
@@ -110,6 +124,12 @@ const styles = StyleSheet.create({
     marginTop: 2,
     marginBottom: 0,
     padding: 0,
+  },
+  bottomTabBanner: {
+    marginVertical: 0,
+    borderRadius: 0,
+    borderWidth: 0,
+    borderTopWidth: 1,
   },
 });
 

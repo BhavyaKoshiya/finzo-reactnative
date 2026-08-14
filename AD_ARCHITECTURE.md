@@ -1,6 +1,8 @@
-# Finzo — Advertising Architecture & Provider Specification (Phase 16.16)
+# Finzo — Advertising Architecture & Provider Specification
 
 This document outlines the provider-agnostic, moderate, privacy-first advertising architecture for the **Finzo** application.
+
+> **⚠️ PLACEMENT FREEZE (Phase 18.2)**: The placement map below is intentionally frozen. Do NOT add, remove, move, reorder, or change the type of any existing ad placement without explicit approval.
 
 ---
 
@@ -44,35 +46,66 @@ UI Screen / Component
 ```
 
 ### Production Safety Guard
-`SimulatedAdProvider` is strictly guarded by `__DEV__ === true`. It can **NEVER** be selected or rendered in production builds.
+`SimulatedAdProvider` is strictly guarded by `__DEV__ === true`. The `AdProviderFactory` contains a **hard production gate** using the real `__DEV__` global (not overridable options). SimulatedAdProvider can **NEVER** be selected or rendered in production builds, even if `isDev` or `devSimulationEnabled` options are tampered with.
 
 ---
 
-## 4. Centralized Placement Registry (`AD_PLACEMENTS`)
+## 4. Frozen Placement Map
 
-Placement IDs are centrally registered to prevent string literal scattering:
+| # | Screen | File | Ad Type | Placement ID | Position |
+|---|---|---|---|---|---|
+| 1 | Home | `HomeScreen.jsx` | Native | `home_native` | Between loan summary & popular calculators |
+| 2 | Home | `HomeScreen.jsx` | Banner | `home_banner` | After explore categories section |
+| 3 | Tabs | `MainTabNavigator.jsx` | Banner | `tab_bottom_banner` | Above bottom tab bar |
+| 4 | Calculators (cat 1) | `CalculatorsScreen.jsx` | Native | `calculator_native` | After Loan & Repayment category |
+| 5 | Calculators (cat 2) | `CalculatorsScreen.jsx` | Banner | `calculator_banner` | After Investment & Wealth category |
+| 6 | Calculators (cat 3) | `CalculatorsScreen.jsx` | Native | `calculator_native` | After Tax & Business category |
+| 7 | EMI Calculator | `EMICalculatorScreen.jsx` | Banner | `calculator_banner` | After results section |
+| 8 | My Loans | `MyLoansScreen.jsx` | Native | `home_native` | After primary loan card |
+| 9 | My Loans | `MyLoansScreen.jsx` | Banner | `my_loans_banner` | After "Add Another Loan" button |
+| 10 | Loan Details | `LoanDetailsScreen.jsx` | Native | `loan_details_native` | Between payment history & overview |
+| 11 | Loan Details | `LoanDetailsScreen.jsx` | Native | `loan_details_native` | After settings/actions |
+| 12 | Profile | `ProfileScreen.jsx` | Banner | `profile_banner` | After rewards card |
+| 13 | Rewards | `RewardsScreen.jsx` | Native | `rewards_native` | After reward catalog items |
+| 14 | Loan Calculators | `LoanCalculatorScreen.jsx` | Interstitial | `calculator_interstitial` | On back button press |
+| 15 | EMI Calculator | `EMICalculatorScreen.jsx` | Interstitial | `calculator_interstitial` | On back button press |
 
-- `HOME_BANNER` / `HOME_NATIVE`
+### Centralized Placement Registry (`AD_PLACEMENTS`)
+
+All IDs in `adPlacementConstants.js`:
+
+- `HOME_BANNER` / `HOME_NATIVE` / `TAB_BOTTOM_BANNER`
 - `CALCULATOR_BANNER` / `CALCULATOR_NATIVE` / `CALCULATOR_INTERSTITIAL`
-- `MY_LOANS_BANNER`
-- `LOAN_DETAILS_NATIVE`
+- `MY_LOANS_BANNER` / `LOAN_DETAILS_NATIVE` / `LOAN_INSIGHTS_BANNER`
 - `PROFILE_BANNER` / `PROFILE_NATIVE` / `PROFILE_REWARDED`
 - `REWARDS_BANNER` / `REWARDS_NATIVE` / `REWARDS_REWARDED`
 
 ---
 
-## 5. Frequency Management (`adFrequencyService`)
+## 5. Interstitial Frequency & Decision Precedence
 
-Interstitial ads are strictly frequency-capped locally:
-- **Max per Session**: 1 impression default (`interstitial.maxPerSession = 1`).
-- **Cooldown Duration**: At least 10 minutes between impressions default (`interstitial.cooldownMinutes = 10`).
-- **Local In-Memory State**: Frequency tracking is strictly local and never transmitted to Firebase or analytics.
+### Defaults (remotely configurable)
+- **Cooldown**: 3 minutes between impressions
+- **Max per Session**: 3 impressions per app session
+
+### Decision Precedence Hierarchy
+1. Financial Workflow Protection (100% ad-free protected screen)
+2. Ad-Free Entitlement (`adFreeUntil > now`)
+3. Offline Connectivity (`isOnline === false`)
+4. Global Ads Disabled (`ads.enabled === false`)
+5. Placement Disabled (per-screen RTDB config)
+6. Provider Unavailable
+7. Cooldown Active (< 3 mins elapsed)
+8. Session Limit Reached (>= 3 impressions)
+9. Double-Tap Guard (ref-based deduplication)
+10. Show Impression
+
+### Back Navigation Safety
+If the interstitial is blocked for any reason, `navigation.goBack()` executes immediately. The user is **never trapped** on a screen due to ad failures.
 
 ---
 
 ## 6. Remote Configuration (`Firebase RTDB /config`)
-
-Ad behavior is controlled dynamically via RTDB `/config/ads`:
 
 ```json
 {
@@ -82,39 +115,63 @@ Ad behavior is controlled dynamically via RTDB `/config/ads`:
     "native": { "enabled": true },
     "interstitial": {
       "enabled": true,
-      "cooldownMinutes": 10,
-      "maxPerSession": 1
+      "cooldownMinutes": 3,
+      "maxPerSession": 3
     },
     "rewarded": { "enabled": true },
     "placements": {
-      "home": { "banner": true, "native": false, "interstitial": false },
+      "home": { "banner": true, "native": true, "interstitial": false },
       "calculators": { "banner": true, "native": true, "interstitial": true },
-      "myLoans": { "banner": true, "native": false, "interstitial": false },
-      "loanDetails": { "banner": false, "native": true, "interstitial": false },
-      "profile": { "banner": true, "native": false, "interstitial": false },
-      "rewards": { "banner": true, "native": true, "interstitial": false }
+      "myLoans": { "banner": true, "native": true, "interstitial": false },
+      "loanDetails": { "banner": true, "native": true, "interstitial": false },
+      "profile": { "banner": true, "native": true, "interstitial": false },
+      "rewards": { "banner": true, "native": true, "interstitial": false, "rewarded": true }
     }
   }
 }
 ```
 
-### Safe Fallbacks
-If remote configuration is missing, malformed, or invalid, `DEFAULT_ADS_CONFIG` ensures safe fallback behavior without breaking app rendering.
+### Strict Validation Bounds
+- `cooldownMinutes`: number between `1` and `1440`.
+- `maxPerSession`: integer between `0` and `20`.
+If remote config is malformed or invalid, `DEFAULT_ADS_CONFIG` local defaults (3 mins / 3 per session) are applied.
 
 ---
 
 ## 7. Ad-Free Entitlement & Connectivity Rules
 
-1. **Ad-Free Entitlement (`adFreeUntil > now`)**:
-   Automatically suppresses ordinary banner, native, and interstitial ads across all screens.
-2. **Internet Connection Requirement (`isInternetReachable`)**:
-   Ads require internet access. If offline, ad loading is bypassed cleanly without error toasts or broken UI placeholders.
-3. **No Financial Actions Interruption**:
-   `AddPaymentScreen`, balance updates, private details, notes, PDF generation, and repayment actions remain **100% ad-free**.
+1. **Ad-Free Entitlement (`adFreeUntil > now`)**: Automatically suppresses ordinary banner, native, and interstitial ads. Rewarded ads remain available (user-initiated).
+2. **Internet Connection Requirement (`isInternetReachable`)**: Ads require internet. If offline, ad loading is bypassed cleanly without error toasts or broken UI.
+3. **No Financial Actions Interruption**: AddPaymentScreen, balance updates, private details, notes, PDF generation, and repayment actions remain **100% ad-free**.
 
 ---
 
-## 8. Real Provider Replacement Path
+## 8. Protected Financial Workflows (100% Ad-Free)
+
+These screens are always ad-free regardless of any configuration:
+
+- Add Loan / Edit Loan
+- Record Payment / Edit Payment / Delete Payment
+- Balance Correction
+- Prepayment Simulator / Payoff Planner
+- Loan Goals / Loan Goal Details
+- Private Details / Notes
+- PDF Export / PDF Generation
+- Local Data Privacy
+
+RTDB configuration **cannot** override these protections.
+
+---
+
+## 9. Financial Data Firewall
+
+Ad providers receive **ONLY**: `placementId`, `adType`, generic options.
+
+They **NEVER** receive: loan amounts, EMIs, interest rates, balances, payment history, account numbers, notes, private details, credentials, or financial goals.
+
+---
+
+## 10. Real Provider Replacement Path
 
 When Finzo obtains ad network approvals in the future:
 1. Provision the approved SDK (AdMob / AppLovin / Unity).
