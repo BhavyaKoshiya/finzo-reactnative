@@ -59,8 +59,8 @@ export const UpcomingPaymentCard = ({
       <View style={styles.headerRow}>
         <View style={styles.titleRow}>
           <AppIcon icon={Calendar} size={18} color={currentTheme.primary} style={{ marginRight: 6 }} />
-          <AppText variant="bodySmall" color={currentTheme.textSecondary} style={{ fontWeight: '600' }}>
-            Next EMI Payment
+          <AppText variant="bodySmall" color={currentTheme.textSecondary} style={{ fontWeight: '600' }} numberOfLines={1}>
+            {loan.name ? `${loan.name} • EMI` : 'Next EMI Payment'}
           </AppText>
         </View>
 
@@ -90,11 +90,18 @@ export const UpcomingPaymentCard = ({
           <AppText variant="screenTitle" color={currentTheme.textPrimary} style={{ fontWeight: '800' }}>
             {formatCurrency(loan.emiAmount)}
           </AppText>
-          {nextDueDate !== '' && (
-            <AppText variant="caption" color={currentTheme.textSecondary} style={{ marginTop: 2 }} numberOfLines={1} ellipsizeMode="tail">
-              Due: <AppText variant="caption" style={{ fontWeight: '700' }}>{formattedDueDate}</AppText>
-            </AppText>
-          )}
+          <View style={styles.subtextRow}>
+            {nextDueDate !== '' && (
+              <AppText variant="caption" color={currentTheme.textSecondary} numberOfLines={1} ellipsizeMode="tail">
+                Due: <AppText variant="caption" style={{ fontWeight: '700' }}>{formattedDueDate}</AppText>
+              </AppText>
+            )}
+            {Number(loan.currentOutstandingPrincipal) > 0 && (
+              <AppText variant="caption" color={currentTheme.textMuted} numberOfLines={1} style={{ marginLeft: 6 }}>
+                • Outstanding: {formatCurrency(loan.currentOutstandingPrincipal)}
+              </AppText>
+            )}
+          </View>
         </View>
 
         {onRecordPayment && status !== 'paid_off' && status !== 'paid' && (
@@ -163,6 +170,12 @@ const styles = StyleSheet.create({
   amountContainer: {
     flex: 1,
     marginRight: 8,
+  },
+  subtextRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+    flexWrap: 'wrap',
   },
   recordBtn: {
     flexDirection: 'row',

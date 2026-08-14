@@ -336,7 +336,7 @@ export const MyLoansScreen = ({ route, navigation }) => {
                   screen="myLoans"
                   placementId={AD_PLACEMENTS.MY_LOANS_BANNER}
                   adType="banner"
-                  style={{ marginTop: 12 }}
+                  style={{ marginTop: 20, marginBottom: 16 }}
                 />
               </View>
             ) : null
@@ -447,6 +447,12 @@ export const MyLoansScreen = ({ route, navigation }) => {
                 }
                 icon={savedFilterMode === 'favorites' ? Star : Bookmark}
               />
+              <AdPlacement
+                screen="myLoans"
+                placementId={AD_PLACEMENTS.MY_LOANS_BANNER}
+                adType="banner"
+                style={{ marginTop: 20 }}
+              />
             </View>
           ) : (
             <FlatList
@@ -457,16 +463,35 @@ export const MyLoansScreen = ({ route, navigation }) => {
                 { paddingBottom: bottomListPadding },
               ]}
               showsVerticalScrollIndicator={false}
-              renderItem={({ item }) => (
-                <SavedCalculationCard
-                  item={item}
-                  onPress={() => handleOpenSavedItem(item)}
-                  onToggleFavorite={handleToggleFavorite}
-                  onDelete={handleDeleteSavedItem}
-                  onShare={handleShareSavedItem}
-                  onPdf={handlePdfSavedItem}
-                />
+              renderItem={({ item, index }) => (
+                <View>
+                  <SavedCalculationCard
+                    item={item}
+                    onPress={() => handleOpenSavedItem(item)}
+                    onToggleFavorite={handleToggleFavorite}
+                    onDelete={handleDeleteSavedItem}
+                    onShare={handleShareSavedItem}
+                    onPdf={handlePdfSavedItem}
+                  />
+                  {index === 0 && (
+                    <AdPlacement
+                      screen="myLoans"
+                      placementId={AD_PLACEMENTS.HOME_NATIVE}
+                      adType="native"
+                      headline="Finzo Smart Calculations"
+                      description="Calculate loans, compare interest rates, and plan financial goals offline."
+                    />
+                  )}
+                </View>
               )}
+              ListFooterComponent={
+                <AdPlacement
+                  screen="myLoans"
+                  placementId={AD_PLACEMENTS.MY_LOANS_BANNER}
+                  adType="banner"
+                  style={{ marginTop: 16, marginBottom: 12 }}
+                />
+              }
             />
           )}
         </View>

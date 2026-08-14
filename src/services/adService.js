@@ -3,6 +3,7 @@ import { AD_PLACEMENTS } from './ads/adPlacementConstants';
 import { AD_STATES } from './ads/adProviderTypes';
 import adDecisionEngine from './ads/adDecisionEngine';
 import { adFrequencyService } from './ads/adFrequencyService';
+import { interstitialFrequencyService, normalizeAdTime } from './ads/interstitialFrequencyService';
 import { rewardedAdSessionManager } from './ads/rewardedAdSessionManager';
 import { adMetricsService } from './ads/adMetricsService';
 import { realtimeConfigService } from '../config/realtimeConfigService';
@@ -17,20 +18,26 @@ import logger from './logger';
 class AdService {
   constructor() {
     this.providerOverride = null;
-    this.devSimulationEnabled = true;
+    this.devSimulationEnabled = false;
     this.modalHandler = null;
     this.interstitialModalHandler = null;
     this.cachedProvider = null;
+    this.isInitialized = false;
+    this.initPromise = null;
   }
 
   setProviderOverride(provider) {
     this.providerOverride = provider;
     this.cachedProvider = null;
+    this.isInitialized = false;
+    this.initPromise = null;
   }
 
   setDevSimulationEnabled(enabled) {
     this.devSimulationEnabled = Boolean(enabled);
     this.cachedProvider = null;
+    this.isInitialized = false;
+    this.initPromise = null;
   }
 
   setModalHandler(handler) {
@@ -73,8 +80,64 @@ class AdService {
     return provider;
   }
 
+  initialize(options = {}) {
+    if (this.isInitialized) return Promise.resolve(true);
+    if (this.initPromise) return this.initPromise;
+
+    this.initPromise = (async () => {
+      try {
+        const provider = this.getProvider();
+        if (provider && typeof provider.initialize === 'function') {
+          const result = await provider.initialize(options);
+          this.isInitialized = Boolean(result);
+          return result;
+        }
+        this.isInitialized = true;
+        return true;
+      } catch (err) {
+        logger.warn('AdService async initialization error:', { error: err?.message });
+        return false;
+      }
+    })();
+
+    return this.initPromise;
+  }
+
+  /**
+   * Preload supported ad inventory via active provider.
+   * @param {Object} [options]
+   * @returns {Promise<{ success: boolean, reason?: string }>}
+   */
+  async preloadAds(options = {}) {
+    try {
+      const provider = this.getProvider();
+      if (provider && typeof provider.preloadAds === 'function') {
+        return await provider.preloadAds(options);
+      }
+      return { success: true };
+    } catch (err) {
+      logger.warn('AdService.preloadAds error:', { error: err?.message });
+      return { success: false, reason: err?.message };
+    }
+  }
+
   isConfigured() {
     return this.getProvider().isConfigured();
+  }
+
+  /**
+   * Resolves authoritative adTime configuration from active provider and remote config.
+   * Single source of truth: Provider -> RTDB config -> Default fallback (3).
+   * @param {Object} [options]
+   * @returns {number}
+   */
+  getAdTime(options = {}) {
+    const provider = this.getProvider();
+    if (provider && typeof provider.getAdTime === 'function') {
+      return provider.getAdTime();
+    }
+    const config = options.config || realtimeConfigService.getConfig();
+    return normalizeAdTime(config?.ads?.adTime || config?.ads?.interstitial?.adTime);
   }
 
   /**
@@ -82,16 +145,13 @@ class AdService {
    */
   canShowAd(params = {}) {
     const config = params.config || realtimeConfigService.getConfig();
-    const frequencyStatus = {
-      ...adFrequencyService.canShowInterstitial({
-        cooldownMinutes: config?.ads?.interstitial?.cooldownMinutes,
-        maxPerSession: config?.ads?.interstitial?.maxPerSession,
-      }),
-      canShow: adFrequencyService.canShowInterstitial({
-        cooldownMinutes: config?.ads?.interstitial?.cooldownMinutes,
-        maxPerSession: config?.ads?.interstitial?.maxPerSession,
-      }).allowed,
-    };
+    const adTime = params.adTime ? normalizeAdTime(params.adTime) : this.getAdTime({ config });
+    const maxPerSession = config?.ads?.interstitial?.maxPerSession;
+
+    const frequencyStatus = interstitialFrequencyService.checkFrequencyStatus({
+      adTime,
+      maxPerSession,
+    });
 
     const decision = adDecisionEngine.canShowAd({
       ...params,
@@ -224,40 +284,70 @@ class AdService {
   }
 
   async showInterstitial(placementId = AD_PLACEMENTS.CALCULATOR_INTERSTITIAL, options = {}) {
-    const decision = this.canShowAd({
+    const config = options.config || realtimeConfigService.getConfig();
+    const adTime = options.adTime ? normalizeAdTime(options.adTime) : this.getAdTime({ config });
+    const maxPerSession = config?.ads?.interstitial?.maxPerSession;
+
+    // 1. Evaluate basic safety constraints (isOnline, isAdFree, protectedScreen, global enabled, placement enabled)
+    // Pass frequencyStatus as allowing so canShowAd evaluates safety preconditions first
+    const basicDecision = adDecisionEngine.canShowAd({
       adType: 'interstitial',
       placementId,
       screen: options.screen,
       isOnline: options.isOnline,
       isAdFree: options.isAdFree,
+      config,
+      frequencyStatus: { canShow: true },
+      provider: this.getProvider(),
     });
 
-    if (!decision.allowed) {
+    // If safety check fails (e.g. protected screen, offline, ad-free, disabled) -> return failed WITHOUT incrementing counter!
+    if (!basicDecision.allowed) {
       return {
         status: AD_STATES.FAILED,
         provider: this.getProvider().getType(),
-        reason: decision.reason,
+        reason: basicDecision.reason,
       };
     }
 
+    // 2. Evaluate Eligible Opportunity and App-Side Counter
+    const oppResult = interstitialFrequencyService.recordEligibleOpportunity({
+      adTime,
+      maxPerSession,
+    });
+
+    if (!oppResult.triggered) {
+      return {
+        status: AD_STATES.FAILED,
+        provider: this.getProvider().getType(),
+        reason: oppResult.reason,
+        counter: oppResult.counter,
+        target: oppResult.target,
+      };
+    }
+
+    // 3. Threshold Met! Trigger provider to display interstitial
     adFrequencyService.setInterstitialShowing(true);
 
     try {
-      const result = await this.getProvider().showInterstitial(placementId, options);
+      const result = await this.getProvider().showInterstitial(placementId, {
+        ...options,
+        counter: oppResult.target,
+      });
       if (result.status === AD_STATES.COMPLETED) {
         adFrequencyService.recordInterstitialImpression();
-      } else {
-        adFrequencyService.setInterstitialShowing(false);
       }
       return result;
     } catch (err) {
-      adFrequencyService.setInterstitialShowing(false);
       logger.warn('AdService.showInterstitial failed', { placementId, error: err?.message });
       return {
         status: AD_STATES.FAILED,
         provider: this.getProvider().getType(),
         reason: err?.message || 'Interstitial playback error',
       };
+    } finally {
+      interstitialFrequencyService.setInterstitialShowing(false);
+      adFrequencyService.setInterstitialShowing(false);
     }
   }
 

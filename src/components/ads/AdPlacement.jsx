@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 import { selectIsAdFree } from '../../store/slices/rewardsSlice';
 import { selectIsOnline } from '../../store/slices/connectivitySlice';
@@ -48,22 +49,68 @@ export const AdPlacement = ({
     return null;
   }
 
+  const provider = adService.getProvider();
+
   if (adType === 'banner') {
-    return <SimulatedBannerAd style={style} />;
+    const isTab = screen === 'tabs';
+    const containerStyle = isTab ? styles.tabBannerContainer : styles.bannerContainer;
+    const bannerContent =
+      provider && typeof provider.renderBanner === 'function'
+        ? provider.renderBanner({ placementId, style })
+        : <SimulatedBannerAd style={style} />;
+
+    return (
+      <View style={[containerStyle, style]}>
+        {bannerContent}
+      </View>
+    );
   }
 
   if (adType === 'native') {
+    if (provider && typeof provider.renderNative === 'function') {
+      return (
+        <View style={[styles.nativeContainer, style]}>
+          {provider.renderNative({
+            placementId,
+            style,
+            headline,
+            description,
+            callToAction,
+          })}
+        </View>
+      );
+    }
     return (
-      <SimulatedNativeAd
-        headline={headline}
-        description={description}
-        callToAction={callToAction}
-        style={style}
-      />
+      <View style={[styles.nativeContainer, style]}>
+        <SimulatedNativeAd
+          headline={headline}
+          description={description}
+          callToAction={callToAction}
+          style={style}
+        />
+      </View>
     );
   }
 
   return null;
 };
+
+const styles = StyleSheet.create({
+  bannerContainer: {
+    marginVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  tabBannerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  nativeContainer: {
+    marginVertical: 12,
+    width: '100%',
+  },
+});
 
 export default AdPlacement;

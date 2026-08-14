@@ -14,6 +14,18 @@ export class BaseAdProvider {
     return false;
   }
 
+  getAdTime() {
+    return 3;
+  }
+
+  /**
+   * Preload supported ad inventory (Banner, Native, Interstitial, Rewarded).
+   * @returns {Promise<{ success: boolean }>}
+   */
+  async preloadAds() {
+    return { success: true };
+  }
+
   // 1. BANNER AD API
   isBannerAvailable(_placementId) {
     return false;

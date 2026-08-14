@@ -35,6 +35,10 @@ export class SimulatedAdProvider extends BaseAdProvider {
     return Boolean(this.simulationEnabled);
   }
 
+  getAdTime() {
+    return 3;
+  }
+
   // 1. BANNER AD API
   isBannerAvailable(_placementId) {
     return this.isConfigured();

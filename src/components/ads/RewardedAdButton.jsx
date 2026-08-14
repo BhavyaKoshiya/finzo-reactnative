@@ -84,7 +84,22 @@ export const RewardedAdButton = ({
     rewardedConfig.dailyWatchLimit > 0 && watchedToday >= rewardedConfig.dailyWatchLimit;
 
   const isFeatureEnabled = Boolean(rewardedConfig.enabled);
-  const isProviderAvailable = adService.isRewardedAvailable(placementId);
+
+  const [isProviderAvailable, setIsProviderAvailable] = useState(() =>
+    adService.isRewardedAvailable(placementId)
+  );
+
+  useEffect(() => {
+    setIsProviderAvailable(adService.isRewardedAvailable(placementId));
+    const interval = setInterval(() => {
+      const available = adService.isRewardedAvailable(placementId);
+      setIsProviderAvailable(available);
+      if (available) {
+        clearInterval(interval);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [placementId]);
 
   const canWatch =
     isOnline &&

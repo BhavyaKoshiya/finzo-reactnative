@@ -12,8 +12,13 @@ import ROUTES from './src/navigation/routes';
 import loanReminderService from './src/features/loans/services/loanReminderService';
 import AppStartupGate from './src/components/containers/AppStartupGate';
 import ConnectivityGate from './src/components/containers/ConnectivityGate';
+import AppUpdateGate from './src/components/containers/AppUpdateGate';
 
 import SimulatedInterstitialModal from './src/components/ads/SimulatedInterstitialModal';
+import adService from './src/services/adService';
+import firebaseAnalyticsService, { ANALYTICS_EVENTS } from './src/services/firebaseAnalyticsService';
+import firebaseCrashlyticsService from './src/services/firebaseCrashlyticsService';
+import firebaseMessagingService from './src/services/firebaseMessagingService';
 
 function AppContent() {
   useEffect(() => {
@@ -29,7 +34,18 @@ function AppContent() {
 
     reconcileState();
 
-    // 2. AppState Foreground Resume Listener
+    // 2. Asynchronous, non-blocking marketing ad provider initialization
+    adService.initialize().catch(() => {});
+
+    // 3. Asynchronous, non-blocking Firebase services initialization
+    firebaseCrashlyticsService.initialize().catch(() => {});
+    firebaseAnalyticsService.logEvent(ANALYTICS_EVENTS.APP_OPEN).catch(() => {});
+
+    // 4. Foreground FCM message listener
+    const unsubscribeFcm = firebaseMessagingService.onMessage(() => {});
+    const unsubscribeFcmOpened = firebaseMessagingService.onNotificationOpenedApp(() => {});
+
+    // 5. AppState Foreground Resume Listener
     const subscription = AppState.addEventListener('change', (nextAppState) => {
       if (nextAppState === 'active') {
         reconcileState();
@@ -73,6 +89,8 @@ function AppContent() {
     return () => {
       subscription.remove();
       unsubscribeNotifee();
+      unsubscribeFcm();
+      unsubscribeFcmOpened();
     };
   }, []);
 
@@ -80,8 +98,10 @@ function AppContent() {
     <SafeAreaProvider>
       <StatusBar barStyle="dark-content" />
       <ConnectivityGate>
-        <AppNavigator />
-        <SimulatedInterstitialModal />
+        <AppUpdateGate>
+          <AppNavigator />
+          <SimulatedInterstitialModal />
+        </AppUpdateGate>
       </ConnectivityGate>
     </SafeAreaProvider>
   );

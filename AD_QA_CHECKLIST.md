@@ -39,19 +39,19 @@ Verify each item before marking a phase complete.
 
 ---
 
-## 3. Calculator Exit Interstitial
+## 3. Calculator Exit Interstitial & adTime Opportunity Frequency (Phase 22)
 
 - [ ] Shows on back button press from LoanCalculatorScreen
 - [ ] Shows on back button press from EMICalculatorScreen
-- [ ] Uses `useInterstitialAd` → `adService.showInterstitial()` → `SimulatedInterstitialModal`
+- [ ] Uses `useInterstitialAd` → `adService.showInterstitial()` → `interstitialFrequencyService` → `MarketingAdProvider`
 - [ ] All 5 loan calculators (Home, Personal, Car, Education, Business) use shared behavior
-- [ ] Respects ad-free suppression
-- [ ] Respects offline suppression
-- [ ] Respects cooldown (3 min default)
-- [ ] Respects session limit (3/session default)
+- [ ] Respects ad-free suppression (never accumulates opportunity counter while ad-free)
+- [ ] Respects offline suppression (never accumulates opportunity counter while offline)
+- [ ] Respects `adTime` opportunity threshold (e.g. `adTime=3` shows on every 3rd eligible back tap)
+- [ ] Respects session limit (3/session hard ceiling)
 - [ ] Back navigation works when interstitial blocked → immediate `goBack()`
 - [ ] Back navigation works when provider fails → immediate `goBack()`
-- [ ] Double-tap protection prevents duplicate modals
+- [ ] Double-tap / concurrency protection prevents duplicate modal/requests
 - [ ] Close callback executes exactly once
 
 ---
@@ -114,3 +114,28 @@ All these screens return `FINANCIAL_WORKFLOW` reason (100% ad-free):
 - [ ] `yarn test` → 0 failures
 - [ ] `npx eslint --quiet src/` → 0 errors, 0 warnings
 - [ ] Phase 18.2 test file: `phase182PlacementPreservation.test.js` passes
+
+---
+
+## 10. Startup Ad Initialization & Preloading QA (Phase 27)
+
+- [ ] `MarketingAdProvider` initializes `react-native-marketing-plugin` during startup
+- [ ] Banner descriptors preload on startup
+- [ ] Native descriptors preload on startup
+- [ ] Interstitial ads preload into cache on startup
+- [ ] Rewarded ads preload when enabled in `adModel`
+- [ ] Splash waits at most 5 seconds for ad readiness
+- [ ] If ads are ready earlier (<5s), Splash dismisses immediately
+- [ ] If ads take >5s, Splash dismisses at 5s and startup proceeds
+- [ ] 5-second timeout does NOT cancel or abort in-flight ad requests
+- [ ] Late-loaded banner and native ads render immediately upon screen mount
+- [ ] Late-loaded interstitial and rewarded ads remain cached for future authorized use
+- [ ] Preloading NEVER automatically displays an ad
+- [ ] Preload does NOT increment `opportunityCounter`
+- [ ] Preload does NOT consume the 3/session limit
+- [ ] Preload does NOT bypass `adDecisionEngine` or financial workflow protections
+- [ ] Offline startup continues immediately without waiting for ads
+- [ ] Ad initialization failure does not block startup or crash the application
+- [ ] Multiple initialization calls are idempotent and return the same promise
+- [ ] App-open ads remain strictly disabled (`enableAppOpenOnResume: false`)
+

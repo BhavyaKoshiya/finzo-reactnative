@@ -16,7 +16,7 @@ class RealtimeConfigService {
   /**
    * Initializes the configuration service:
    * 1. Loads persisted Last-Known-Good configuration from AsyncStorage.
-   * 2. Attaches single RTDB listener at '/config'.
+   * 2. Attaches single RTDB listener at root '/'.
    */
   async initialize() {
     if (this.isInitialized) return this.activeConfig;
@@ -29,28 +29,44 @@ class RealtimeConfigService {
     }
 
     // 2. Attach RTDB Listener if available
-    try {
-      // Dynamic import to allow test mocks / graceful fallback when offline
-      const databaseModule = require('@react-native-firebase/database');
-      const database = databaseModule.default || databaseModule;
+    await this._attachRtdbListener();
 
-      const ref = database().ref('/config');
-      const onValueChange = ref.on('value', (snapshot) => {
+    return this.activeConfig;
+  }
+
+  /**
+   * Attempts to attach the RTDB listener with one retry.
+   * Firebase auto-initializes natively via google-services.json, but there can be
+   * a brief race condition on cold start where the native app isn't registered yet.
+   */
+  async _attachRtdbListener(retryCount = 0) {
+    try {
+      const { getDatabase, ref } = require('@react-native-firebase/database');
+      const db = getDatabase(undefined, 'https://finzo-app-calc-default-rtdb.firebaseio.com');
+      const rootRef = ref(db, '/');
+
+      const onValueChange = rootRef.on('value', (snapshot) => {
         const val = snapshot.val();
+        logger.info('RTDB snapshot received from Firebase', { hasData: Boolean(val) });
         if (val) {
           this.processRemotePayload(val);
         } else {
-          logger.info('RTDB /config returned empty payload. Retaining active config.');
+          logger.info('RTDB returned empty payload. Retaining active config.');
         }
       }, (error) => {
-        logger.warn('RTDB subscription error:', { message: error.message });
+        logger.warn('RTDB subscription error from Firebase:', { message: error.message });
       });
 
-      this.rtdbUnsubscribe = () => ref.off('value', onValueChange);
+      this.rtdbUnsubscribe = () => rootRef.off('value', onValueChange);
       this.isInitialized = true;
       logger.info('RealtimeConfigService initialized successfully');
     } catch (err) {
-      logger.info('RTDB module not available or initialized. Using active fallback config.', { error: err.message });
+      if (retryCount < 2) {
+        // Wait briefly for native Firebase to finish auto-initialization
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        return this._attachRtdbListener(retryCount + 1);
+      }
+      logger.warn('RTDB module not available or failed to initialize:', { error: err.message });
       this.isInitialized = true;
     }
 
@@ -59,18 +75,43 @@ class RealtimeConfigService {
 
   /**
    * Processes, validates, and activates a remote configuration payload.
+   * Tolerates both root-level payloads and nested '/config' payloads,
+   * automatically merging partial trees with defaults.
    */
-  processRemotePayload(payload) {
-    const { valid, errors } = validateRealtimeConfig(payload);
+  processRemotePayload(rawPayload) {
+    if (!rawPayload || typeof rawPayload !== 'object') return false;
+
+    // Support both root payload with .config and direct payload
+    const payload = (rawPayload.config && typeof rawPayload.config === 'object')
+      ? rawPayload.config
+      : rawPayload;
+
+    // Merge with defaults to gracefully support partial configurations (e.g. only appUpdate)
+    const merged = {
+      ...DEFAULT_REALTIME_CONFIG,
+      ...payload,
+      version: payload.version || DEFAULT_REALTIME_CONFIG.version,
+      appUpdate: payload.appUpdate
+        ? { ...DEFAULT_REALTIME_CONFIG.appUpdate, ...payload.appUpdate }
+        : DEFAULT_REALTIME_CONFIG.appUpdate,
+      ads: payload.ads
+        ? { ...DEFAULT_REALTIME_CONFIG.ads, ...payload.ads }
+        : DEFAULT_REALTIME_CONFIG.ads,
+      rewards: payload.rewards
+        ? { ...DEFAULT_REALTIME_CONFIG.rewards, ...payload.rewards }
+        : DEFAULT_REALTIME_CONFIG.rewards,
+    };
+
+    const { valid, errors } = validateRealtimeConfig(merged);
     if (!valid) {
       logger.warn('Remote RTDB config validation failed. Retaining active config.', { errors });
       return false;
     }
 
-    this.activeConfig = payload;
-    this.saveLastKnownGoodConfig(payload);
+    this.activeConfig = merged;
+    this.saveLastKnownGoodConfig(merged);
     this.notifyListeners();
-    logger.info('Remote RTDB configuration activated successfully', { version: payload.version });
+    logger.info('Remote RTDB configuration activated successfully', { version: merged.version });
     return true;
   }
 

@@ -1,12 +1,14 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { ArrowLeft, ShieldCheck, HardDrive, CloudOff, Server } from 'lucide-react-native';
+import { ArrowLeft, ShieldCheck, HardDrive, CloudOff, Server, FileText } from 'lucide-react-native';
 import ScreenContainer from '../../../components/containers/ScreenContainer';
 import AppHeader from '../../../components/navigation/AppHeader';
 import AppText from '../../../components/common/AppText';
 import AppCard from '../../../components/cards/AppCard';
 import AppIcon from '../../../components/common/AppIcon';
+import SecondaryButton from '../../../components/buttons/SecondaryButton';
 import { useAppTheme } from '../../../hooks/useAppTheme';
+import ROUTES from '../../../navigation/routes';
 
 export const LocalDataPrivacyScreen = ({ navigation }) => {
   const { currentTheme } = useAppTheme();
@@ -86,6 +88,14 @@ export const LocalDataPrivacyScreen = ({ navigation }) => {
             <AppText variant="bodySmall">• Advertising infrastructure does NOT receive loan, payment, or private financial data</AppText>
           </View>
         </AppCard>
+
+        {/* View Full Privacy Policy CTA */}
+        <SecondaryButton
+          title="Read Full Privacy Policy"
+          icon={FileText}
+          onPress={() => navigation.navigate(ROUTES.PRIVACY_POLICY)}
+          accessibilityLabel="Read full comprehensive Privacy Policy"
+        />
       </View>
     </ScreenContainer>
   );

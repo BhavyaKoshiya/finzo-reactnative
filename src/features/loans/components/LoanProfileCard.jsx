@@ -75,11 +75,11 @@ export const LoanProfileCard = ({ profile, onPress, style }) => {
           <AppIcon icon={ChevronRight} size={20} color={currentTheme.textMuted} />
         </View>
 
-        {/* Metrics Grid */}
+        {/* Metrics Grid: Clear distinction between Outstanding (Still Owe) and Borrowed (Original) */}
         <View style={[styles.metricsRow, { borderColor: currentTheme.border }]}>
           <View style={styles.metricCol}>
-            <AppText variant="caption" color={currentTheme.textSecondary}>
-              Outstanding
+            <AppText variant="caption" color={currentTheme.textSecondary} style={{ fontWeight: '600' }}>
+              Still Owe (Outstanding)
             </AppText>
             <AppText
               variant="titleMedium"
@@ -91,12 +91,15 @@ export const LoanProfileCard = ({ profile, onPress, style }) => {
             >
               {formattedCurrentOutstanding}
             </AppText>
+            <AppText variant="caption" color={currentTheme.textMuted} style={styles.borrowedSubtext} numberOfLines={1}>
+              Borrowed: {adapted.formattedOriginalPrincipal}
+            </AppText>
           </View>
 
           <View style={styles.metricDivider} />
 
           <View style={styles.metricCol}>
-            <AppText variant="caption" color={currentTheme.textSecondary}>
+            <AppText variant="caption" color={currentTheme.textSecondary} style={{ fontWeight: '600' }}>
               Monthly EMI
             </AppText>
             <AppText
@@ -108,6 +111,38 @@ export const LoanProfileCard = ({ profile, onPress, style }) => {
               style={styles.metricValue}
             >
               {formattedEmiAmount}
+            </AppText>
+            {nextEmiInfo?.formattedDate ? (
+              <AppText variant="caption" color={currentTheme.textMuted} style={styles.borrowedSubtext} numberOfLines={1}>
+                Due: {nextEmiInfo.formattedDate}
+              </AppText>
+            ) : (
+              <AppText variant="caption" color={currentTheme.textMuted} style={styles.borrowedSubtext} numberOfLines={1}>
+                {formattedInterestRate} p.a.
+              </AppText>
+            )}
+          </View>
+        </View>
+
+        {/* Repayment Progress Bar */}
+        <View style={styles.progressContainer}>
+          <View style={[styles.progressBarBg, { backgroundColor: currentTheme.border }]}>
+            <View
+              style={[
+                styles.progressBarFill,
+                {
+                  backgroundColor: currentTheme.primary,
+                  width: `${Math.min(100, Math.max(0, repaymentPercentage))}%`,
+                },
+              ]}
+            />
+          </View>
+          <View style={styles.progressLabelsRow}>
+            <AppText variant="caption" color={currentTheme.textMuted}>
+              {repaymentPercentage}% principal repaid ({formattedPrincipalRepaid})
+            </AppText>
+            <AppText variant="caption" color={currentTheme.textMuted}>
+              {remainingTenureText}
             </AppText>
           </View>
         </View>
@@ -126,24 +161,6 @@ export const LoanProfileCard = ({ profile, onPress, style }) => {
             </AppText>
           </View>
         ) : null}
-
-        {/* Footer Sub-info */}
-        <View style={styles.footerRow}>
-          <View style={styles.footerTag}>
-            <AppText variant="bodySmall" color={currentTheme.textSecondary} numberOfLines={1}>
-              {formattedInterestRate} • {repaymentPercentage}% paid ({formattedPrincipalRepaid})
-            </AppText>
-          </View>
-
-          {nextEmiInfo?.formattedDate && (
-            <View style={styles.nextEmiTag}>
-              <AppIcon icon={Calendar} size={13} color={currentTheme.textSecondary} style={{ marginRight: 4 }} />
-              <AppText variant="bodySmall" color={currentTheme.textSecondary} numberOfLines={1}>
-                Next: {nextEmiInfo.formattedDate}
-              </AppText>
-            </View>
-          )}
-        </View>
       </TouchableOpacity>
     </AppCard>
   );
@@ -218,6 +235,28 @@ const styles = StyleSheet.create({
     backgroundColor: '#E5E7EB',
     marginHorizontal: 12,
   },
+  borrowedSubtext: {
+    marginTop: 2,
+    fontSize: 11,
+  },
+  progressContainer: {
+    marginTop: 10,
+  },
+  progressBarBg: {
+    height: 4,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  progressLabelsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 4,
+  },
   latestPaymentStrip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -233,20 +272,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     marginRight: 8,
-  },
-  footerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  footerTag: {
-    flex: 1,
-    marginRight: 8,
-  },
-  nextEmiTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
 });
 

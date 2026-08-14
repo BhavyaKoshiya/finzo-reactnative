@@ -1,8 +1,8 @@
-# Finzo — Advertising Architecture & Provider Specification
+# Finzo — Advertising Architecture & Provider Specification (Feature-Frozen)
 
 This document outlines the provider-agnostic, moderate, privacy-first advertising architecture for the **Finzo** application.
 
-> **⚠️ PLACEMENT FREEZE (Phase 18.2)**: The placement map below is intentionally frozen. Do NOT add, remove, move, reorder, or change the type of any existing ad placement without explicit approval.
+> **⚠️ ARCHITECTURE & PLACEMENT FREEZE (Phase 23)**: The advertising architecture, placement map, and `adTime` opportunity engine are **FEATURE-FROZEN**. Do NOT introduce new ad placements, ad networks, or alternative frequency models.
 
 ---
 
@@ -37,16 +37,17 @@ UI Screen / Component
        ↓
   AdProviderFactory
        ↓
-┌───────────────────────────────┬───────────────────────────────┐
-│ Development (__DEV__ = true)  │ Production (__DEV__ = false)  │
-├───────────────────────────────┼───────────────────────────────┤
-│ SimulatedAdProvider           │ ApprovedAdProvider (Future)   │
-│ (Development Simulator)       │ OR NoAdProvider (Fallback)    │
-└───────────────────────────────┴───────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│ MarketingAdProvider (react-native-marketing-plugin v0.4.0)   │
+├──────────────────────────────┬──────────────────────────────┤
+│ Development (__DEV__ = true) │ Production (__DEV__ = false) │
+├──────────────────────────────┼──────────────────────────────┤
+│ Test Ad Units / Test Config  │ Live Ad Units / Prod Config  │
+└──────────────────────────────┴──────────────────────────────┘
 ```
 
 ### Production Safety Guard
-`SimulatedAdProvider` is strictly guarded by `__DEV__ === true`. The `AdProviderFactory` contains a **hard production gate** using the real `__DEV__` global (not overridable options). SimulatedAdProvider can **NEVER** be selected or rendered in production builds, even if `isDev` or `devSimulationEnabled` options are tampered with.
+`SimulatedAdProvider` is strictly prohibited in production builds (`__DEV__ === false`). Both development and production run on `MarketingAdProvider` (adapting `react-native-marketing-plugin` backed by `react-native-google-mobile-ads`), ensuring identical lifecycle behavior while separating test and production ad unit configurations.
 
 ---
 
@@ -82,26 +83,29 @@ All IDs in `adPlacementConstants.js`:
 
 ---
 
-## 5. Interstitial Frequency & Decision Precedence
+## 5. Interstitial Frequency & App-Side `adTime` Architecture (Phase 22)
 
-### Defaults (remotely configurable)
-- **Cooldown**: 3 minutes between impressions
-- **Max per Session**: 3 impressions per app session
+### Defaults & Configuration Source
+- **Opportunity Gating (`adTime`)**: Read from marketing JSON model (`adTime: 3` default). An interstitial is presented every $N$-th eligible non-financial opportunity.
+- **Max per Session (`maxPerSession`)**: Hard ceiling of 3 impressions per app session.
+- **State Scope**: In-memory / session state managed by `interstitialFrequencyService`. Zero persistence in financial Redux slices.
 
 ### Decision Precedence Hierarchy
-1. Financial Workflow Protection (100% ad-free protected screen)
-2. Ad-Free Entitlement (`adFreeUntil > now`)
-3. Offline Connectivity (`isOnline === false`)
-4. Global Ads Disabled (`ads.enabled === false`)
-5. Placement Disabled (per-screen RTDB config)
-6. Provider Unavailable
-7. Cooldown Active (< 3 mins elapsed)
-8. Session Limit Reached (>= 3 impressions)
-9. Double-Tap Guard (ref-based deduplication)
-10. Show Impression
+1. **Financial Workflow Protection** (15 protected screens $\rightarrow$ STOP, zero counter accumulation)
+2. **Ad-Free Entitlement** (`adFreeUntil > now` $\rightarrow$ STOP, zero counter accumulation)
+3. **Offline Connectivity** (`isOnline === false` $\rightarrow$ STOP, zero counter accumulation)
+4. **Global Ads Disabled** (`ads.enabled === false` $\rightarrow$ STOP, zero counter accumulation)
+5. **Placement Disabled** (per-screen RTDB config $\rightarrow$ STOP, zero counter accumulation)
+6. **Session Limit Reached** (`sessionCount >= 3` $\rightarrow$ STOP)
+7. **Opportunity Counting & Threshold Check**:
+   - Increments in-memory `opportunityCounter++`.
+   - If `opportunityCounter < adTime` $\rightarrow$ suppress (`THRESHOLD_NOT_MET`).
+   - If `opportunityCounter >= adTime` $\rightarrow$ reset `opportunityCounter = 0`, increment `sessionCount++`, trigger interstitial show.
+8. **Double-Tap / Concurrency Guard** (`isInterstitialShowing` request lock)
+9. **Show Impression** via `MarketingAdProvider`
 
-### Back Navigation Safety
-If the interstitial is blocked for any reason, `navigation.goBack()` executes immediately. The user is **never trapped** on a screen due to ad failures.
+### Back Navigation Safety & Provider Failure
+If an interstitial is suppressed or the provider fails to load, `navigation.goBack()` executes immediately. The opportunity counter remains consumed/reset to prevent repeated immediate ad attempts on subsequent taps.
 
 ---
 
@@ -177,3 +181,28 @@ When Finzo obtains ad network approvals in the future:
 1. Provision the approved SDK (AdMob / AppLovin / Unity).
 2. Implement `ApprovedAdProvider` methods mapping `placementId` to real ad units.
 3. No UI screen or component changes will be required.
+
+---
+
+## 11. Startup Ad Initialization & Preloading (Phase 27)
+
+### Startup Sequence & 5-Second Splash Cap
+1. **BootSplash Visibility**: The native BootSplash is displayed upon app launch while `AppStartupGate` performs startup tasks.
+2. **Ad SDK Initialization & Preloading**: `MarketingAdProvider` initializes `react-native-marketing-plugin` and begins preloading supported ad inventory (Banner descriptors, Native descriptors, Interstitial ads, and Rewarded ads if configured).
+3. **Maximum 5-Second Splash Wait**:
+   - `AppStartupGate` awaits ad initialization/preload and realtime configuration for a **maximum of 5.0 seconds** (`AD_STARTUP_TIMEOUT_MS = 5000`).
+   - If ad initialization completes early (e.g. at 1s or 2s), Splash dismisses immediately.
+   - If ad initialization takes longer than 5 seconds, Splash dismisses at 5s and startup continues past Splash.
+4. **Non-Cancelling Async Background Continuation**:
+   - The 5-second timeout applies **strictly to the Splash screen wait**.
+   - It **NEVER** cancels, aborts, or resets underlying in-flight ad preload requests.
+   - Late-loading ads continue loading asynchronously in the background.
+5. **Late-Loaded Ad Behavior**:
+   - When late-loaded banner and native ads finish loading, they render immediately upon component mount.
+   - Late-loaded interstitials remain cached in memory for future authorized use.
+   - **CRITICAL**: Preloaded or late-loaded ads **NEVER** automatically display. Interstitials and rewarded ads only display when explicitly requested by user action and authorized by `adDecisionEngine`.
+6. **Zero Impact on Frequency & Session Limits**:
+   - Preload operations do NOT increment `opportunityCounter`.
+   - Preload operations do NOT consume the 3/session interstitial limit.
+   - Preload operations do NOT bypass `adDecisionEngine` or financial workflow protections.
+

@@ -9,8 +9,10 @@ export const AD_DECISION_REASONS = {
   ADS_DISABLED: 'ADS_DISABLED',
   PLACEMENT_DISABLED: 'PLACEMENT_DISABLED',
   AD_FREE_ACTIVE: 'AD_FREE_ACTIVE',
+  THRESHOLD_NOT_MET: 'THRESHOLD_NOT_MET',
   COOLDOWN_ACTIVE: 'COOLDOWN_ACTIVE',
   SESSION_LIMIT_REACHED: 'SESSION_LIMIT_REACHED',
+  REQUEST_ACTIVE: 'REQUEST_ACTIVE',
   FINANCIAL_WORKFLOW: 'FINANCIAL_WORKFLOW',
   NO_PROVIDER: 'NO_PROVIDER',
   INVALID_CONFIGURATION: 'INVALID_CONFIGURATION',
@@ -111,16 +113,22 @@ export const canShowAd = (params = {}) => {
     return { allowed: false, reason: AD_DECISION_REASONS.PLACEMENT_DISABLED };
   }
 
-  // 5. INTERSTITIAL FREQUENCY & COOLDOWN CHECKS
+  // 5. INTERSTITIAL FREQUENCY & THRESHOLD CHECKS
   if (adType === 'interstitial') {
     if (frequencyStatus.canShow === false) {
+      if (frequencyStatus.reason === 'THRESHOLD_NOT_MET') {
+        return { allowed: false, reason: AD_DECISION_REASONS.THRESHOLD_NOT_MET };
+      }
+      if (frequencyStatus.reason === 'session_limit' || frequencyStatus.reason === 'SESSION_LIMIT_REACHED') {
+        return { allowed: false, reason: AD_DECISION_REASONS.SESSION_LIMIT_REACHED };
+      }
+      if (frequencyStatus.reason === 'request_active' || frequencyStatus.reason === 'REQUEST_ACTIVE') {
+        return { allowed: false, reason: AD_DECISION_REASONS.REQUEST_ACTIVE };
+      }
       if (frequencyStatus.reason === 'cooldown') {
         return { allowed: false, reason: AD_DECISION_REASONS.COOLDOWN_ACTIVE };
       }
-      if (frequencyStatus.reason === 'session_limit') {
-        return { allowed: false, reason: AD_DECISION_REASONS.SESSION_LIMIT_REACHED };
-      }
-      return { allowed: false, reason: AD_DECISION_REASONS.COOLDOWN_ACTIVE };
+      return { allowed: false, reason: AD_DECISION_REASONS.THRESHOLD_NOT_MET };
     }
   }
 

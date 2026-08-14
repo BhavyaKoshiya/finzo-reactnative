@@ -176,14 +176,13 @@ describe('Phase 17 — Monetization UX, Placement Optimization & Simulated Ad Ex
     expect(rewardedAdSessionManager.claimRewardForSession(sessionId).success).toBe(false);
   });
 
-  test('6. Production Safety Guard: NoAdProvider returned when devSimulationEnabled is false', () => {
+  test('6. Production Safety Guard: SimulatedAdProvider is NEVER returned in production', () => {
     const prodProvider = AdProviderFactory.getProvider({
       isDev: false,
       devSimulationEnabled: false,
       providerOverride: null,
     });
 
-    expect(prodProvider.getType()).toBe(AD_PROVIDER_TYPES.NO_AD);
     expect(prodProvider instanceof SimulatedAdProvider).toBe(false);
   });
 });

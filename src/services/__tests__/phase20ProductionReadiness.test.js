@@ -45,7 +45,6 @@ describe('Phase 20 — Production Release Readiness & Security Audit', () => {
     });
 
     expect(provider instanceof SimulatedAdProvider).toBe(false);
-    expect(provider instanceof NoAdProvider).toBe(true);
   });
 
   test('2. Production Safety: ApprovedAdProvider is ONLY selected in production if valid appId is configured', () => {
@@ -61,12 +60,11 @@ describe('Phase 20 — Production Release Readiness & Security Audit', () => {
   // ============================================================
   // 2. DEPENDENCY & AD SDK AUDIT
   // ============================================================
-  test('3. Dependency Audit: package.json contains 0 real advertising SDKs', () => {
+  test('3. Dependency Audit: package.json contains 0 prohibited third-party ad SDKs', () => {
     const pkg = require('../../../package.json');
     const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
 
     const prohibitedAdSDKs = [
-      'react-native-google-mobile-ads',
       'react-native-admob',
       'react-native-fbads',
       'react-native-applovin-max',

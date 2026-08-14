@@ -26,6 +26,9 @@ target 'Finzo' do
   pod 'FirebaseDatabase', :modular_headers => true
   pod 'FirebaseAppCheckInterop', :modular_headers => true
   pod 'leveldb-library', :modular_headers => true
+  pod 'GoogleDataTransport', :modular_headers => true
+  pod 'nanopb', :modular_headers => true
+  pod 'PromisesObjC', :modular_headers => true
 
   use_react_native!(
     :path => config[:reactNativePath],

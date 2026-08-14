@@ -16,6 +16,7 @@ import {
   WalletCards,
   Bell,
   ShieldAlert,
+  FileText,
 } from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
@@ -253,7 +254,7 @@ export const ProfileScreen = ({ navigation }) => {
           screen="profile"
           placementId={AD_PLACEMENTS.PROFILE_BANNER}
           adType="banner"
-          style={{ marginTop: 12 }}
+          style={{ marginTop: 18, marginBottom: 12 }}
         />
       </ProfileSection>
 
@@ -333,6 +334,14 @@ export const ProfileScreen = ({ navigation }) => {
           subtitle="Finzo is designed to keep your financial data on your device"
           onPress={() => navigation.navigate(ROUTES.LOCAL_DATA_PRIVACY)}
           accessibilityLabel="View privacy and local data information"
+          style={styles.rowMargin}
+        />
+        <ProfileRow
+          icon={FileText}
+          title="Privacy Policy"
+          subtitle="Comprehensive disclosures on data, advertising & services"
+          onPress={() => navigation.navigate(ROUTES.PRIVACY_POLICY)}
+          accessibilityLabel="Read full Privacy Policy"
         />
       </ProfileSection>
 

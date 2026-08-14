@@ -44,10 +44,11 @@ export const ROUTES = {
   // Loan Goals (Phase 16.12)
   LOAN_GOALS: 'LoanGoals',
   LOAN_GOAL_DETAILS: 'LoanGoalDetails',
-  // Private Loan Details & Local Privacy (Phase 16.13)
+  // Private Loan Details & Local Privacy (Phase 16.13 & Phase 25)
   LOAN_PRIVATE_DETAILS: 'LoanPrivateDetails',
   LOAN_NOTES: 'LoanNotes',
   LOCAL_DATA_PRIVACY: 'LocalDataPrivacy',
+  PRIVACY_POLICY: 'PrivacyPolicy',
 };
 
 export default ROUTES;

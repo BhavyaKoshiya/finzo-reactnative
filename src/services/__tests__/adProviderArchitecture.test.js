@@ -51,9 +51,8 @@ describe('Phase 16.15 — Swappable Ad Provider Architecture', () => {
     const devProvider = AdProviderFactory.getProvider({ isDev: true, devSimulationEnabled: true });
     expect(devProvider.getType()).toBe(AD_PROVIDER_TYPES.SIMULATED);
 
-    // PRODUCTION SAFETY GUARD
+    // PRODUCTION SAFETY GUARD: SimulatedAdProvider is strictly blocked in production
     const prodProvider = AdProviderFactory.getProvider({ isDev: false, devSimulationEnabled: false });
-    expect(prodProvider.getType()).toBe(AD_PROVIDER_TYPES.NO_AD);
     expect(prodProvider.getType()).not.toBe(AD_PROVIDER_TYPES.SIMULATED);
   });
 

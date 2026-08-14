@@ -2,7 +2,8 @@
   "project_info": {
     "project_number": "241984760178",
     "project_id": "finzo-app-calc",
-    "storage_bucket": "finzo-app-calc.firebasestorage.app"
+    "storage_bucket": "finzo-app-calc.firebasestorage.app",
+    "firebase_url": "https://finzo-app-calc-default-rtdb.firebaseio.com"
   },
   "client": [
     {

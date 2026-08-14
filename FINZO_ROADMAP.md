@@ -14,6 +14,90 @@
 - **Phase 18.2**: Ad Placement Preservation & Calculator Banner Hardening — COMPLETED & VERIFIED
 - **Phase 19**: Production Data Integrity, Persistence Safety & Recovery Hardening — COMPLETED & VERIFIED
 - **Phase 20**: Production Release Readiness, Security Audit & End-to-End QA — COMPLETED & VERIFIED
+- **Phase 21**: Real Marketing Plugin Integration (`react-native-marketing-plugin@0.4.0`) — COMPLETED & VERIFIED
+- **Phase 22**: App-Side Interstitial Frequency Using Marketing JSON `adTime` — COMPLETED & VERIFIED
+- **Phase 23**: Final Ad Configuration & Monetization QA (Feature Freeze) — COMPLETED & VERIFIED
+- **Phase 24**: Final UX & Product Polish — COMPLETED & VERIFIED
+- **Phase 25**: Release Hardening, Force Update & Comprehensive Privacy Policy — COMPLETED & VERIFIED
+- **Part 11**: Firebase Analytics, Cloud Messaging & Crashlytics Integration — COMPLETED & VERIFIED
+- **Phase 26**: Store Submission & Launch Readiness — COMPLETED & ROADMAP FROZEN
+- **Phase 27**: Ad Startup Initialization & Preloading — COMPLETED & VERIFIED
+
+---
+
+## Phase 27 Highlights (Ad Startup Initialization & Preloading)
+- **Startup Ad Initialization & Preload**: Integrated `MarketingAdProvider` with `AppStartupGate` and `BootSplash` to initialize `react-native-marketing-plugin` and begin preloading supported inventory (Banner, Native, Interstitial, Rewarded) during app launch.
+- **Maximum 5-Second Splash Cap**: Configured a hard 5.0-second maximum Splash wait (`AD_STARTUP_TIMEOUT_MS = 5000`). If ads complete initialization early (<5s), Splash dismisses immediately; if initialization takes longer than 5s, Splash dismisses at 5s and startup proceeds.
+- **Non-Cancelling Async Background Loading**: Timeout strictly governs the Splash wait and never aborts or cancels background ad loading requests. Late-loading ads complete asynchronously in the background.
+- **Immediate vs User-Triggered Display**:
+  - Banner & Native ads display immediately upon screen mount when loaded.
+  - Interstitial & Rewarded ads remain cached in memory for future authorized use and **NEVER** automatically display.
+- **Strict Invariant Safety**: Preloading does NOT increment `opportunityCounter`, does NOT consume the 3/session interstitial limit, does NOT bypass `adDecisionEngine`, and keeps `enableAppOpenOnResume: false` strictly enforced.
+- **Full Test Suite & Clean Build**: **101/101 Jest test suites passing (724/724 unit tests 100% passing)** and **0 ESLint errors/warnings**.
+
+
+## Phase 26 Highlights (Store Submission & Launch Readiness)
+- **Feature & Architecture Freeze**: All feature development, UI design, financial calculations, advertising architecture, and Firebase services are declared feature-complete and frozen.
+- **Store Submission Metadata**: Prepared Google Play Console and Apple App Store listings, copy, categorization, and keyword specifications in [STORE_SUBMISSION_SPECIFICATION.md](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/STORE_SUBMISSION_SPECIFICATION.md).
+- **Data Safety Declarations**: Audited and documented exact Google Play Data Safety and Apple App Privacy nutrition labels (distinguishing 100% on-device financial records from third-party advertising identifiers and telemetry).
+- **Release Build Verification**: Android `assembleRelease` and `bundleRelease` tasks verified (`BUILD SUCCESSFUL`, Exit code 0). iOS project configuration verified with `MARKETING_VERSION = 1.0.0` and `CURRENT_PROJECT_VERSION = 1`.
+- **Full Test Suite & Clean Build**: **100/100 Jest test suites passing (707/707 unit tests 100% passing)** and **0 ESLint errors/warnings**.
+
+---
+
+## Part 11 Highlights (Firebase Analytics, FCM & Crashlytics)
+- **Firebase Analytics Integration**: Centralized in [firebaseAnalyticsService.js](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/src/services/firebaseAnalyticsService.js). Product-level telemetry with active parameter sanitization (`sanitizeAnalyticsParams`) preventing monetary amounts, loan balances, notes, or credentials from entering event streams.
+- **Firebase Crashlytics Integration**: Centralized in [firebaseCrashlyticsService.js](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/src/services/firebaseCrashlyticsService.js). Captures technical JavaScript exceptions and device metadata without attaching Redux state or user identity.
+- **Firebase Cloud Messaging Integration**: Centralized in [firebaseMessagingService.js](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/src/services/firebaseMessagingService.js). Handles foreground/background notifications and device tokens with strict payload sanitization (`sanitizeNotificationData`).
+- **Resilient Startup & Privacy Disclosures**: Asynchronous, non-blocking service initialization; comprehensive privacy disclosures in [PrivacyPolicyScreen.jsx](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/src/features/privacy/screens/PrivacyPolicyScreen.jsx) and [FIREBASE_SERVICES_ARCHITECTURE.md](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/FIREBASE_SERVICES_ARCHITECTURE.md).
+- **Full Test Suite & Clean Build**: **100/100 Jest test suites passing (707/707 unit tests 100% passing)** and **0 ESLint errors/warnings**.
+
+---
+
+## Phase 25 Highlights
+- **Remote-Configured Force & Optional Update**: Implemented [appUpdateService.js](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/src/services/appUpdateService.js) and [AppUpdateGate.jsx](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/src/components/containers/AppUpdateGate.jsx) with semantic version comparison (`compareSemver`) and fail-safe defaults.
+- **Centralized Store Redirection**: Implemented [appStoreService.js](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/src/services/appStoreService.js) for Android Google Play intent/HTTPS and iOS App Store URLs. Store destinations belong strictly to the application and are never stored in Firebase.
+- **Comprehensive In-App Privacy Policy**: Created [PrivacyPolicyScreen.jsx](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/src/features/privacy/screens/PrivacyPolicyScreen.jsx) and [PRIVACY_POLICY.md](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/PRIVACY_POLICY.md) covering all 31 critical disclosure areas, accurately distinguishing local financial records from third-party advertising identifiers.
+- **Release Build Alignment**: Standardized `versionName: "1.0.0"` in Android Gradle and `MARKETING_VERSION = 1.0.0` in iOS project.
+- **Full Test Suite & Clean Build**: **99/99 Jest test suites passing (692/692 unit tests 100% passing)** and **0 ESLint errors/warnings**.
+
+---
+
+## Phase 24 Highlights
+- **Comprehensive UX & Design System Polish**: Audited all user-facing screens (Home, My Loans, Loan Details, Payments, Calculators, Goals, Private Details, Notes, Profile, Rewards, Connectivity).
+- **Clear Financial Hierarchy**: Distinctly separated "What I originally borrowed" (Total Loan Amount) from "What I still owe" (Outstanding Amount) with prominent visual priority and progress indicators on all loan cards.
+- **Loan Details Information Architecture**: Structured into logical sections (Overview, Next Due EMI, Insights, Goals, Quick Actions, Activity, Loan Overview, Notes, Private Details, Ledger Calculation Details, Manage/Actions).
+- **Transparent Privacy & Connectivity Messaging**: Refined `InternetRequiredScreen` to clearly explain the advertising support model while reassuring users that financial data never leaves the device.
+- **Full Test Suite & Clean Build**: **98/98 Jest test suites passing (677/677 unit tests 100% passing)** and **0 ESLint errors/warnings**.
+
+---
+
+## Phase 23 Highlights
+- **Advertising Architecture Feature-Frozen**: Declared the advertising engine, 14-placement layout, and monetization model feature-frozen.
+- **Unified Single Source of Truth for `adTime`**: Established single authoritative resolution chain: Marketing JSON $\rightarrow$ Marketing Plugin $\rightarrow$ `MarketingAdProvider.getAdTime()` $\rightarrow$ `adService.getAdTime()` $\rightarrow$ `interstitialFrequencyService` $\rightarrow$ `adDecisionEngine` $\rightarrow$ `showInterstitial`.
+- **Precedence & Safety Guarantees**: Verified 15 protected financial workflows, offline sessions, ad-free entitlement (30m, 5/day cap), and hard session limit (max 3) never leak or accumulate interstitial debt.
+- **Fail-Safe & Non-blocking Startup**: Verified BootSplash is independent of advertising network connectivity, and provider errors never trap user navigation.
+- **Full Test Suite & Clean Build**: **98/98 Jest test suites passing (677/677 unit tests 100% passing)** and **0 ESLint errors/warnings**.
+
+---
+
+## Phase 22 Highlights
+- **App-Side Opportunity Frequency**: Removed fixed 3-minute cooldown as primary interstitial frequency; replaced with deterministic `adTime` opportunity gating read from marketing JSON (`interstitialFrequencyService.js`).
+- **Precedence Safety Pipeline**: Strict safety gating ensures 15 protected financial workflows, offline sessions, ad-free periods, and disabled ad configurations never accumulate opportunity counter debt.
+- **Counter Invariants**: Threshold resets counter to 0 immediately upon interstitial trigger, session limit hard ceiling remains at 3 per app session, and double-tap request locks prevent concurrency leaks.
+- **Fail-Safe Continuation**: Provider load/show failures consume the opportunity counter and continue navigation smoothly without trapping users or causing rapid retry loops.
+- **Full Test Suite**: Added `phase22InterstitialFrequency.test.js` achieving **97/97 test suites passing (661/661 unit tests 100% passing)** and **0 ESLint errors/warnings**.
+
+---
+
+## Phase 21 Highlights
+- **Real Ad Provider Integration**: Integrated `react-native-marketing-plugin@0.4.0` (backed by `react-native-google-mobile-ads@^16.0.2` and `react-native-device-info@^15.0.2`) as Finzo's official advertising adapter (`MarketingAdProvider`).
+- **Dev + Prod Real Plugin Execution**: Both development and production execute `MarketingAdProvider` (with development test ad units in DEV and production ad units in PROD).
+- **Finzo Decision Authority Preserved**: Finzo's `adDecisionEngine` remains the sole authority (3-min interstitial cooldown, 3/session limit, 15 protected financial workflows, ad-free timer, and offline gating).
+- **App-Open Ad Protection**: Hard-coded `enableAppOpenOnResume: false` to ensure financial workflows and calculations are never interrupted.
+- **Rewarded Session Idempotency**: Binds `showRewardAd` directly through `rewardedAdSessionManager` to prevent duplicate claims and enforce the 5-ads/day limit.
+- **Full Test Suite & Clean Build**: **96/96 Jest test suites (644/644 unit tests 100% passing)** and **0 ESLint errors/warnings**. iOS CocoaPods (116 pods) and Android Gradle configurations verified.
+- **Documentation**: Created `AD_PROVIDER_ARCHITECTURE.md` and `LOCAL_DATA_PRIVACY_ARCHITECTURE.md`, updated `AD_ARCHITECTURE.md`, `SECURITY_AUDIT.md`, and `PRODUCTION_READINESS.md`.
 
 ---
 

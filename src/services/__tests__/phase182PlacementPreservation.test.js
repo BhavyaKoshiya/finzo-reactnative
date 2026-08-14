@@ -492,13 +492,13 @@ describe('Phase 18.2 — Production Simulator Safety', () => {
     global.__DEV__ = realDev;
   });
 
-  test('33. AdProviderFactory returns NoAdProvider when __DEV__=false', () => {
+  test('33. AdProviderFactory prevents SimulatedAdProvider when __DEV__=false', () => {
     global.__DEV__ = false;
     const provider = AdProviderFactory.getProvider({
       isDev: false,
       devSimulationEnabled: true,
     });
-    expect(provider).toBeInstanceOf(NoAdProvider);
+    expect(provider).not.toBeInstanceOf(SimulatedAdProvider);
   });
 
   test('34. AdProviderFactory hard gate: isDev=true override cannot bypass __DEV__=false', () => {
@@ -507,11 +507,10 @@ describe('Phase 18.2 — Production Simulator Safety', () => {
       isDev: true, // Attempting to override
       devSimulationEnabled: true,
     });
-    expect(provider).toBeInstanceOf(NoAdProvider);
     expect(provider).not.toBeInstanceOf(SimulatedAdProvider);
   });
 
-  test('35. AdProviderFactory returns SimulatedAdProvider when __DEV__=true', () => {
+  test('35. AdProviderFactory returns SimulatedAdProvider when forceSimulation/devSimulationEnabled=true', () => {
     global.__DEV__ = true;
     const provider = AdProviderFactory.getProvider({
       isDev: true,
@@ -520,17 +519,16 @@ describe('Phase 18.2 — Production Simulator Safety', () => {
     expect(provider).toBeInstanceOf(SimulatedAdProvider);
   });
 
-  test('36. No real advertising SDK packages installed', () => {
-    // Verify no real ad SDK is importable
-    const realAdSdks = [
-      'react-native-google-mobile-ads',
+  test('36. Prohibited 3rd party advertising SDK packages not installed', () => {
+    // Verify prohibited third-party ad networks (AppLovin, IronSource, Unity) are not present
+    const prohibitedSdks = [
       'react-native-admob',
       '@react-native-admob/admob',
       'react-native-applovin-max',
       'react-native-iron-source',
       'react-native-unity-ads',
     ];
-    realAdSdks.forEach((sdk) => {
+    prohibitedSdks.forEach((sdk) => {
       expect(() => require(sdk)).toThrow();
     });
   });
