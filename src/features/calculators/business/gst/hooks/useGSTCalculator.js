@@ -7,7 +7,12 @@ export const GST_MODE_OPTIONS = [
   { label: 'Inclusive (Extract GST from Amount)', value: 'inclusive' },
 ];
 
-export const GST_RATE_PRESETS = ['5', '12', '18', '28'];
+export const GST_RATE_PRESETS = [
+  { label: '5%', value: '5' },
+  { label: '12%', value: '12' },
+  { label: '18%', value: '18' },
+  { label: '28%', value: '28' },
+];
 
 export const DEFAULT_GST_INPUTS = {
   amount: '100000',
@@ -21,6 +26,10 @@ export const useGSTCalculator = (initialInputs = {}) => {
   const [amount, setAmountState] = useState(defaults.amount);
   const [gstRate, setGstRateState] = useState(defaults.gstRate);
   const [mode, setModeState] = useState(defaults.mode);
+  const [selectedRatePreset, setSelectedRatePreset] = useState(() => {
+    const initRate = String(initialInputs?.gstRate || defaults.gstRate).trim();
+    return GST_RATE_PRESETS.some((p) => p.value === initRate) ? initRate : 'custom';
+  });
   const [editingSavedCalculationId, setEditingSavedCalculationId] = useState(initialInputs?.editingSavedCalculationId || null);
   const [savedTitle, setSavedTitle] = useState(initialInputs?.savedTitle || '');
 
@@ -36,12 +45,26 @@ export const useGSTCalculator = (initialInputs = {}) => {
 
   const setGstRate = (val) => {
     setGstRateState(val);
+    const matched = GST_RATE_PRESETS.find((p) => p.value === String(val).trim());
+    setSelectedRatePreset(matched ? matched.value : 'custom');
     if (isCalculated) setIsResultStale(true);
   };
 
   const setMode = (val) => {
     setModeState(val);
     if (isCalculated) setIsResultStale(true);
+  };
+
+  const handleModeChange = (val) => {
+    setMode(val);
+  };
+
+  const handleRatePresetChange = (presetValue) => {
+    setSelectedRatePreset(presetValue);
+    if (presetValue !== 'custom') {
+      setGstRateState(presetValue);
+      if (isCalculated) setIsResultStale(true);
+    }
   };
 
   const compute = useCallback((amt, rate, m) => {
@@ -104,6 +127,7 @@ export const useGSTCalculator = (initialInputs = {}) => {
     setAmountState(DEFAULT_GST_INPUTS.amount);
     setGstRateState(DEFAULT_GST_INPUTS.gstRate);
     setModeState(DEFAULT_GST_INPUTS.mode);
+    setSelectedRatePreset(DEFAULT_GST_INPUTS.gstRate);
     setEditingSavedCalculationId(null);
     setSavedTitle('');
     setFieldErrors({});
@@ -121,6 +145,9 @@ export const useGSTCalculator = (initialInputs = {}) => {
     setGstRate,
     mode,
     setMode,
+    handleModeChange,
+    selectedRatePreset,
+    handleRatePresetChange,
     editingSavedCalculationId,
     savedTitle,
     fieldErrors,

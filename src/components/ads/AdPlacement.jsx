@@ -29,11 +29,16 @@ export const AdPlacement = ({
   const isAdFree = useSelector(selectIsAdFree);
   const isOnline = useSelector((state) => (selectIsOnline ? selectIsOnline(state) : true));
   const [config, setConfig] = useState(realtimeConfigService.getConfig());
+  const [adFailed, setAdFailed] = useState(false);
 
   useEffect(() => {
     const unsub = realtimeConfigService.subscribe((cfg) => setConfig(cfg));
     return () => unsub();
   }, []);
+
+  if (adFailed) {
+    return null;
+  }
 
   // Delegate all authorization, entitlement, connectivity, and safety decisions to central decision engine!
   const decision = adService.canShowAd({
@@ -52,12 +57,21 @@ export const AdPlacement = ({
   const provider = adService.getProvider();
 
   if (adType === 'banner') {
-    const isTab = screen === 'tabs';
-    const containerStyle = isTab ? styles.tabBannerContainer : styles.bannerContainer;
     const bannerContent =
       provider && typeof provider.renderBanner === 'function'
-        ? provider.renderBanner({ placementId, style })
+        ? provider.renderBanner({
+            placementId,
+            style,
+            onAdFailed: () => setAdFailed(true),
+          })
         : <SimulatedBannerAd style={style} />;
+
+    if (!bannerContent) {
+      return null;
+    }
+
+    const isTab = screen === 'tabs';
+    const containerStyle = isTab ? styles.tabBannerContainer : styles.bannerContainer;
 
     return (
       <View style={[containerStyle, style]}>
@@ -67,27 +81,34 @@ export const AdPlacement = ({
   }
 
   if (adType === 'native') {
+    let nativeContent = null;
     if (provider && typeof provider.renderNative === 'function') {
-      return (
-        <View style={[styles.nativeContainer, style]}>
-          {provider.renderNative({
-            placementId,
-            style,
-            headline,
-            description,
-            callToAction,
-          })}
-        </View>
-      );
-    }
-    return (
-      <View style={[styles.nativeContainer, style]}>
+      nativeContent = provider.renderNative({
+        placementId,
+        style,
+        headline,
+        description,
+        callToAction,
+        onAdFailed: () => setAdFailed(true),
+      });
+    } else {
+      nativeContent = (
         <SimulatedNativeAd
           headline={headline}
           description={description}
           callToAction={callToAction}
           style={style}
         />
+      );
+    }
+
+    if (!nativeContent) {
+      return null;
+    }
+
+    return (
+      <View style={[styles.nativeContainer, style]}>
+        {nativeContent}
       </View>
     );
   }

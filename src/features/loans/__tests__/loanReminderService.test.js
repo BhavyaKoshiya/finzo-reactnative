@@ -4,8 +4,14 @@ import { PAYMENT_TYPES } from '../constants/loanPaymentConstants';
 
 describe('loanReminderService — Local Notifee Reminder Manager', () => {
   beforeEach(async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-08-01T10:00:00Z'));
     loanReminderService.clearRegistry();
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   const sampleLoan = {

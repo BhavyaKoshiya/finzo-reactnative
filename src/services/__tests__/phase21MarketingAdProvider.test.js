@@ -215,4 +215,40 @@ describe('Phase 21 — Real Marketing Plugin Integration', () => {
     expect(AD_PLACEMENTS.PROFILE_BANNER).toBe('profile_banner');
     expect(AD_PLACEMENTS.REWARDS_NATIVE).toBe('rewards_native');
   });
+
+  // ============================================================
+  // 7. DISABLED ADS & CLEAN ZERO-SPACE COLLAPSE
+  // ============================================================
+  test('13. When ads are disabled in adModel, renderBanner and renderNative return null (zero space)', () => {
+    marketingPlugin.adModel = {
+      isad: false,
+      isbannerenable: false,
+      isnativeenable: false,
+      isinterstitialenable: false,
+      isrewarded: false,
+    };
+
+    const provider = new MarketingAdProvider();
+
+    expect(provider.isBannerAvailable('home_banner')).toBe(false);
+    expect(provider.isNativeAvailable('home_native')).toBe(false);
+    expect(provider.renderBanner({ placementId: 'home_banner' })).toBeNull();
+    expect(provider.renderNative({ placementId: 'home_native' })).toBeNull();
+
+    const bannerDecision = adDecisionEngine.canShowAd({
+      adType: 'banner',
+      placementId: 'home_banner',
+      provider,
+    });
+    expect(bannerDecision.allowed).toBe(false);
+    expect(bannerDecision.reason).toBe('ADS_DISABLED');
+
+    const nativeDecision = adDecisionEngine.canShowAd({
+      adType: 'native',
+      placementId: 'home_native',
+      provider,
+    });
+    expect(nativeDecision.allowed).toBe(false);
+    expect(nativeDecision.reason).toBe('ADS_DISABLED');
+  });
 });

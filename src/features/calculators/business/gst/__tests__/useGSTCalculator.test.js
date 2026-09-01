@@ -74,5 +74,54 @@ describe('useGSTCalculator Custom Hook', () => {
 
     expect(hookValues.amount).toBe(DEFAULT_GST_INPUTS.amount);
     expect(hookValues.result.totalAmount).toBe(118000);
+    expect(hookValues.selectedRatePreset).toBe('18');
+  });
+
+  test('should handle standard rate preset change correctly', () => {
+    act(() => {
+      renderer.create(<TestComponent />);
+    });
+
+    expect(hookValues.selectedRatePreset).toBe('18');
+    expect(hookValues.gstRate).toBe('18');
+
+    act(() => {
+      hookValues.handleRatePresetChange('12');
+    });
+
+    expect(hookValues.selectedRatePreset).toBe('12');
+    expect(hookValues.gstRate).toBe('12');
+
+    act(() => {
+      hookValues.handleCalculate();
+    });
+
+    expect(hookValues.result.gstAmount).toBe(12000);
+    expect(hookValues.result.totalAmount).toBe(112000);
+  });
+
+  test('should set preset to custom when custom rate is entered', () => {
+    act(() => {
+      renderer.create(<TestComponent />);
+    });
+
+    act(() => {
+      hookValues.setGstRate('7.5');
+    });
+
+    expect(hookValues.selectedRatePreset).toBe('custom');
+    expect(hookValues.gstRate).toBe('7.5');
+  });
+
+  test('should update calculation mode via handleModeChange', () => {
+    act(() => {
+      renderer.create(<TestComponent />);
+    });
+
+    act(() => {
+      hookValues.handleModeChange('inclusive');
+    });
+
+    expect(hookValues.mode).toBe('inclusive');
   });
 });

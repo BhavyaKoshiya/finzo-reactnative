@@ -141,6 +141,9 @@ export class MarketingAdProvider extends BaseAdProvider {
   }
 
   renderBanner({ placementId, style, onAdLoaded, onAdFailed } = {}) {
+    if (!this.isBannerAvailable(placementId)) {
+      return null;
+    }
     return (
       <BannerAdView
         key={placementId}
@@ -164,6 +167,9 @@ export class MarketingAdProvider extends BaseAdProvider {
   }
 
   renderNative({ placementId, size = 'medium', style, onAdLoaded, onAdFailed } = {}) {
+    if (!this.isNativeAvailable(placementId)) {
+      return null;
+    }
     return (
       <NativeAdComponent
         key={placementId}

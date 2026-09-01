@@ -69,6 +69,7 @@ export const isProtectedScreen = (screen) => {
 export const canShowAd = (params = {}) => {
   const {
     adType = 'banner',
+    placementId,
     screen,
     isOnline = true,
     isAdFree = false,
@@ -133,9 +134,21 @@ export const canShowAd = (params = {}) => {
   }
 
   // 6. PROVIDER AVAILABILITY CHECK
-  if (provider && typeof provider.isConfigured === 'function') {
-    if (!provider.isConfigured()) {
+  if (provider) {
+    if (typeof provider.isConfigured === 'function' && !provider.isConfigured()) {
       return { allowed: false, reason: AD_DECISION_REASONS.NO_PROVIDER };
+    }
+    if (adType === 'banner' && typeof provider.isBannerAvailable === 'function' && !provider.isBannerAvailable(placementId)) {
+      return { allowed: false, reason: AD_DECISION_REASONS.ADS_DISABLED };
+    }
+    if (adType === 'native' && typeof provider.isNativeAvailable === 'function' && !provider.isNativeAvailable(placementId)) {
+      return { allowed: false, reason: AD_DECISION_REASONS.ADS_DISABLED };
+    }
+    if (adType === 'interstitial' && typeof provider.isInterstitialAvailable === 'function' && !provider.isInterstitialAvailable(placementId)) {
+      return { allowed: false, reason: AD_DECISION_REASONS.ADS_DISABLED };
+    }
+    if (adType === 'rewarded' && typeof provider.isRewardedAvailable === 'function' && !provider.isRewardedAvailable(placementId)) {
+      return { allowed: false, reason: AD_DECISION_REASONS.ADS_DISABLED };
     }
   }
 

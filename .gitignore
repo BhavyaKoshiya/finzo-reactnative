@@ -35,6 +35,17 @@ local.properties
 !debug.keystore
 .kotlin/
 
+# Android build artifacts
+*.apk
+*.aab
+*.ap_
+*.dex
+android/app/release/
+
+# Signing & credentials
+*.jks
+*.pepk
+
 # node.js
 #
 node_modules/
