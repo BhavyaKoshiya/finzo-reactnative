@@ -141,14 +141,34 @@ export class MarketingAdProvider extends BaseAdProvider {
   }
 
   renderBanner({ placementId, style, onAdLoaded, onAdFailed } = {}) {
+    const model = marketingPlugin.adModel;
+    logger.info('[FAD] called', {
+      placementId,
+      isInitialized: this.isInitialized,
+      hasAdModel: !!model,
+      isad: model?.isad,
+      isbannerenable: model?.isbannerenable,
+      isadManger: model?.isadManger,
+      bannerAd: model?.bannerAd,
+      bannerAdPriority: JSON.stringify(model?.bannerAdPriority),
+      isBannerAvailable: this.isBannerAvailable(placementId),
+    });
     if (!this.isBannerAvailable(placementId)) {
+      logger.warn('[FAD] BLOCKED: isBannerAvailable=false');
       return null;
     }
+    logger.info('[FAD] Rendering <BannerAdView>');
     return (
       <BannerAdView
         key={placementId}
-        onAdLoaded={onAdLoaded}
-        onAdFailed={onAdFailed}
+        onAdLoaded={() => {
+          logger.info('[FAD] ✅ BannerAdView onAdLoaded');
+          onAdLoaded?.();
+        }}
+        onAdFailed={(err) => {
+          logger.warn('[FAD] ❌ BannerAdView onAdFailed', { error: err });
+          onAdFailed?.(err);
+        }}
       />
     );
   }

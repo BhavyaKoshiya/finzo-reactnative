@@ -36,7 +36,10 @@ export const AdPlacement = ({
     return () => unsub();
   }, []);
 
+  console.log(`[FAD] render | screen=${screen} placementId=${placementId} adType=${adType} isAdFree=${isAdFree} isOnline=${isOnline} adFailed=${adFailed}`);
+
   if (adFailed) {
+    console.log(`[FAD] BLOCKED: adFailed=true | placementId=${placementId}`);
     return null;
   }
 
@@ -50,23 +53,37 @@ export const AdPlacement = ({
     config,
   });
 
+  console.log(`[FAD] canShowAd decision | allowed=${decision.allowed} reason=${decision.reason || 'none'} placementId=${placementId}`);
+
   if (!decision.allowed) {
+    console.log(`[FAD] BLOCKED by canShowAd: reason=${decision.reason} | placementId=${placementId}`);
     return null;
   }
 
   const provider = adService.getProvider();
 
   if (adType === 'banner') {
+    console.log(`[FAD] Banner path | provider=${provider?.getType?.()} hasRenderBanner=${typeof provider?.renderBanner === 'function'} isBannerAvailable=${provider?.isBannerAvailable?.(placementId)}`);
+
     const bannerContent =
       provider && typeof provider.renderBanner === 'function'
         ? provider.renderBanner({
             placementId,
             style,
-            onAdFailed: () => setAdFailed(true),
+            onAdLoaded: () => {
+              console.log(`[FAD] ✅ Banner AD LOADED | placementId=${placementId}`);
+            },
+            onAdFailed: (err) => {
+              console.log(`[FAD] ❌ Banner AD FAILED | placementId=${placementId} error=`, err);
+              setAdFailed(true);
+            },
           })
         : <SimulatedBannerAd style={style} />;
 
+    console.log(`[FAD] bannerContent result | isNull=${bannerContent === null} type=${bannerContent?.type?.name || bannerContent?.type || 'null'}`);
+
     if (!bannerContent) {
+      console.log(`[FAD] BLOCKED: renderBanner returned null | placementId=${placementId}`);
       return null;
     }
 
