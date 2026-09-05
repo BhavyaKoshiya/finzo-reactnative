@@ -59,6 +59,7 @@ import { navigateToMyLoans } from '../../navigation/navigationHelpers';
 import AdPlacement from '../../components/ads/AdPlacement';
 import { AD_PLACEMENTS } from '../../services/ads/adPlacementConstants';
 import appStoreService from '../../services/appStoreService';
+import DeviceInfo from 'react-native-device-info';
 
 export const ProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -67,6 +68,15 @@ export const ProfileScreen = ({ navigation }) => {
   const [devAdModalVisible, setDevAdModalVisible] = useState(false);
   const [now, setNow] = useState(new Date());
   const [config, setConfig] = useState(realtimeConfigService.getConfig());
+
+  const appVersion = (() => {
+    try {
+      const v = DeviceInfo?.getVersion?.();
+      return v ? `v${v}` : 'v1.0.0';
+    } catch {
+      return 'v1.0.0';
+    }
+  })();
 
   // 1-minute live timer while screen is focused
   useFocusEffect(
@@ -363,7 +373,7 @@ export const ProfileScreen = ({ navigation }) => {
         <ProfileRow
           icon={Info}
           title="App Version"
-          value="v1.0.0 (Offline MVP)"
+          value={appVersion}
           style={styles.rowMargin}
         />
         <ProfileRow
