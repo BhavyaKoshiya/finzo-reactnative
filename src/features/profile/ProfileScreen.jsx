@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity, Share, Alert, Switch } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Share, Alert, Switch, Platform } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useFocusEffect } from '@react-navigation/native';
 import {
@@ -58,6 +58,7 @@ import { ROUTES } from '../../navigation/routes';
 import { navigateToMyLoans } from '../../navigation/navigationHelpers';
 import AdPlacement from '../../components/ads/AdPlacement';
 import { AD_PLACEMENTS } from '../../services/ads/adPlacementConstants';
+import appStoreService from '../../services/appStoreService';
 
 export const ProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -115,13 +116,25 @@ export const ProfileScreen = ({ navigation }) => {
 
   const handleShareApp = async () => {
     try {
+      const storeUrl = appStoreService.getStoreUrl();
       await Share.share({
-        message:
-          'Check out Finzo - an offline-first financial calculator and planning utility for EMI, SIP, FD, GST & real loan tracking!',
+        message: `Check out Finzo - an offline-first financial calculator and planning utility for EMI, SIP, FD, GST & real loan tracking!\n\nDownload now: ${storeUrl}`,
+        url: storeUrl,
         title: 'Finzo Finance Calculator',
       });
     } catch (err) {
       Alert.alert('Share Failed', err.message);
+    }
+  };
+
+  const handleRateApp = async () => {
+    try {
+      const result = await appStoreService.rateApp();
+      if (!result.success) {
+        Alert.alert('Unable to Open Store', result.error || 'Please try again later.');
+      }
+    } catch (err) {
+      Alert.alert('Error', err.message);
     }
   };
 
@@ -351,6 +364,14 @@ export const ProfileScreen = ({ navigation }) => {
           icon={Info}
           title="App Version"
           value="v1.0.0 (Offline MVP)"
+          style={styles.rowMargin}
+        />
+        <ProfileRow
+          icon={Star}
+          title="Rate Finzo"
+          subtitle={Platform.OS === 'ios' ? 'Love Finzo? Rate us on the App Store' : 'Love Finzo? Rate us on Google Play'}
+          onPress={handleRateApp}
+          accessibilityLabel="Rate Finzo on app store"
           style={styles.rowMargin}
         />
         <ProfileRow

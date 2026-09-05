@@ -63,6 +63,8 @@ describe('ProfileScreen', () => {
     expect(jsonString).toContain('Theme Preference');
     expect(jsonString).toContain('Data & Privacy');
     expect(jsonString).toContain('About Finzo');
+    expect(jsonString).toContain('Rate Finzo');
+    expect(jsonString).toContain('Share Finzo');
   });
 
   it('should support dispatching setThemeMode', () => {

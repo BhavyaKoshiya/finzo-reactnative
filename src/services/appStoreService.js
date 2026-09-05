@@ -89,6 +89,15 @@ class AppStoreService {
 
     return { success: false, error: `Unsupported platform: ${Platform.OS}` };
   }
+
+  /**
+   * Opens the official store page for user review and rating.
+   * Semantic alias for openStore().
+   * @returns {Promise<{ success: boolean, url?: string, error?: string }>}
+   */
+  async rateApp() {
+    return this.openStore();
+  }
 }
 
 export const appStoreService = new AppStoreService();

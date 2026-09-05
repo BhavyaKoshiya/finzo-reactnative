@@ -1,3 +1,5 @@
+import { ANDROID_PLAY_STORE_WEB_URL } from '../../../services/appStoreService';
+
 /**
  * Pure Text Share Builder
  * Formats a clean, readable calculation summary for sharing via Messaging/Email.
@@ -35,6 +37,7 @@ export const buildShareText = (exportModel) => {
   }
 
   lines.push('Calculated with Finzo');
+  lines.push(`Download App: ${ANDROID_PLAY_STORE_WEB_URL}`);
   return lines.join('\n');
 };
 
