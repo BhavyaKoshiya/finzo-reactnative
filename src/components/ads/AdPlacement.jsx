@@ -5,6 +5,7 @@ import { selectIsAdFree } from '../../store/slices/rewardsSlice';
 import { selectIsOnline } from '../../store/slices/connectivitySlice';
 import { realtimeConfigService } from '../../config/realtimeConfigService';
 import adService from '../../services/adService';
+import firebaseAnalyticsService from '../../services/firebaseAnalyticsService';
 import SimulatedBannerAd from './SimulatedBannerAd';
 import SimulatedNativeAd from './SimulatedNativeAd';
 
@@ -57,6 +58,11 @@ export const AdPlacement = ({
 
   if (!decision.allowed) {
     console.log(`[FAD] BLOCKED by canShowAd: reason=${decision.reason} | placementId=${placementId}`);
+    if (adType === 'banner') {
+      firebaseAnalyticsService.logBannerAdSuppressed({ placementId, screen, reason: decision.reason });
+    } else if (adType === 'native') {
+      firebaseAnalyticsService.logNativeAdSuppressed({ placementId, screen, reason: decision.reason });
+    }
     return null;
   }
 
@@ -72,10 +78,16 @@ export const AdPlacement = ({
             style,
             onAdLoaded: () => {
               console.log(`[FAD] ✅ Banner AD LOADED | placementId=${placementId}`);
+              firebaseAnalyticsService.logBannerAdLoaded({ placementId, screen });
             },
             onAdFailed: (err) => {
               console.log(`[FAD] ❌ Banner AD FAILED | placementId=${placementId} error=`, err);
               setAdFailed(true);
+              firebaseAnalyticsService.logBannerAdFailed({
+                placementId,
+                screen,
+                reason: err?.message || 'Banner load error',
+              });
             },
           })
         : <SimulatedBannerAd style={style} />;
@@ -106,7 +118,17 @@ export const AdPlacement = ({
         headline,
         description,
         callToAction,
-        onAdFailed: () => setAdFailed(true),
+        onAdLoaded: () => {
+          firebaseAnalyticsService.logNativeAdLoaded({ placementId, screen });
+        },
+        onAdFailed: (err) => {
+          setAdFailed(true);
+          firebaseAnalyticsService.logNativeAdFailed({
+            placementId,
+            screen,
+            reason: err?.message || 'Native load error',
+          });
+        },
       });
     } else {
       nativeContent = (

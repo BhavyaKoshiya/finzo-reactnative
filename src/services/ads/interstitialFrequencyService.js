@@ -22,6 +22,10 @@ export const INTERSTITIAL_ELIGIBLE_ACTIONS = [
   'calculator_result',
   'info_screen_exit',
   'calculator_interstitial',
+  'navigation',
+  'navigation_change',
+  'tab_change',
+  'screen_change',
 ];
 
 /**
@@ -64,7 +68,12 @@ export class InterstitialFrequencyService {
       return false;
     }
 
-    return INTERSTITIAL_ELIGIBLE_ACTIONS.includes(normalized) || normalized.includes('calculator');
+    return (
+      INTERSTITIAL_ELIGIBLE_ACTIONS.includes(normalized) ||
+      normalized.includes('calculator') ||
+      normalized.includes('nav') ||
+      normalized.includes('tab')
+    );
   }
 
   /**

@@ -25,6 +25,7 @@ import GSTResultCard from './components/GSTResultCard';
 import { createCalculationSnapshot } from '../../../saved/types/savedTypes';
 import { restoreSavedCalculationInputs } from '../../../saved/utils/calculationRestoreAdapters';
 import { addSavedCalculation, updateSavedCalculation } from '../../../../store/slices/savedCalculationsSlice';
+import useInterstitialAd from '../../../../hooks/useInterstitialAd';
 
 export const GSTCalculatorScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -32,6 +33,10 @@ export const GSTCalculatorScreen = ({ route, navigation }) => {
   const scrollViewRef = useRef(null);
   const resultsYRef = useRef(0);
   const [saveModalVisible, setSaveModalVisible] = useState(false);
+
+  const { handleBackWithAd } = useInterstitialAd({
+    screen: 'calculators',
+  });
 
   const restoredInputs = route?.params?.savedCalculation
     ? restoreSavedCalculationInputs(route.params.savedCalculation)
@@ -98,7 +103,7 @@ export const GSTCalculatorScreen = ({ route, navigation }) => {
       subtitle="Goods & Services Tax Payout & Breakdown"
       leftAction={{
         icon: ArrowLeft,
-        onPress: () => navigation.goBack(),
+        onPress: handleBackWithAd,
         accessibilityLabel: 'Go back',
       }}
     />

@@ -39,6 +39,15 @@ jest.mock('react-native-marketing-plugin', () => {
     marketingPlugin: mockMarketingPlugin,
     BannerAdView: jest.fn().mockReturnValue(null),
     NativeAdComponent: jest.fn().mockReturnValue(null),
+    bannerAdManager: { preloadAll: jest.fn() },
+    nativeAdManager: { preloadAll: jest.fn() },
+    interstitialAdManager: {
+      _admobInterstitial: null,
+      _adManagerInterstitial: null,
+      preloadAds: jest.fn().mockResolvedValue(undefined),
+    },
+    rewardedAdManager: { preloadAds: jest.fn().mockResolvedValue(undefined) },
+    MyAds: { nativeNormal: 'nativeNormal' },
     MarketingPlugin: {
       getInstance: () => mockMarketingPlugin,
     },

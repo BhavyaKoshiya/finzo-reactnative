@@ -137,6 +137,29 @@ export const selectRewardedAdsPlacementEnabled = (config) => {
 export const selectPlacementAdConfig = (config, screen) => {
   const adConfig = selectAdConfig(config);
   const placements = adConfig?.placements || DEFAULT_ADS_CONFIG.placements;
+  if (screen && placements[screen]) {
+    return placements[screen];
+  }
+  if (screen && typeof screen === 'string') {
+    const lower = screen.toLowerCase();
+    if (
+      lower.includes('calculator') ||
+      lower.includes('emi') ||
+      lower.includes('sip') ||
+      lower.includes('fd') ||
+      lower.includes('rd') ||
+      lower.includes('interest') ||
+      lower.includes('percentage') ||
+      lower.includes('cagr') ||
+      lower.includes('roi') ||
+      lower.includes('gst')
+    ) {
+      return placements.calculators || { banner: true, native: true, interstitial: true };
+    }
+    if (lower === 'navigation' || lower.includes('nav')) {
+      return placements.navigation || { banner: false, native: false, interstitial: true };
+    }
+  }
   return placements[screen] || { banner: false, native: false, interstitial: false };
 };
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { BaseAdProvider } from './baseAdProvider';
 import { AD_PROVIDER_TYPES, AD_STATES } from './adProviderTypes';
 import { normalizeAdTime } from './interstitialFrequencyService';
+import { AdEventType } from 'react-native-google-mobile-ads';
 import {
   marketingPlugin,
   BannerAdView,
@@ -219,10 +220,69 @@ export class MarketingAdProvider extends BaseAdProvider {
         await this.initialize();
       }
 
+      // Capture the currently loaded ad instance BEFORE calling show.
+      // We need this reference to listen for the CLOSED event, since the plugin's
+      // showInterstitial() resolves immediately after ad.show() — it doesn't wait
+      // for the user to dismiss the ad. Without this, navigation.goBack() fires
+      // while the ad is still visible, causing it to disappear.
+      const activeAd = interstitialAdManager._admobInterstitial || interstitialAdManager._adManagerInterstitial;
+
       // Finzo adDecisionEngine has already authorized this show.
       // Pass a derived counter matching the plugin's adTime to ensure internal trigger conditions pass.
       const targetCounter = marketingPlugin.adModel?.adTime ?? 2;
-      await marketingPlugin.showInterstitial(targetCounter);
+
+      if (activeAd && activeAd.loaded) {
+        // Wrap in a Promise that only resolves when the ad is CLOSED (user dismissed it)
+        await new Promise((resolve) => {
+          const AD_DISMISS_TIMEOUT_MS = 120000; // 2 minute safety timeout
+
+          let settled = false;
+          const settle = () => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(safetyTimer);
+            resolve();
+          };
+
+          // Listen for the CLOSED event (user dismissed the ad)
+          const unsubscribeClosed = activeAd.addAdEventListener(
+            AdEventType.CLOSED,
+            () => {
+              unsubscribeClosed();
+              if (unsubscribeError) unsubscribeError();
+              settle();
+            }
+          );
+
+          // Listen for ERROR event (ad failed to render)
+          const unsubscribeError = activeAd.addAdEventListener(
+            AdEventType.ERROR,
+            () => {
+              if (unsubscribeClosed) unsubscribeClosed();
+              unsubscribeError();
+              settle();
+            }
+          );
+
+          // Safety timeout: don't block navigation forever if events don't fire
+          const safetyTimer = setTimeout(() => {
+            try { unsubscribeClosed(); } catch (_e) { /* ignore */ }
+            try { unsubscribeError(); } catch (_e) { /* ignore */ }
+            settle();
+          }, AD_DISMISS_TIMEOUT_MS);
+
+          // Show the ad directly with immersiveModeEnabled to fix rendering on
+          // Xiaomi/MIUI devices. MIUI's custom window manager can cause the ad's
+          // SurfaceView content to be invisible unless immersive mode forces the
+          // ad Activity to take full window control.
+          activeAd.show({ immersiveModeEnabled: true }).catch(() => {
+            settle();
+          });
+        });
+      } else {
+        // No preloaded ad available — call show anyway (may be a Qureka/FB fallback)
+        await marketingPlugin.showInterstitial(targetCounter);
+      }
 
       return {
         status: AD_STATES.COMPLETED,

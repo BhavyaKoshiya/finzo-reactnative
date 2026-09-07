@@ -18,11 +18,35 @@ export const ANALYTICS_EVENTS = {
   PAYMENT_RECORDED: 'payment_recorded',
   GOAL_CREATED: 'goal_created',
   PDF_EXPORTED: 'pdf_exported',
+  // Legacy / Product Events
   REWARDED_AD_STARTED: 'rewarded_ad_started',
   REWARDED_AD_COMPLETED: 'rewarded_ad_completed',
   AD_FREE_ACTIVATED: 'ad_free_activated',
   UPDATE_PROMPT_SHOWN: 'update_prompt_shown',
   UPDATE_CLICKED: 'update_clicked',
+
+  // 1. Interstitial Ads (Separate Format Events)
+  INTERSTITIAL_AD_SHOWN: 'interstitial_ad_shown',
+  INTERSTITIAL_AD_FAILED: 'interstitial_ad_failed',
+  INTERSTITIAL_AD_DISMISSED: 'interstitial_ad_dismissed',
+  INTERSTITIAL_AD_SUPPRESSED: 'interstitial_ad_suppressed',
+
+  // 2. Rewarded Ads (Separate Format Events)
+  REWARDED_AD_REWARD_CLAIMED: 'rewarded_ad_reward_claimed',
+  REWARDED_AD_FAILED: 'rewarded_ad_failed',
+  REWARDED_AD_SUPPRESSED: 'rewarded_ad_suppressed',
+
+  // 3. Banner Ads (Separate Format Events)
+  BANNER_AD_LOADED: 'banner_ad_loaded',
+  BANNER_AD_FAILED: 'banner_ad_failed',
+  BANNER_AD_CLICKED: 'banner_ad_clicked',
+  BANNER_AD_SUPPRESSED: 'banner_ad_suppressed',
+
+  // 4. Native Ads (Separate Format Events)
+  NATIVE_AD_LOADED: 'native_ad_loaded',
+  NATIVE_AD_FAILED: 'native_ad_failed',
+  NATIVE_AD_CLICKED: 'native_ad_clicked',
+  NATIVE_AD_SUPPRESSED: 'native_ad_suppressed',
 };
 
 /**
@@ -252,15 +276,135 @@ class FirebaseAnalyticsService {
     });
   }
 
-  async logRewardedAdStarted(placementId) {
+  // 1. Rewarded Ad Events
+  async logRewardedAdStarted(placementId, screen = 'profile') {
     return this.logEvent(ANALYTICS_EVENTS.REWARDED_AD_STARTED, {
       placement_id: String(placementId || 'default').substring(0, 40),
+      screen: String(screen || 'profile').substring(0, 40),
     });
   }
 
-  async logRewardedAdCompleted(placementId) {
+  async logRewardedAdCompleted(placementId, screen = 'profile') {
     return this.logEvent(ANALYTICS_EVENTS.REWARDED_AD_COMPLETED, {
       placement_id: String(placementId || 'default').substring(0, 40),
+      screen: String(screen || 'profile').substring(0, 40),
+    });
+  }
+
+  async logRewardedAdRewardClaimed({ placementId, points, durationMinutes } = {}) {
+    return this.logEvent(ANALYTICS_EVENTS.REWARDED_AD_REWARD_CLAIMED, {
+      placement_id: String(placementId || 'default').substring(0, 40),
+      points: typeof points === 'number' ? points : 0,
+      duration_minutes: typeof durationMinutes === 'number' ? durationMinutes : 0,
+    });
+  }
+
+  async logRewardedAdFailed({ placementId, screen = 'profile', reason } = {}) {
+    return this.logEvent(ANALYTICS_EVENTS.REWARDED_AD_FAILED, {
+      placement_id: String(placementId || 'default').substring(0, 40),
+      screen: String(screen || 'profile').substring(0, 40),
+      reason: String(reason || 'unknown').substring(0, 60),
+    });
+  }
+
+  async logRewardedAdSuppressed({ placementId, screen = 'profile', reason } = {}) {
+    return this.logEvent(ANALYTICS_EVENTS.REWARDED_AD_SUPPRESSED, {
+      placement_id: String(placementId || 'default').substring(0, 40),
+      screen: String(screen || 'profile').substring(0, 40),
+      reason: String(reason || 'unknown').substring(0, 60),
+    });
+  }
+
+  // 2. Interstitial Ad Events
+  async logInterstitialAdShown({ placementId, screen } = {}) {
+    return this.logEvent(ANALYTICS_EVENTS.INTERSTITIAL_AD_SHOWN, {
+      placement_id: String(placementId || 'default').substring(0, 40),
+      screen: String(screen || 'unknown').substring(0, 40),
+    });
+  }
+
+  async logInterstitialAdFailed({ placementId, screen, reason } = {}) {
+    return this.logEvent(ANALYTICS_EVENTS.INTERSTITIAL_AD_FAILED, {
+      placement_id: String(placementId || 'default').substring(0, 40),
+      screen: String(screen || 'unknown').substring(0, 40),
+      reason: String(reason || 'unknown').substring(0, 60),
+    });
+  }
+
+  async logInterstitialAdDismissed({ placementId, screen } = {}) {
+    return this.logEvent(ANALYTICS_EVENTS.INTERSTITIAL_AD_DISMISSED, {
+      placement_id: String(placementId || 'default').substring(0, 40),
+      screen: String(screen || 'unknown').substring(0, 40),
+    });
+  }
+
+  async logInterstitialAdSuppressed({ placementId, screen, reason } = {}) {
+    return this.logEvent(ANALYTICS_EVENTS.INTERSTITIAL_AD_SUPPRESSED, {
+      placement_id: String(placementId || 'default').substring(0, 40),
+      screen: String(screen || 'unknown').substring(0, 40),
+      reason: String(reason || 'unknown').substring(0, 60),
+    });
+  }
+
+  // 3. Banner Ad Events
+  async logBannerAdLoaded({ placementId, screen } = {}) {
+    return this.logEvent(ANALYTICS_EVENTS.BANNER_AD_LOADED, {
+      placement_id: String(placementId || 'default').substring(0, 40),
+      screen: String(screen || 'unknown').substring(0, 40),
+    });
+  }
+
+  async logBannerAdFailed({ placementId, screen, reason } = {}) {
+    return this.logEvent(ANALYTICS_EVENTS.BANNER_AD_FAILED, {
+      placement_id: String(placementId || 'default').substring(0, 40),
+      screen: String(screen || 'unknown').substring(0, 40),
+      reason: String(reason || 'unknown').substring(0, 60),
+    });
+  }
+
+  async logBannerAdClicked({ placementId, screen } = {}) {
+    return this.logEvent(ANALYTICS_EVENTS.BANNER_AD_CLICKED, {
+      placement_id: String(placementId || 'default').substring(0, 40),
+      screen: String(screen || 'unknown').substring(0, 40),
+    });
+  }
+
+  async logBannerAdSuppressed({ placementId, screen, reason } = {}) {
+    return this.logEvent(ANALYTICS_EVENTS.BANNER_AD_SUPPRESSED, {
+      placement_id: String(placementId || 'default').substring(0, 40),
+      screen: String(screen || 'unknown').substring(0, 40),
+      reason: String(reason || 'unknown').substring(0, 60),
+    });
+  }
+
+  // 4. Native Ad Events
+  async logNativeAdLoaded({ placementId, screen } = {}) {
+    return this.logEvent(ANALYTICS_EVENTS.NATIVE_AD_LOADED, {
+      placement_id: String(placementId || 'default').substring(0, 40),
+      screen: String(screen || 'unknown').substring(0, 40),
+    });
+  }
+
+  async logNativeAdFailed({ placementId, screen, reason } = {}) {
+    return this.logEvent(ANALYTICS_EVENTS.NATIVE_AD_FAILED, {
+      placement_id: String(placementId || 'default').substring(0, 40),
+      screen: String(screen || 'unknown').substring(0, 40),
+      reason: String(reason || 'unknown').substring(0, 60),
+    });
+  }
+
+  async logNativeAdClicked({ placementId, screen } = {}) {
+    return this.logEvent(ANALYTICS_EVENTS.NATIVE_AD_CLICKED, {
+      placement_id: String(placementId || 'default').substring(0, 40),
+      screen: String(screen || 'unknown').substring(0, 40),
+    });
+  }
+
+  async logNativeAdSuppressed({ placementId, screen, reason } = {}) {
+    return this.logEvent(ANALYTICS_EVENTS.NATIVE_AD_SUPPRESSED, {
+      placement_id: String(placementId || 'default').substring(0, 40),
+      screen: String(screen || 'unknown').substring(0, 40),
+      reason: String(reason || 'unknown').substring(0, 60),
     });
   }
 

@@ -19,12 +19,17 @@ import SimpleInterestResultCard from './components/SimpleInterestResultCard';
 import { createCalculationSnapshot } from '../../../saved/types/savedTypes';
 import { restoreSavedCalculationInputs } from '../../../saved/utils/calculationRestoreAdapters';
 import { addSavedCalculation, updateSavedCalculation } from '../../../../store/slices/savedCalculationsSlice';
+import useInterstitialAd from '../../../../hooks/useInterstitialAd';
 
 export const SimpleInterestCalculatorScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const scrollViewRef = useRef(null);
   const resultsYRef = useRef(0);
   const [saveModalVisible, setSaveModalVisible] = useState(false);
+
+  const { handleBackWithAd } = useInterstitialAd({
+    screen: 'calculators',
+  });
 
   const restoredInputs = route?.params?.savedCalculation
     ? restoreSavedCalculationInputs(route.params.savedCalculation)
@@ -91,7 +96,7 @@ export const SimpleInterestCalculatorScreen = ({ route, navigation }) => {
       subtitle="Non-compounded Interest & Maturity Returns"
       leftAction={{
         icon: ArrowLeft,
-        onPress: () => navigation.goBack(),
+        onPress: handleBackWithAd,
         accessibilityLabel: 'Go back',
       }}
     />

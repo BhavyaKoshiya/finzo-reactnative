@@ -112,11 +112,80 @@ describe('Firebase Services QA — Analytics, Crashlytics & Messaging', () => {
       expect(firebaseLogEvent).toHaveBeenCalledTimes(11);
     });
 
-    test('logEvent handles errors gracefully without crashing the application', async () => {
-      firebaseLogEvent.mockRejectedValueOnce(new Error('Analytics network timeout'));
+    test('Dedicated separate ad format tracking methods log distinct events', async () => {
+      // 1. Interstitial events
+      await firebaseAnalyticsService.logInterstitialAdShown({ placementId: 'calc_interstitial', screen: 'calculators' });
+      expect(firebaseLogEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        ANALYTICS_EVENTS.INTERSTITIAL_AD_SHOWN,
+        expect.objectContaining({ placement_id: 'calc_interstitial', screen: 'calculators' })
+      );
 
-      const result = await firebaseAnalyticsService.logEvent(ANALYTICS_EVENTS.APP_OPEN);
-      expect(result).toBe(false);
+      await firebaseAnalyticsService.logInterstitialAdFailed({ placementId: 'calc_interstitial', screen: 'calculators', reason: 'timeout' });
+      expect(firebaseLogEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        ANALYTICS_EVENTS.INTERSTITIAL_AD_FAILED,
+        expect.objectContaining({ reason: 'timeout' })
+      );
+
+      await firebaseAnalyticsService.logInterstitialAdSuppressed({ placementId: 'calc_interstitial', screen: 'calculators', reason: 'AD_FREE_ACTIVE' });
+      expect(firebaseLogEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        ANALYTICS_EVENTS.INTERSTITIAL_AD_SUPPRESSED,
+        expect.objectContaining({ reason: 'AD_FREE_ACTIVE' })
+      );
+
+      // 2. Rewarded events
+      await firebaseAnalyticsService.logRewardedAdStarted('profile_rewarded', 'profile');
+      expect(firebaseLogEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        ANALYTICS_EVENTS.REWARDED_AD_STARTED,
+        expect.objectContaining({ placement_id: 'profile_rewarded', screen: 'profile' })
+      );
+
+      await firebaseAnalyticsService.logRewardedAdCompleted('profile_rewarded', 'profile');
+      expect(firebaseLogEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        ANALYTICS_EVENTS.REWARDED_AD_COMPLETED,
+        expect.objectContaining({ placement_id: 'profile_rewarded' })
+      );
+
+      await firebaseAnalyticsService.logRewardedAdRewardClaimed({ placementId: 'profile_rewarded', points: 10, durationMinutes: 30 });
+      expect(firebaseLogEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        ANALYTICS_EVENTS.REWARDED_AD_REWARD_CLAIMED,
+        expect.objectContaining({ points: 10, duration_minutes: 30 })
+      );
+
+      // 3. Banner events
+      await firebaseAnalyticsService.logBannerAdLoaded({ placementId: 'home_banner', screen: 'home' });
+      expect(firebaseLogEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        ANALYTICS_EVENTS.BANNER_AD_LOADED,
+        expect.objectContaining({ placement_id: 'home_banner', screen: 'home' })
+      );
+
+      await firebaseAnalyticsService.logBannerAdFailed({ placementId: 'home_banner', screen: 'home', reason: 'Network error' });
+      expect(firebaseLogEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        ANALYTICS_EVENTS.BANNER_AD_FAILED,
+        expect.objectContaining({ reason: 'Network error' })
+      );
+
+      // 4. Native events
+      await firebaseAnalyticsService.logNativeAdLoaded({ placementId: 'home_native', screen: 'home' });
+      expect(firebaseLogEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        ANALYTICS_EVENTS.NATIVE_AD_LOADED,
+        expect.objectContaining({ placement_id: 'home_native', screen: 'home' })
+      );
+
+      await firebaseAnalyticsService.logNativeAdClicked({ placementId: 'home_native', screen: 'home' });
+      expect(firebaseLogEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        ANALYTICS_EVENTS.NATIVE_AD_CLICKED,
+        expect.objectContaining({ placement_id: 'home_native', screen: 'home' })
+      );
     });
   });
 

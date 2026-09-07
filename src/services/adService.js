@@ -7,6 +7,7 @@ import { interstitialFrequencyService, normalizeAdTime } from './ads/interstitia
 import { rewardedAdSessionManager } from './ads/rewardedAdSessionManager';
 import { adMetricsService } from './ads/adMetricsService';
 import { realtimeConfigService } from '../config/realtimeConfigService';
+import firebaseAnalyticsService from './firebaseAnalyticsService';
 import logger from './logger';
 
 /**
@@ -288,14 +289,35 @@ class AdService {
     const adTime = options.adTime ? normalizeAdTime(options.adTime) : this.getAdTime({ config });
     const maxPerSession = config?.ads?.interstitial?.maxPerSession;
 
+    let isAdFree = options.isAdFree;
+    let isOnline = options.isOnline;
+    if (isAdFree === undefined || isOnline === undefined) {
+      try {
+        const { store } = require('../store');
+        const state = store?.getState?.();
+        if (state) {
+          if (isAdFree === undefined) {
+            const { selectIsAdFree } = require('../store/slices/rewardsSlice');
+            isAdFree = selectIsAdFree ? selectIsAdFree(state) : false;
+          }
+          if (isOnline === undefined) {
+            const { selectIsOnline } = require('../store/slices/connectivitySlice');
+            isOnline = selectIsOnline ? selectIsOnline(state) : (state.connectivity?.isOnline ?? true);
+          }
+        }
+      } catch (_err) {
+        // Redux store lookup fallback
+      }
+    }
+
     // 1. Evaluate basic safety constraints (isOnline, isAdFree, protectedScreen, global enabled, placement enabled)
     // Pass frequencyStatus as allowing so canShowAd evaluates safety preconditions first
     const basicDecision = adDecisionEngine.canShowAd({
       adType: 'interstitial',
       placementId,
       screen: options.screen,
-      isOnline: options.isOnline,
-      isAdFree: options.isAdFree,
+      isOnline: isOnline !== undefined ? isOnline : true,
+      isAdFree: isAdFree !== undefined ? isAdFree : false,
       config,
       frequencyStatus: { canShow: true },
       provider: this.getProvider(),
@@ -303,6 +325,11 @@ class AdService {
 
     // If safety check fails (e.g. protected screen, offline, ad-free, disabled) -> return failed WITHOUT incrementing counter!
     if (!basicDecision.allowed) {
+      firebaseAnalyticsService.logInterstitialAdSuppressed({
+        placementId,
+        screen: options.screen,
+        reason: basicDecision.reason,
+      });
       return {
         status: AD_STATES.FAILED,
         provider: this.getProvider().getType(),
@@ -317,6 +344,11 @@ class AdService {
     });
 
     if (!oppResult.triggered) {
+      firebaseAnalyticsService.logInterstitialAdSuppressed({
+        placementId,
+        screen: options.screen,
+        reason: oppResult.reason,
+      });
       return {
         status: AD_STATES.FAILED,
         provider: this.getProvider().getType(),
@@ -336,10 +368,25 @@ class AdService {
       });
       if (result.status === AD_STATES.COMPLETED) {
         adFrequencyService.recordInterstitialImpression();
+        firebaseAnalyticsService.logInterstitialAdShown({
+          placementId,
+          screen: options.screen,
+        });
+      } else {
+        firebaseAnalyticsService.logInterstitialAdFailed({
+          placementId,
+          screen: options.screen,
+          reason: result.reason || 'Not completed',
+        });
       }
       return result;
     } catch (err) {
       logger.warn('AdService.showInterstitial failed', { placementId, error: err?.message });
+      firebaseAnalyticsService.logInterstitialAdFailed({
+        placementId,
+        screen: options.screen,
+        reason: err?.message || 'Playback error',
+      });
       return {
         status: AD_STATES.FAILED,
         provider: this.getProvider().getType(),
@@ -398,6 +445,11 @@ class AdService {
     });
 
     if (!decision.allowed) {
+      firebaseAnalyticsService.logRewardedAdSuppressed({
+        placementId,
+        screen: options.screen,
+        reason: decision.reason,
+      });
       return {
         status: AD_STATES.FAILED,
         provider: this.getProvider().getType(),
@@ -407,17 +459,24 @@ class AdService {
 
     // Start unique local session ID
     const sessionId = rewardedAdSessionManager.startSession(placementId);
+    firebaseAnalyticsService.logRewardedAdStarted(placementId, options.screen);
 
     try {
       const result = await this.getProvider().showRewarded(placementId, options);
       if (result.status === AD_STATES.COMPLETED) {
         rewardedAdSessionManager.completeSession(sessionId);
+        firebaseAnalyticsService.logRewardedAdCompleted(placementId, options.screen);
         return {
           ...result,
           sessionId,
         };
       }
       rewardedAdSessionManager.cancelSession(sessionId);
+      firebaseAnalyticsService.logRewardedAdFailed({
+        placementId,
+        screen: options.screen,
+        reason: result.reason || 'Not completed',
+      });
       return {
         ...result,
         sessionId,
@@ -425,6 +484,11 @@ class AdService {
     } catch (err) {
       rewardedAdSessionManager.failSession(sessionId);
       logger.warn('AdService.showRewarded failed', { placementId, error: err?.message });
+      firebaseAnalyticsService.logRewardedAdFailed({
+        placementId,
+        screen: options.screen,
+        reason: err?.message || 'Playback error',
+      });
       return {
         status: AD_STATES.FAILED,
         provider: this.getProvider().getType(),
@@ -438,7 +502,13 @@ class AdService {
    * Securely validates and grants reward for a completed session ID.
    */
   claimRewardedSession(sessionId) {
-    return rewardedAdSessionManager.claimRewardForSession(sessionId);
+    const validation = rewardedAdSessionManager.claimRewardForSession(sessionId);
+    if (validation && validation.valid) {
+      firebaseAnalyticsService.logRewardedAdRewardClaimed({
+        placementId: validation.session?.placementId,
+      });
+    }
+    return validation;
   }
 
   async destroyRewarded(placementId = AD_PLACEMENTS.PROFILE_REWARDED) {

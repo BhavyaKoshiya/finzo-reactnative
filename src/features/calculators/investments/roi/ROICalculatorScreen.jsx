@@ -17,12 +17,17 @@ import ROIResultCard from './components/ROIResultCard';
 import { createCalculationSnapshot } from '../../../saved/types/savedTypes';
 import { restoreSavedCalculationInputs } from '../../../saved/utils/calculationRestoreAdapters';
 import { addSavedCalculation, updateSavedCalculation } from '../../../../store/slices/savedCalculationsSlice';
+import useInterstitialAd from '../../../../hooks/useInterstitialAd';
 
 export const ROICalculatorScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const scrollViewRef = useRef(null);
   const resultsYRef = useRef(0);
   const [saveModalVisible, setSaveModalVisible] = useState(false);
+
+  const { handleBackWithAd } = useInterstitialAd({
+    screen: 'calculators',
+  });
 
   const restoredInputs = route?.params?.savedCalculation
     ? restoreSavedCalculationInputs(route.params.savedCalculation)
@@ -85,7 +90,7 @@ export const ROICalculatorScreen = ({ route, navigation }) => {
       subtitle="Return on Investment Percentage & Gain"
       leftAction={{
         icon: ArrowLeft,
-        onPress: () => navigation.goBack(),
+        onPress: handleBackWithAd,
         accessibilityLabel: 'Go back',
       }}
     />

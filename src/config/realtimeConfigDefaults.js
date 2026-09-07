@@ -68,6 +68,11 @@ export const DEFAULT_ADS_CONFIG = {
       native: false,
       interstitial: false,
     },
+    navigation: {
+      banner: false,
+      native: false,
+      interstitial: true,
+    },
   },
 };
 

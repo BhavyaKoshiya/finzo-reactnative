@@ -170,6 +170,8 @@ jest.mock('react-native-marketing-plugin', () => {
   };
 
   const mockInterstitialAdManager = {
+    _admobInterstitial: null,
+    _adManagerInterstitial: null,
     preloadAds: jest.fn().mockResolvedValue(undefined),
     showInterstitial: jest.fn().mockResolvedValue(undefined),
     dispose: jest.fn(),

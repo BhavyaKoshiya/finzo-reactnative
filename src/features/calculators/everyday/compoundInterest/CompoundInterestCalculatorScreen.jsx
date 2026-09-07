@@ -24,12 +24,17 @@ import CompoundInterestChart from './components/CompoundInterestChart';
 import { createCalculationSnapshot } from '../../../saved/types/savedTypes';
 import { restoreSavedCalculationInputs } from '../../../saved/utils/calculationRestoreAdapters';
 import { addSavedCalculation, updateSavedCalculation } from '../../../../store/slices/savedCalculationsSlice';
+import useInterstitialAd from '../../../../hooks/useInterstitialAd';
 
 export const CompoundInterestCalculatorScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const scrollViewRef = useRef(null);
   const resultsYRef = useRef(0);
   const [saveModalVisible, setSaveModalVisible] = useState(false);
+
+  const { handleBackWithAd } = useInterstitialAd({
+    screen: 'calculators',
+  });
 
   const restoredInputs = route?.params?.savedCalculation
     ? restoreSavedCalculationInputs(route.params.savedCalculation)
@@ -98,7 +103,7 @@ export const CompoundInterestCalculatorScreen = ({ route, navigation }) => {
       subtitle="Exponential Wealth & Compounded Growth"
       leftAction={{
         icon: ArrowLeft,
-        onPress: () => navigation.goBack(),
+        onPress: handleBackWithAd,
         accessibilityLabel: 'Go back',
       }}
     />
