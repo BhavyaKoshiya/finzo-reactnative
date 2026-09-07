@@ -74,33 +74,22 @@ export const rewardService = {
     }
 
     const pointsToAward = Number(rewardedConfig.pointsPerAd) || 0;
+    const milestone = rewardedConfig.milestone;
 
-    // Dispatch point completion
+    // Dispatch point completion and atomic milestone evaluation (safe against midnight date change)
     dispatch(
       recordRewardedAdCompletion({
         pointsAwarded: pointsToAward,
         transactionId: adCompletionResult.transactionId,
         provider: adCompletionResult.provider,
+        milestone: milestone && milestone.enabled ? {
+          enabled: true,
+          requiredAds: milestone.requiredAds,
+          adFreeMinutes: milestone.adFreeMinutes,
+          isStackable: Boolean(milestone.isStackable),
+        } : null,
       })
     );
-
-    // Milestone check:
-    const milestone = rewardedConfig.milestone;
-    if (milestone && milestone.enabled) {
-      const watchedCount = (currentState.rewardedAdsWatchedToday || 0) + 1;
-      const todayKey = new Date().toISOString().substring(0, 10);
-      const isAlreadyClaimedToday = currentState.rewardedAdMilestoneClaimedDate === todayKey;
-
-      if (watchedCount >= milestone.requiredAds && !isAlreadyClaimedToday) {
-        dispatch(
-          claimRewardedAdMilestone({
-            dateKey: todayKey,
-            requiredAds: milestone.requiredAds,
-            adFreeMinutes: milestone.adFreeMinutes,
-          })
-        );
-      }
-    }
 
     return { success: true, pointsAwarded: pointsToAward };
   },

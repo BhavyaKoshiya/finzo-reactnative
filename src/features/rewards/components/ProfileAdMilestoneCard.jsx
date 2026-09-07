@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { Gift, CheckCircle2 } from 'lucide-react-native';
 import AppCard from '../../../components/cards/AppCard';
 import AppText from '../../../components/common/AppText';
@@ -13,11 +13,13 @@ import {
   selectRewardedAdsWatchedToday,
   selectIsRewardedMilestoneClaimedToday,
   selectAdFreeUntil,
+  syncDailyRewardedAdsDate,
 } from '../../../store/slices/rewardsSlice';
-import { isAdFreeActive } from '../utils/rewardUtils';
+import { isAdFreeActive, formatAdFreeDuration } from '../utils/rewardUtils';
 import { AD_PLACEMENTS } from '../../../services/ads/adPlacementConstants';
 
 export const ProfileAdMilestoneCard = ({ style }) => {
+  const dispatch = useDispatch();
   const { currentTheme, isDark } = useAppTheme();
   const [config, setConfig] = useState(realtimeConfigService.getConfig());
   const watchedToday = useSelector(selectRewardedAdsWatchedToday);
@@ -25,6 +27,10 @@ export const ProfileAdMilestoneCard = ({ style }) => {
   const adFreeUntil = useSelector(selectAdFreeUntil);
 
   const adFreeIsActive = isAdFreeActive(adFreeUntil);
+
+  useEffect(() => {
+    dispatch(syncDailyRewardedAdsDate());
+  }, [dispatch]);
 
   useEffect(() => {
     const unsub = realtimeConfigService.subscribe((cfg) => setConfig(cfg));
@@ -37,10 +43,13 @@ export const ProfileAdMilestoneCard = ({ style }) => {
   const isEnabled = Boolean(rewardedConfig?.enabled && milestone?.enabled);
   const requiredAds = Number(milestone?.requiredAds) || 5;
   const adFreeMinutes = Number(milestone?.adFreeMinutes) || 30;
+  const isStackable = Boolean(milestone?.isStackable);
+  const pointsPerAd = Number(rewardedConfig?.pointsPerAd) || 0;
+  const pointsSuffix = pointsPerAd > 0 ? ` (+${pointsPerAd} pts each)` : '';
 
   const currentCount = Math.min(watchedToday, requiredAds);
   const remainingCount = Math.max(0, requiredAds - currentCount);
-  const isCompleted = isClaimedToday || currentCount >= requiredAds;
+  const isCompleted = !isStackable && (isClaimedToday || currentCount >= requiredAds);
 
   // Section 29: If remote config disables rewarded ads or milestone, suppress completely
   if (!isEnabled) {
@@ -48,6 +57,9 @@ export const ProfileAdMilestoneCard = ({ style }) => {
   }
 
   const activeColor = isDark ? '#4ADE80' : currentTheme.success;
+  const formattedRewardShort = formatAdFreeDuration(adFreeMinutes, { style: 'short' });
+  const formattedRewardLong = formatAdFreeDuration(adFreeMinutes, { style: 'long' });
+  const formattedRewardDescriptor = formatAdFreeDuration(adFreeMinutes, { style: 'descriptor' });
 
   // STATE C: Ad-Free Currently Active
   if (adFreeIsActive) {
@@ -57,13 +69,19 @@ export const ProfileAdMilestoneCard = ({ style }) => {
           <View style={styles.titleGroup}>
             <AppIcon icon={Gift} size={18} color={currentTheme.primary} style={{ marginRight: 8 }} />
             <AppText variant="bodyMedium" style={{ fontWeight: '700' }}>
-              Today's Ad-Free Reward
+              {isStackable ? 'Earn Ad-Free Time' : "Today's Ad-Free Reward"}
             </AppText>
           </View>
           <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700' }}>
-            +{adFreeMinutes} min Reward
+            +{formattedRewardShort} Reward
           </AppText>
         </View>
+
+        {isStackable && (
+          <AppText variant="caption" color={currentTheme.textSecondary} style={{ marginBottom: 6 }}>
+            Stack another +{formattedRewardShort} ad-free{pointsSuffix}.
+          </AppText>
+        )}
 
         <View style={styles.progressDotsRow}>
           {Array.from({ length: requiredAds }).map((_, idx) => {
@@ -97,12 +115,12 @@ export const ProfileAdMilestoneCard = ({ style }) => {
             </View>
           ) : (
             <AppText variant="caption" color={currentTheme.textSecondary}>
-              {remainingCount} more to earn
+              {remainingCount} more to {isStackable ? 'stack' : 'earn'}
             </AppText>
           )}
         </View>
 
-        {!isCompleted && (
+        {(!isCompleted || isStackable) && (
           <View style={{ marginTop: 8 }}>
             <RewardedAdButton placementId={AD_PLACEMENTS.PROFILE_REWARDED} />
           </View>
@@ -111,7 +129,7 @@ export const ProfileAdMilestoneCard = ({ style }) => {
     );
   }
 
-  // STATE B: Ad-Free Inactive, Milestone Completed Today / Daily Limit Reached
+  // STATE B: Ad-Free Inactive, Milestone Completed Today / Daily Limit Reached (Only when NOT stackable)
   if (isCompleted) {
     return (
       <AppCard style={[styles.card, style]} accessibilityRole="summary" accessibilityLabel="Daily Ad-Free Reward Completed">
@@ -125,7 +143,7 @@ export const ProfileAdMilestoneCard = ({ style }) => {
         </View>
 
         <AppText variant="caption" color={currentTheme.textSecondary} style={{ marginVertical: 6 }}>
-          Today's {adFreeMinutes}-minute reward has already been unlocked.
+          Today's {formattedRewardDescriptor} reward has already been unlocked.
         </AppText>
 
         <View style={styles.progressDotsRow}>
@@ -170,12 +188,12 @@ export const ProfileAdMilestoneCard = ({ style }) => {
           </AppText>
         </View>
         <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700' }}>
-          +{adFreeMinutes} min Reward
+          +{formattedRewardShort} Reward
         </AppText>
       </View>
 
       <AppText variant="caption" color={currentTheme.textSecondary} style={{ marginBottom: 8 }}>
-        Watch {requiredAds} rewarded ads today to unlock {adFreeMinutes} minutes ad-free.
+        Watch {requiredAds} rewarded ads today to unlock {formattedRewardLong} ad-free{pointsSuffix}.
       </AppText>
 
       <View style={styles.progressDotsRow}>

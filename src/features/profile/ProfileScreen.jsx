@@ -40,6 +40,7 @@ import {
   isAdFreeActive,
   formatAdFreeExpiry,
   formatAdFreeRemainingTime,
+  formatAdFreeDuration,
 } from '../rewards/utils/rewardUtils';
 import {
   selectActiveLoanCount,
@@ -209,7 +210,7 @@ export const ProfileScreen = ({ navigation }) => {
               {isClaimedToday && (
                 <View style={styles.unlockedSubRow}>
                   <AppText variant="caption" color={adFreeColor} style={{ fontWeight: '700' }}>
-                    ✓ Today's {adFreeMinutes} min reward unlocked
+                    ✓ Today's {formatAdFreeDuration(adFreeMinutes, { style: 'descriptor' })} reward unlocked
                   </AppText>
                 </View>
               )}

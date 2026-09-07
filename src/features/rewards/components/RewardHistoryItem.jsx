@@ -6,6 +6,7 @@ import AppText from '../../../components/common/AppText';
 import AppIcon from '../../../components/common/AppIcon';
 import { useAppTheme } from '../../../hooks/useAppTheme';
 import { formatRewardDate } from '../utils/dateUtils';
+import { formatAdFreeDuration } from '../utils/rewardUtils';
 import { REWARD_TITLES, REWARD_TYPES } from '../config/rewardConfig';
 
 export const RewardHistoryItem = ({ item, style }) => {
@@ -29,7 +30,7 @@ export const RewardHistoryItem = ({ item, style }) => {
   } else if (item.type === REWARD_TYPES.REWARDED_AD_MILESTONE) {
     icon = ShieldCheck;
     const minutes = item.metadata?.adFreeMinutes || 30;
-    pointsDisplay = `+${minutes} min Ad-Free`;
+    pointsDisplay = `+${formatAdFreeDuration(minutes, { style: 'short' })} Ad-Free`;
   } else if (item.type === REWARD_TYPES.REDEMPTION) {
     pointsDisplay = `${item.points} Points`;
   }

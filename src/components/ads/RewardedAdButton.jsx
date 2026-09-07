@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, ToastAndroid, Platform, Alert } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { PlayCircle, Clock, Lock, CheckCircle2 } from 'lucide-react-native';
 import PrimaryButton from '../buttons/PrimaryButton';
@@ -38,11 +38,19 @@ export const RewardedAdButton = ({
   const rewardedConfig = selectRewardedAdsConfig(config);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isPreparing, setIsPreparing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalResolver, setModalResolver] = useState(null);
 
   // Check network connectivity
   const isOnline = connectivity?.isConnected && connectivity?.isInternetReachable;
+
+  // Proactive background preloading when component mounts or connectivity/config becomes available
+  useEffect(() => {
+    if (isOnline && rewardedConfig?.enabled) {
+      adService.loadRewarded(placementId).catch(() => {});
+    }
+  }, [placementId, isOnline, rewardedConfig?.enabled]);
 
   // Register modal handler with adService for development simulation
   useEffect(() => {
@@ -108,6 +116,15 @@ export const RewardedAdButton = ({
     !isDailyLimitReached &&
     cooldownLeft === 0;
 
+  const showAdLoadingToast = () => {
+    const msg = 'Ad is loading. Please try again in a few seconds.';
+    if (Platform.OS === 'android') {
+      ToastAndroid.show(msg, ToastAndroid.SHORT);
+    } else {
+      Alert.alert('', msg);
+    }
+  };
+
   const handlePress = async () => {
     if (!canWatch || isLoading) return;
 
@@ -119,16 +136,26 @@ export const RewardedAdButton = ({
         if (onAdCompleted) {
           onAdCompleted(result);
         }
+      } else if (result && result.status === 'FAILED') {
+        showAdLoadingToast();
+        setIsPreparing(true);
+        setTimeout(() => setIsPreparing(false), 2500);
+        adService.loadRewarded(placementId).catch(() => {});
       }
     } catch (err) {
-      // Handled silently
+      showAdLoadingToast();
+      setIsPreparing(true);
+      setTimeout(() => setIsPreparing(false), 2500);
+      adService.loadRewarded(placementId).catch(() => {});
     } finally {
       setIsLoading(false);
     }
   };
 
+  const pointsPerAd = Number(rewardedConfig?.pointsPerAd) || 0;
+
   // Determine button title & icon based on state
-  let buttonTitle = 'Watch Rewarded Ad';
+  let buttonTitle = pointsPerAd > 0 ? `Watch Ad (+${pointsPerAd} Pts)` : 'Watch Rewarded Ad';
   let buttonIcon = PlayCircle;
   let disabled = false;
 
@@ -151,6 +178,10 @@ export const RewardedAdButton = ({
   } else if (isLoading) {
     buttonTitle = 'Loading Ad...';
     buttonIcon = PlayCircle;
+    disabled = true;
+  } else if (isPreparing) {
+    buttonTitle = 'Ad is preparing...';
+    buttonIcon = Clock;
     disabled = true;
   } else if (!isProviderAvailable) {
     buttonTitle = 'Ad Unavailable';

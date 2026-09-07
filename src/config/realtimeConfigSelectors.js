@@ -75,6 +75,10 @@ export const selectRewardedAdFreeMinutes = (config) => {
   return Number(selectRewardedAdMilestone(config)?.adFreeMinutes) || 30;
 };
 
+export const selectRewardedAdIsStackable = (config) => {
+  return Boolean(selectRewardedAdMilestone(config)?.isStackable);
+};
+
 export const selectDiscountConfig = (config) => {
   const active = config || DEFAULT_REALTIME_CONFIG;
   return active.rewards?.discounts || DEFAULT_REALTIME_CONFIG.rewards.discounts;

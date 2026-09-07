@@ -159,8 +159,11 @@ export const validateRealtimeConfig = (config) => {
         if (ms.adFreeMinutes !== undefined && (typeof ms.adFreeMinutes !== 'number' || ms.adFreeMinutes < 1 || ms.adFreeMinutes > 10080)) {
           errors.push('rewardedAds.milestone.adFreeMinutes must be integer (1-10080)');
         }
+        if (ms.isStackable !== undefined && !isBoolean(ms.isStackable)) {
+          errors.push('rewardedAds.milestone.isStackable must be a boolean');
+        }
 
-        if (ms.enabled && ra.enabled && typeof ms.requiredAds === 'number' && typeof ra.dailyWatchLimit === 'number' && ms.requiredAds > ra.dailyWatchLimit) {
+        if (ms.enabled && ra.enabled && typeof ms.requiredAds === 'number' && typeof ra.dailyWatchLimit === 'number' && ra.dailyWatchLimit > 0 && ms.requiredAds > ra.dailyWatchLimit) {
           errors.push(`rewardedAds.milestone.requiredAds (${ms.requiredAds}) cannot exceed dailyWatchLimit (${ra.dailyWatchLimit})`);
         }
       }

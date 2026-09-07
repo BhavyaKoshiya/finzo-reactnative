@@ -172,6 +172,52 @@ export const rewardsSlice = createSlice({
         totalWatchedToday: state.rewardedAdsWatchedToday,
         totalPoints: state.points,
       });
+
+      // Atomic milestone evaluation: eliminates midnight race condition and stale external state
+      if (payload.milestone && payload.milestone.enabled) {
+        const ms = payload.milestone;
+        const todayKey = payload.dateKey || getLocalDateKey(now);
+        const isStackable = Boolean(ms.isStackable);
+        const isAlreadyClaimedToday = state.rewardedAdMilestoneClaimedDate === todayKey;
+        const requiredAds = typeof ms.requiredAds === 'number' ? ms.requiredAds : 5;
+        const adFreeMinutes = typeof ms.adFreeMinutes === 'number' ? ms.adFreeMinutes : 30;
+
+        if (state.rewardedAdsWatchedToday >= requiredAds && (isStackable || !isAlreadyClaimedToday)) {
+          const isCurrentlyActive = isAdFreeActive(state.adFreeUntil, now);
+          const baseTime = isCurrentlyActive && state.adFreeUntil ? new Date(state.adFreeUntil) : now;
+          const newExpiryDate = new Date(baseTime.getTime() + adFreeMinutes * 60 * 1000);
+          const newExpiryIso = newExpiryDate.toISOString();
+
+          state.adFreeUntil = newExpiryIso;
+          state.rewardedAdMilestoneClaimedDate = todayKey;
+
+          if (isStackable) {
+            state.rewardedAdsWatchedToday = 0;
+          }
+
+          const milestoneTransaction = {
+            id: `milestone_${todayKey}_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+            type: REWARD_TYPES.REWARDED_AD_MILESTONE,
+            points: 0,
+            createdAt: nowIso,
+            metadata: {
+              dateKey: todayKey,
+              completedAds: requiredAds,
+              requiredAds,
+              adFreeMinutes,
+              isStackable,
+            },
+          };
+
+          state.rewardHistory = [milestoneTransaction, ...state.rewardHistory].slice(0, MAX_REWARD_HISTORY);
+          logger.info('Rewarded ad milestone claimed atomically', {
+            todayKey,
+            adFreeMinutes,
+            newExpiryIso,
+            isStackable,
+          });
+        }
+      }
     },
 
     claimRewardedAdMilestone: (state, action) => {
@@ -179,9 +225,10 @@ export const rewardsSlice = createSlice({
       const now = payload.date ? new Date(payload.date) : new Date();
       const nowIso = now.toISOString();
       const todayKey = payload.dateKey || getLocalDateKey(now);
+      const isStackable = Boolean(payload.isStackable);
 
-      // Idempotency check: prevent duplicate milestone claims on same calendar day
-      if (state.rewardedAdMilestoneClaimedDate === todayKey) {
+      // Idempotency check: if not stackable, prevent duplicate claims on same calendar day
+      if (!isStackable && state.rewardedAdMilestoneClaimedDate === todayKey) {
         logger.info('Rewarded ad milestone claim skipped: already claimed for date', { todayKey });
         return;
       }
@@ -198,8 +245,13 @@ export const rewardsSlice = createSlice({
       state.adFreeUntil = newExpiryIso;
       state.rewardedAdMilestoneClaimedDate = todayKey;
 
+      if (isStackable) {
+        // Reset current cycle count to 0 so user can stack another cycle like Cleanzo
+        state.rewardedAdsWatchedToday = 0;
+      }
+
       const transaction = {
-        id: `milestone_${todayKey}_${Date.now()}`,
+        id: `milestone_${todayKey}_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
         type: REWARD_TYPES.REWARDED_AD_MILESTONE,
         points: 0,
         createdAt: nowIso,
@@ -208,6 +260,7 @@ export const rewardsSlice = createSlice({
           completedAds: requiredAds,
           requiredAds,
           adFreeMinutes,
+          isStackable,
         },
       };
 
@@ -216,7 +269,13 @@ export const rewardsSlice = createSlice({
         todayKey,
         adFreeMinutes,
         newExpiryIso,
+        isStackable,
       });
+    },
+
+    syncDailyRewardedAdsDate: (state, action) => {
+      const now = action?.payload?.date ? new Date(action.payload.date) : new Date();
+      ensureDailyReset(state, now);
     },
 
     resetDailyRewardedAdsLimit: (state) => {
@@ -238,6 +297,7 @@ export const {
   redeemReward,
   recordRewardedAdCompletion,
   claimRewardedAdMilestone,
+  syncDailyRewardedAdsDate,
   resetDailyRewardedAdsLimit,
   clearAdFreeStatus,
   resetRewards,

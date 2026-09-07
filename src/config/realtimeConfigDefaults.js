@@ -93,6 +93,7 @@ export const DEFAULT_REALTIME_CONFIG = {
         enabled: true,
         requiredAds: 5,
         adFreeMinutes: 30,
+        isStackable: true,
       },
     },
 

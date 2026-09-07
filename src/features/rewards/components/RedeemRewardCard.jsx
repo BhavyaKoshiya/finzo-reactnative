@@ -7,7 +7,7 @@ import AppIcon from '../../../components/common/AppIcon';
 import PrimaryButton from '../../../components/buttons/PrimaryButton';
 import { useAppTheme } from '../../../hooks/useAppTheme';
 import { calculateRewardPrice } from '../utils/discountUtils';
-import { canRedeemReward } from '../utils/rewardUtils';
+import { canRedeemReward, formatAdFreeDuration } from '../utils/rewardUtils';
 
 export const RedeemRewardCard = ({
   reward,
@@ -28,13 +28,15 @@ export const RedeemRewardCard = ({
   const discountTagBg = isDark ? 'rgba(34, 197, 94, 0.18)' : 'rgba(34, 197, 94, 0.12)';
   const discountTagColor = isDark ? '#4ADE80' : currentTheme.success;
 
+  const pointsNeeded = Math.max(0, priceInfo.finalPointsCost - userPoints);
+
   const buttonTitle = isAffordable
     ? `Redeem ${priceInfo.finalPointsCost} Pts`
-    : `Need ${priceInfo.finalPointsCost} Pts`;
+    : `Need ${pointsNeeded} More Pts`;
 
   const accessibilityLabelText = isAffordable
     ? `Redeem ${reward.title} for ${priceInfo.finalPointsCost} Finzo points.`
-    : `${reward.title}. Requires ${priceInfo.finalPointsCost} Finzo points. You currently have ${userPoints}.`;
+    : `${reward.title}. Requires ${priceInfo.finalPointsCost} Finzo points. You need ${pointsNeeded} more points.`;
 
   return (
     <AppCard style={[styles.card, style]}>
@@ -50,9 +52,7 @@ export const RedeemRewardCard = ({
             <View style={styles.badgeChip}>
               <AppIcon icon={Clock} size={12} color={currentTheme.textSecondary} style={{ marginRight: 3 }} />
               <AppText variant="caption" color={currentTheme.textSecondary} style={styles.badgeText}>
-                {reward.durationMinutes >= 60
-                  ? `${reward.durationMinutes / 60}h`
-                  : `${reward.durationMinutes}m`}
+                {formatAdFreeDuration(reward.durationMinutes, { style: 'badge' })}
               </AppText>
             </View>
           </View>
