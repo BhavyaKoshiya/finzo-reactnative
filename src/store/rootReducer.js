@@ -7,6 +7,7 @@ import loanPaymentsReducer from './slices/loanPaymentsSlice';
 import loanGoalsReducer from './slices/loanGoalsSlice';
 import loanPrivateDetailsReducer from './slices/loanPrivateDetailsSlice';
 import loanNotesReducer from './slices/loanNotesSlice';
+import loanRateRevisionsReducer from './slices/loanRateRevisionsSlice';
 import connectivityReducer from './slices/connectivitySlice';
 
 const rootReducer = combineReducers({
@@ -18,7 +19,9 @@ const rootReducer = combineReducers({
   loanGoals: loanGoalsReducer,
   loanPrivateDetails: loanPrivateDetailsReducer,
   loanNotes: loanNotesReducer,
+  loanRateRevisions: loanRateRevisionsReducer,
   connectivity: connectivityReducer,
 });
 
 export default rootReducer;
+

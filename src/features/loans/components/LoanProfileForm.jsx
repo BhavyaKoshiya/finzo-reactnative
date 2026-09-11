@@ -142,6 +142,54 @@ export const LoanProfileForm = ({
           required
         />
 
+        <View style={styles.rateTypeContainer}>
+          <AppText variant="bodySmall" color={currentTheme.textSecondary} style={{ marginBottom: 6, fontWeight: '600' }}>
+            Interest Rate Type
+          </AppText>
+          <View style={styles.rateTypeToggleRow}>
+            <TouchableOpacity
+              onPress={() => form.setRateType('floating')}
+              style={[
+                styles.rateTypeTab,
+                {
+                  backgroundColor: form.rateType === 'floating' ? currentTheme.primary : (isDark ? currentTheme.surfaceSubtle : '#F1F5F9'),
+                },
+              ]}
+              activeOpacity={0.8}
+            >
+              <AppText
+                variant="bodySmall"
+                style={{
+                  fontWeight: '700',
+                  color: form.rateType === 'floating' ? '#FFFFFF' : currentTheme.textSecondary,
+                }}
+              >
+                Floating (Repo/EBLR)
+              </AppText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => form.setRateType('fixed')}
+              style={[
+                styles.rateTypeTab,
+                {
+                  backgroundColor: form.rateType === 'fixed' ? currentTheme.primary : (isDark ? currentTheme.surfaceSubtle : '#F1F5F9'),
+                },
+              ]}
+              activeOpacity={0.8}
+            >
+              <AppText
+                variant="bodySmall"
+                style={{
+                  fontWeight: '700',
+                  color: form.rateType === 'fixed' ? '#FFFFFF' : currentTheme.textSecondary,
+                }}
+              >
+                Fixed Rate
+              </AppText>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         <MoneyInput
           label="Monthly EMI Amount"
           value={form.emiAmount}
@@ -403,6 +451,21 @@ const styles = StyleSheet.create({
   },
   cancelBtn: {
     width: '100%',
+  },
+  rateTypeContainer: {
+    marginBottom: 16,
+  },
+  rateTypeToggleRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  rateTypeTab: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

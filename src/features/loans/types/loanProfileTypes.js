@@ -36,6 +36,7 @@ export const createLoanProfile = ({
   notes = '',
   isPrimary = false,
   status = 'active',
+  rateType = 'floating',
   createdAt = new Date().toISOString(),
   updatedAt = new Date().toISOString(),
 } = {}) => {
@@ -51,6 +52,7 @@ export const createLoanProfile = ({
     ledgerVersion: Number(ledgerVersion) || 1,
     name: String(name || 'My Loan').trim(),
     loanType,
+    rateType: rateType === 'fixed' ? 'fixed' : 'floating',
     lenderName: String(lenderName || '').trim(),
     originalPrincipal: numOriginal,
     currentOutstandingPrincipal: numCurrent,

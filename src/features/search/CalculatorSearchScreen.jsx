@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -12,11 +12,34 @@ import { ArrowLeft, Search, X } from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
 import AppIcon from '../../components/common/AppIcon';
+import AppCard from '../../components/cards/AppCard';
 import CalculatorCard from '../../components/cards/CalculatorCard';
 import EmptyState from '../../components/feedback/EmptyState';
 import { useAppTheme } from '../../hooks/useAppTheme';
 import { searchCalculators } from '../../calculators/search/calculatorSearch';
 import { CALCULATOR_CATEGORIES } from '../../calculators/registry/calculatorCategories';
+import AdPlacement from '../../components/ads/AdPlacement';
+import { AD_PLACEMENTS } from '../../services/ads/adPlacementConstants';
+
+const TILES_PER_AD = 4;
+
+const AD_ROTATION = [
+  {
+    id: 'search_ad_1',
+    headline: 'Smart Financial Planning',
+    description: 'Calculate loan EMIs, interest savings, prepayments & investment returns offline.',
+  },
+  {
+    id: 'search_ad_2',
+    headline: 'Investment & Wealth Growth',
+    description: 'Explore SIP return projections, FD interest, and compounding calculations offline.',
+  },
+  {
+    id: 'search_ad_3',
+    headline: 'Business & Everyday Tools',
+    description: 'Quick GST calculations, simple interest & percentage tools for fast decisions.',
+  },
+];
 
 export const CalculatorSearchScreen = ({ navigation }) => {
   const { currentTheme } = useAppTheme();
@@ -34,6 +57,35 @@ export const CalculatorSearchScreen = ({ navigation }) => {
   }, []);
 
   const results = searchCalculators(query, undefined, selectedCategory);
+
+  const listData = useMemo(() => {
+    if (!results || results.length === 0) return [];
+
+    const items = [];
+    let adIndex = 0;
+
+    for (let i = 0; i < results.length; i += TILES_PER_AD) {
+      const chunk = results.slice(i, i + TILES_PER_AD);
+      items.push({
+        type: 'chunk',
+        id: `chunk-${i}`,
+        calculators: chunk,
+      });
+
+      // Insert ad after every full chunk of TILES_PER_AD
+      if (chunk.length === TILES_PER_AD) {
+        const adContent = AD_ROTATION[adIndex % AD_ROTATION.length];
+        items.push({
+          type: 'ad',
+          id: `ad-${i}-${adIndex}`,
+          adContent,
+        });
+        adIndex++;
+      }
+    }
+
+    return items;
+  }, [results]);
 
   const handleClearQuery = () => {
     setQuery('');
@@ -169,23 +221,45 @@ export const CalculatorSearchScreen = ({ navigation }) => {
         </View>
       ) : (
         <FlatList
-          data={results}
+          data={listData}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <CalculatorCard
-              title={item.name}
-              description={item.description}
-              icon={item.icon}
-              status={item.status}
-              badgeText={item.badgeText}
-              onPress={
-                item.route ? () => navigation.navigate(item.route) : null
-              }
-              style={styles.cardMargin}
-            />
-          )}
+          renderItem={({ item }) => {
+            if (item.type === 'ad') {
+              return (
+                <View style={styles.adWrapper}>
+                  <AdPlacement
+                    screen="calculators"
+                    placementId={AD_PLACEMENTS.CALCULATOR_NATIVE}
+                    adType="native"
+                    headline={item.adContent.headline}
+                    description={item.adContent.description}
+                  />
+                </View>
+              );
+            }
+
+            return (
+              <AppCard style={styles.groupedCard}>
+                {item.calculators.map((calc, idx) => (
+                  <CalculatorCard
+                    key={calc.id}
+                    title={calc.name}
+                    description={calc.description}
+                    icon={calc.icon}
+                    status={calc.status}
+                    badgeText={calc.badgeText}
+                    onPress={
+                      calc.route ? () => navigation.navigate(calc.route) : null
+                    }
+                    isGrouped={true}
+                    hasDivider={idx < item.calculators.length - 1}
+                  />
+                ))}
+              </AppCard>
+            );
+          }}
         />
       )}
     </ScreenContainer>
@@ -250,6 +324,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 24,
+  },
+  groupedCard: {
+    padding: 0,
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+  adWrapper: {
+    marginBottom: 12,
   },
   emptyContainer: {
     flex: 1,

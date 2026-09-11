@@ -28,6 +28,7 @@ const persistConfig = {
     'loanGoals',
     'loanPrivateDetails',
     'loanNotes',
+    'loanRateRevisions',
   ],
 };
 

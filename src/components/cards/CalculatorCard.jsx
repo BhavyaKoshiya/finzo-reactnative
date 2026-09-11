@@ -14,6 +14,8 @@ export const CalculatorCard = ({
   badgeText,
   disabled,
   style,
+  isGrouped = false,
+  hasDivider = false,
   ...props
 }) => {
   const { currentTheme, isDark } = useAppTheme();
@@ -34,6 +36,92 @@ export const CalculatorCard = ({
     ? '#60A5FA'
     : currentTheme.primary;
 
+  const content = (
+    <View style={styles.header}>
+      {icon && (
+        <View
+          style={[
+            styles.iconContainer,
+            {
+              backgroundColor: iconBgColor,
+            },
+          ]}
+        >
+          <AppIcon
+            icon={icon}
+            size={22}
+            color={iconColor}
+          />
+        </View>
+      )}
+
+      <View style={styles.textContainer}>
+        <View style={styles.titleRow}>
+          <AppText
+            variant="cardTitle"
+            color={isDisabled ? currentTheme.textSecondary : currentTheme.textPrimary}
+            style={styles.titleText}
+          >
+            {title}
+          </AppText>
+          {badgeLabel && (
+            <View
+              style={[
+                styles.badgeContainer,
+                {
+                  backgroundColor: currentTheme.surfaceHighlight || (isDark ? '#334155' : '#F3F4F6'),
+                  borderColor: currentTheme.border,
+                },
+              ]}
+            >
+              <AppText
+                variant="caption"
+                color={currentTheme.textMuted}
+                style={styles.badgeText}
+              >
+                {badgeLabel}
+              </AppText>
+            </View>
+          )}
+        </View>
+
+        {description && (
+          <AppText
+            variant="bodySmall"
+            color={currentTheme.textSecondary}
+            style={styles.description}
+          >
+            {description}
+          </AppText>
+        )}
+      </View>
+    </View>
+  );
+
+  if (isGrouped) {
+    return (
+      <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.7}
+        disabled={isDisabled}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: isDisabled }}
+        style={[
+          styles.groupedTile,
+          hasDivider && {
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            borderBottomColor: currentTheme.border,
+          },
+          isDisabled && styles.disabledCard,
+          style,
+        ]}
+        {...props}
+      >
+        {content}
+      </TouchableOpacity>
+    );
+  }
+
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -43,65 +131,7 @@ export const CalculatorCard = ({
       accessibilityState={{ disabled: isDisabled }}
     >
       <AppCard style={[styles.card, isDisabled && styles.disabledCard, style]} {...props}>
-        <View style={styles.header}>
-          {icon && (
-            <View
-              style={[
-                styles.iconContainer,
-                {
-                  backgroundColor: iconBgColor,
-                },
-              ]}
-            >
-              <AppIcon
-                icon={icon}
-                size={22}
-                color={iconColor}
-              />
-            </View>
-          )}
-
-          <View style={styles.textContainer}>
-            <View style={styles.titleRow}>
-              <AppText
-                variant="cardTitle"
-                color={isDisabled ? currentTheme.textSecondary : currentTheme.textPrimary}
-                style={styles.titleText}
-              >
-                {title}
-              </AppText>
-              {badgeLabel && (
-                <View
-                  style={[
-                    styles.badgeContainer,
-                    {
-                      backgroundColor: currentTheme.surfaceHighlight || (isDark ? '#334155' : '#F3F4F6'),
-                      borderColor: currentTheme.border,
-                    },
-                  ]}
-                >
-                  <AppText
-                    variant="caption"
-                    color={currentTheme.textMuted}
-                    style={styles.badgeText}
-                  >
-                    {badgeLabel}
-                  </AppText>
-                </View>
-              )}
-            </View>
-
-            {description && (
-              <AppText
-                variant="bodySmall"
-                color={currentTheme.textSecondary}
-                style={styles.description}
-              >
-                {description}
-              </AppText>
-            )}
-          </View>
-        </View>
+        {content}
       </AppCard>
     </TouchableOpacity>
   );
@@ -109,6 +139,9 @@ export const CalculatorCard = ({
 
 const styles = StyleSheet.create({
   card: {
+    padding: 16,
+  },
+  groupedTile: {
     padding: 16,
   },
   disabledCard: {

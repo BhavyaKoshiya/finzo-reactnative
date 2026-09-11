@@ -445,9 +445,10 @@ describe('Phase 19 — Production Data Integrity & Persistence Safety', () => {
   // 11. REDUX-PERSIST MIGRATION ARCHITECTURE
   // ============================================================
   test('13. Migration manifest migrates version 0 to version 1 without wiping existing data', () => {
-    expect(PERSIST_VERSION).toBe(1);
+    expect(PERSIST_VERSION).toBeGreaterThanOrEqual(1);
     expect(typeof migrations[0]).toBe('function');
     expect(typeof migrations[1]).toBe('function');
+    expect(typeof migrations[2]).toBe('function');
 
     const v0State = {
       loanProfiles: {
@@ -462,6 +463,10 @@ describe('Phase 19 — Production Data Integrity & Persistence Safety', () => {
     expect(v1State.loanProfiles.profiles[0].name).toBe('Old Loan');
     expect(v1State.settings.themeMode).toBe('dark');
     expect(v1State.settings.currency).toBe('INR'); // Default added cleanly
+
+    const v2State = migrations[2](v1State);
+    expect(v2State.loanRateRevisions.revisions).toEqual([]);
+    expect(v2State.loanProfiles.profiles[0].rateType).toBe('floating');
   });
 
   // ============================================================

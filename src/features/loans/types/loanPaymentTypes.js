@@ -1,4 +1,4 @@
-import { PAYMENT_TYPES, BALANCE_SOURCES } from '../constants/loanPaymentConstants';
+import { PAYMENT_TYPES, BALANCE_SOURCES, PREPAYMENT_STRATEGIES } from '../constants/loanPaymentConstants';
 
 export const LOAN_PAYMENT_SCHEMA_VERSION = 1;
 
@@ -18,12 +18,20 @@ export const createLoanPayment = ({
   principalAmount = null,
   interestAmount = null,
   feesAmount = null,
+  penaltyAmount = null,
+  penaltyReason = null,
+  isLatePayment = false,
+  daysLate = 0,
   outstandingBefore = null,
   outstandingAfter = null,
   actualClosingBalance = null,
   balanceSource = BALANCE_SOURCES.ESTIMATED,
   balanceUpdated = true,
   calculationSnapshot = null,
+  prepaymentStrategy = null,
+  brokenPeriodInterest = null,
+  exactNewEmi = null,
+  exactNewTenureMonths = null,
   note = '',
   createdAt = new Date().toISOString(),
   updatedAt = new Date().toISOString(),
@@ -35,9 +43,11 @@ export const createLoanPayment = ({
   const numInterest = interestAmount !== null && interestAmount !== undefined && !isNaN(Number(interestAmount))
     ? Number(interestAmount)
     : null;
-  const numFees = feesAmount !== null && feesAmount !== undefined && !isNaN(Number(feesAmount))
-    ? Number(feesAmount)
-    : null;
+  const rawPenalty = penaltyAmount !== null && penaltyAmount !== undefined && !isNaN(Number(penaltyAmount))
+    ? Number(penaltyAmount)
+    : (feesAmount !== null && feesAmount !== undefined && !isNaN(Number(feesAmount)) ? Number(feesAmount) : null);
+  const numPenalty = rawPenalty !== null && rawPenalty > 0 ? rawPenalty : null;
+  const numFees = numPenalty;
   const numBefore = outstandingBefore !== null && outstandingBefore !== undefined && !isNaN(Number(outstandingBefore))
     ? Number(outstandingBefore)
     : null;
@@ -46,6 +56,22 @@ export const createLoanPayment = ({
     : null;
   const numActualAfter = actualClosingBalance !== null && actualClosingBalance !== undefined && !isNaN(Number(actualClosingBalance))
     ? Number(actualClosingBalance)
+    : null;
+
+  const numBrokenPeriodInterest = brokenPeriodInterest !== null && brokenPeriodInterest !== undefined && !isNaN(Number(brokenPeriodInterest)) && Number(brokenPeriodInterest) > 0
+    ? Number(brokenPeriodInterest)
+    : null;
+
+  const numExactNewEmi = exactNewEmi !== null && exactNewEmi !== undefined && !isNaN(Number(exactNewEmi)) && Number(exactNewEmi) > 0
+    ? Number(exactNewEmi)
+    : null;
+
+  const numExactNewTenure = exactNewTenureMonths !== null && exactNewTenureMonths !== undefined && !isNaN(Number(exactNewTenureMonths)) && Number(exactNewTenureMonths) > 0
+    ? Math.round(Number(exactNewTenureMonths))
+    : null;
+
+  const resolvedStrategy = paymentType === PAYMENT_TYPES.PREPAYMENT && Object.values(PREPAYMENT_STRATEGIES).includes(prepaymentStrategy)
+    ? prepaymentStrategy
     : null;
 
   const resolvedSnapshot = calculationSnapshot || {
@@ -72,6 +98,10 @@ export const createLoanPayment = ({
     interestAmount: numInterest,
     estimatedInterest: numInterest,
     feesAmount: numFees,
+    penaltyAmount: numPenalty,
+    penaltyReason: penaltyReason ? String(penaltyReason).trim() : null,
+    isLatePayment: Boolean(isLatePayment),
+    daysLate: Number(daysLate) || 0,
     outstandingBefore: numBefore,
     openingBalance: numBefore,
     outstandingAfter: numAfter,
@@ -80,6 +110,10 @@ export const createLoanPayment = ({
     balanceSource: Object.values(BALANCE_SOURCES).includes(balanceSource) ? balanceSource : BALANCE_SOURCES.ESTIMATED,
     balanceUpdated: Boolean(balanceUpdated),
     calculationSnapshot: resolvedSnapshot,
+    prepaymentStrategy: resolvedStrategy,
+    brokenPeriodInterest: numBrokenPeriodInterest,
+    exactNewEmi: numExactNewEmi,
+    exactNewTenureMonths: numExactNewTenure,
     note: String(note || '').trim(),
     createdAt,
     updatedAt,

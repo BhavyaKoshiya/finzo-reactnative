@@ -10,6 +10,7 @@ import { useLoanPaymentForm } from '../hooks/useLoanPaymentForm';
 import LoanPaymentForm from '../components/LoanPaymentForm';
 import { PAYMENT_TYPES } from '../constants/loanPaymentConstants';
 import { recalculateLoanBalanceFromPayments } from '../utils/paymentBalanceUtils';
+import { applyPrepaymentStrategy } from '../utils/applyPrepaymentStrategy';
 import { formatCurrency } from '../../../utils/financeFormatters';
 
 export const AddPaymentScreen = ({ route, navigation }) => {
@@ -19,8 +20,13 @@ export const AddPaymentScreen = ({ route, navigation }) => {
   const loan = useSelector((state) => selectLoanProfileById(state, loanId));
   const payments = useSelector((state) => selectPaymentsForLoan(state, loanId));
 
+  const initialValues = {
+    loanId,
+    ...(route?.params?.initialValues || {}),
+  };
+
   const form = useLoanPaymentForm({
-    initialValues: { loanId },
+    initialValues,
     currentLoanOutstanding: loan?.currentOutstandingPrincipal || 0,
     annualInterestRate: loan?.annualInterestRate || 0,
     setEmiAmount: loan?.emiAmount || 0,
@@ -62,17 +68,32 @@ export const AddPaymentScreen = ({ route, navigation }) => {
       dispatch(updateLoanPaymentsForLoan({ loanId: loan.id, payments: updatedPayments }));
     }
 
+    const resolvedNewBalance = payload.balanceSource === 'bank_confirmed' && payload.actualClosingBalance !== null
+      ? payload.actualClosingBalance
+      : finalEstimatedBalance;
+
+    // Apply prepayment strategy updates (EMI or tenure)
+    let strategyUpdates = {};
+    if (payload.paymentType === PAYMENT_TYPES.PREPAYMENT && payload.prepaymentStrategy) {
+      strategyUpdates = applyPrepaymentStrategy({
+        loan,
+        newBalance: resolvedNewBalance,
+        strategy: payload.prepaymentStrategy,
+        exactNewEmi: payload.exactNewEmi,
+        exactNewTenureMonths: payload.exactNewTenureMonths,
+      });
+    }
+
     dispatch(
       updateLoanProfile({
         id: loan.id,
-        currentOutstandingPrincipal: payload.balanceSource === 'bank_confirmed' && payload.actualClosingBalance !== null
-          ? payload.actualClosingBalance
-          : finalEstimatedBalance,
+        currentOutstandingPrincipal: resolvedNewBalance,
         userConfirmedBalance: payload.balanceSource === 'bank_confirmed' && payload.actualClosingBalance !== null
           ? payload.actualClosingBalance
           : loan.userConfirmedBalance,
         balanceSource: payload.balanceSource,
         lastBalanceConfirmationDate: payload.balanceSource === 'bank_confirmed' ? payload.paymentDate : loan.lastBalanceConfirmationDate,
+        ...strategyUpdates,
       })
     );
 
@@ -108,15 +129,19 @@ export const AddPaymentScreen = ({ route, navigation }) => {
       );
     } else {
       const formattedPaid = formatCurrency(payload.paymentAmount);
-      const newBal = payload.balanceSource === 'bank_confirmed' && payload.actualClosingBalance !== null
-        ? payload.actualClosingBalance
-        : finalEstimatedBalance;
-      const formattedBal = formatCurrency(newBal);
+      const formattedBal = formatCurrency(resolvedNewBalance);
       const sourceText = payload.balanceSource === 'bank_confirmed' ? 'Bank Confirmed' : 'Finzo Estimate';
+
+      let detailMsg = `${formattedPaid} recorded successfully.\nNew Balance: ${formattedBal} (${sourceText}).`;
+      if (strategyUpdates.emiAmount) {
+        detailMsg += `\nNew Monthly EMI: ${formatCurrency(strategyUpdates.emiAmount)}`;
+      } else if (strategyUpdates.remainingTenure) {
+        detailMsg += `\nNew Remaining Tenure: ${strategyUpdates.remainingTenure.value} ${strategyUpdates.remainingTenure.unit}`;
+      }
 
       Alert.alert(
         'Payment Recorded',
-        `${formattedPaid} recorded successfully.\nNew Balance: ${formattedBal} (${sourceText}).`,
+        detailMsg,
         [{ text: 'OK', onPress: () => navigation.goBack() }]
       );
     }

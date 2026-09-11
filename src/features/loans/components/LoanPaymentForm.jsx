@@ -9,20 +9,29 @@ import PrimaryButton from '../../../components/buttons/PrimaryButton';
 import SecondaryButton from '../../../components/buttons/SecondaryButton';
 import AppCard from '../../../components/cards/AppCard';
 import AppIcon from '../../../components/common/AppIcon';
-import { CheckSquare, Square, Calculator, Sparkles, Building2, CheckCircle2, AlertTriangle } from 'lucide-react-native';
+import { CheckSquare, Square, Calculator, Sparkles, Building2, CheckCircle2, AlertTriangle, Clock, Info } from 'lucide-react-native';
 import { useAppTheme } from '../../../hooks/useAppTheme';
-import { PAYMENT_TYPE_OPTIONS, PAYMENT_TYPES } from '../constants/loanPaymentConstants';
+import { PAYMENT_TYPE_OPTIONS, PAYMENT_TYPES, PREPAYMENT_STRATEGIES, PREPAYMENT_STRATEGY_OPTIONS } from '../constants/loanPaymentConstants';
 import { formatCurrency } from '../../../utils/financeFormatters';
 
 export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding = 0 }) => {
   const { currentTheme } = useAppTheme();
   const [showBankDetails, setShowBankDetails] = useState(
-    Boolean(form.actualInterest || form.actualPrincipal || form.actualClosingBalance || form.isBankConfirmed)
+    Boolean(
+      form.actualInterest ||
+      form.actualPrincipal ||
+      form.actualClosingBalance ||
+      form.isBankConfirmed ||
+      form.penaltyAmount ||
+      form.feesAmount ||
+      form.isLatePayment
+    )
   );
 
   const setEmiAmount = form.setEmiAmount || 0;
   const preview = form.preview || {};
   const numAmount = Number(form.amount) || 0;
+  const numBrokenPeriod = Number(form.brokenPeriodInterest) || 0;
   const isOverpayment = preview.isOverpayment;
 
   return (
@@ -60,6 +69,82 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
           </TouchableOpacity>
         )}
 
+        {/* Prepayment Strategy Picker — only when paymentType is Prepayment */}
+        {form.paymentType === PAYMENT_TYPES.PREPAYMENT && (
+          <View style={styles.strategySection}>
+            <AppText variant="bodySmall" style={styles.strategyLabel}>
+              Prepayment Strategy
+            </AppText>
+            <View style={styles.strategyRow}>
+              {PREPAYMENT_STRATEGY_OPTIONS.map((opt) => {
+                const isSelected = form.prepaymentStrategy === opt.value;
+                return (
+                  <TouchableOpacity
+                    key={opt.value}
+                    onPress={() => form.setPrepaymentStrategy(opt.value)}
+                    activeOpacity={0.8}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: isSelected }}
+                    accessibilityLabel={`${opt.label}: ${opt.description}`}
+                    style={[
+                      styles.strategyTile,
+                      {
+                        backgroundColor: isSelected ? `${currentTheme.primary}15` : currentTheme.surfaceSubtle,
+                        borderColor: isSelected ? currentTheme.primary : currentTheme.border,
+                      },
+                    ]}
+                  >
+                    <AppText
+                      variant="bodySmall"
+                      color={isSelected ? currentTheme.primary : currentTheme.textPrimary}
+                      style={{ fontWeight: '700', marginBottom: 2 }}
+                    >
+                      {opt.label}
+                    </AppText>
+                    <AppText variant="caption" color={currentTheme.textMuted} numberOfLines={1}>
+                      {opt.description}
+                    </AppText>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {/* Optional Exact Bank Value Override */}
+            {form.prepaymentStrategy === PREPAYMENT_STRATEGIES.REDUCE_EMI ? (
+              <View style={styles.overrideContainer}>
+                <MoneyInput
+                  label="Bank's Exact New EMI (Optional)"
+                  value={form.exactNewEmi}
+                  onChangeValue={form.setExactNewEmi}
+                  placeholder="Leave blank for Finzo's estimate"
+                />
+                <View style={styles.brokenPeriodHint}>
+                  <AppIcon icon={Info} size={12} color={currentTheme.textMuted} style={{ marginRight: 5, marginTop: 1 }} />
+                  <AppText variant="caption" color={currentTheme.textMuted} style={{ flex: 1, fontSize: 11 }}>
+                    Leave blank to auto-calculate. Fill only if your bank rounded your new EMI differently.
+                  </AppText>
+                </View>
+              </View>
+            ) : (
+              <View style={styles.overrideContainer}>
+                <TextInputField
+                  label="Bank's Exact Remaining Months (Optional)"
+                  value={form.exactNewTenureMonths}
+                  onChangeText={form.setExactNewTenureMonths}
+                  keyboardType="numeric"
+                  placeholder="e.g. 42 (Leave blank for Finzo's estimate)"
+                />
+                <View style={styles.brokenPeriodHint}>
+                  <AppIcon icon={Info} size={12} color={currentTheme.textMuted} style={{ marginRight: 5, marginTop: 1 }} />
+                  <AppText variant="caption" color={currentTheme.textMuted} style={{ flex: 1, fontSize: 11 }}>
+                    Leave blank to auto-calculate. Fill only if your bank schedule specifies exact remaining months.
+                  </AppText>
+                </View>
+              </View>
+            )}
+          </View>
+        )}
+
         <MoneyInput
           label="Payment Amount"
           value={form.amount}
@@ -74,6 +159,24 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
             <AppText variant="caption" color={currentTheme.warning} style={{ fontWeight: '600', flex: 1 }}>
               Payment exceeds Finzo's estimated outstanding balance.
             </AppText>
+          </View>
+        )}
+
+        {/* Broken Period Interest — only for Prepayments */}
+        {form.paymentType === PAYMENT_TYPES.PREPAYMENT && (
+          <View style={styles.brokenPeriodSection}>
+            <MoneyInput
+              label="Broken Period Interest (Optional)"
+              value={form.brokenPeriodInterest}
+              onChangeValue={form.setBrokenPeriodInterest}
+              placeholder="e.g. 1847"
+            />
+            <View style={styles.brokenPeriodHint}>
+              <AppIcon icon={Info} size={12} color={currentTheme.textMuted} style={{ marginRight: 5, marginTop: 1 }} />
+              <AppText variant="caption" color={currentTheme.textMuted} style={{ flex: 1, fontSize: 11 }}>
+                Interest charged by bank for days between last EMI date and prepayment date
+              </AppText>
+            </View>
           </View>
         )}
 
@@ -121,14 +224,37 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
         </View>
 
         {form.paymentType === PAYMENT_TYPES.PREPAYMENT ? (
-          <View style={styles.previewRow}>
-            <AppText variant="caption" color={currentTheme.textSecondary}>
-              Principal Reduction (100%):
-            </AppText>
-            <AppText variant="bodySmall" color={currentTheme.primary} style={{ fontWeight: '700' }}>
-              {formatCurrency(numAmount)}
-            </AppText>
-          </View>
+          <>
+            {numBrokenPeriod > 0 ? (
+              <>
+                <View style={styles.previewRow}>
+                  <AppText variant="caption" color={currentTheme.textSecondary}>
+                    Broken Period Interest:
+                  </AppText>
+                  <AppText variant="bodySmall" color={currentTheme.warning} style={{ fontWeight: '600' }}>
+                    {formatCurrency(numBrokenPeriod)}
+                  </AppText>
+                </View>
+                <View style={styles.previewRow}>
+                  <AppText variant="caption" color={currentTheme.textSecondary}>
+                    Principal Reduction:
+                  </AppText>
+                  <AppText variant="bodySmall" color={currentTheme.primary} style={{ fontWeight: '700' }}>
+                    {formatCurrency(Math.max(0, numAmount - numBrokenPeriod))}
+                  </AppText>
+                </View>
+              </>
+            ) : (
+              <View style={styles.previewRow}>
+                <AppText variant="caption" color={currentTheme.textSecondary}>
+                  Principal Reduction (100%):
+                </AppText>
+                <AppText variant="bodySmall" color={currentTheme.primary} style={{ fontWeight: '700' }}>
+                  {formatCurrency(numAmount)}
+                </AppText>
+              </View>
+            )}
+          </>
         ) : (
           <>
             <View style={styles.previewRow}>
@@ -165,6 +291,21 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
         </AppText>
       </AppCard>
 
+      {/* Late Payment Notice */}
+      {form.isLatePayment && (
+        <View style={styles.lateAlertBanner}>
+          <AppIcon icon={Clock} size={16} color="#B45309" style={{ marginRight: 8, marginTop: 2 }} />
+          <View style={{ flex: 1 }}>
+            <AppText variant="caption" style={{ color: '#92400E', fontWeight: '700' }}>
+              Late Payment Detected ({form.daysLate} day{form.daysLate > 1 ? 's' : ''} overdue)
+            </AppText>
+            <AppText variant="caption" style={{ color: '#B45309', marginTop: 2 }}>
+              Did your bank charge an overdue penalty or bounce fee? You can record it under Bank Details below.
+            </AppText>
+          </View>
+        </View>
+      )}
+
       {/* SECTION 3: Optional Actual Bank Values */}
       <AppCard style={styles.sectionCard}>
         <TouchableOpacity
@@ -178,7 +319,7 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
               Have your bank's statement?
             </AppText>
             <AppText variant="caption" color={currentTheme.textSecondary}>
-              Enter exact bank interest, principal, or closing balance
+              Enter exact bank interest, principal, balance, or penalties
             </AppText>
           </View>
           <AppText variant="caption" color={currentTheme.primary} style={{ fontWeight: '700' }}>
@@ -208,6 +349,19 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
               onChangeValue={form.setActualClosingBalance}
               placeholder="e.g. 709980"
             />
+
+            <MoneyInput
+              label="Penalty / Charges from Bank (Optional)"
+              value={form.penaltyAmount}
+              onChangeValue={form.setPenaltyAmount}
+              placeholder="e.g. 500"
+            />
+            <View style={[styles.brokenPeriodHint, { marginBottom: 12 }]}>
+              <AppIcon icon={Info} size={12} color={currentTheme.textMuted} style={{ marginRight: 5, marginTop: 1 }} />
+              <AppText variant="caption" color={currentTheme.textMuted} style={{ flex: 1, fontSize: 11 }}>
+                EMI bounce fee, late charges, or prepayment penalty from bank
+              </AppText>
+            </View>
 
             <TouchableOpacity
               onPress={() => form.setIsBankConfirmed(!form.isBankConfirmed)}
@@ -274,6 +428,36 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
   },
+  strategySection: {
+    marginBottom: 14,
+  },
+  strategyLabel: {
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  strategyRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  strategyTile: {
+    flex: 1,
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1.5,
+  },
+  overrideContainer: {
+    marginTop: 12,
+  },
+  brokenPeriodSection: {
+    marginBottom: 4,
+  },
+  brokenPeriodHint: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: -8,
+    marginBottom: 12,
+    paddingHorizontal: 4,
+  },
   sectionTitle: {
     marginBottom: 12,
     fontSize: 16,
@@ -291,6 +475,16 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: '#FEF3C7',
     borderRadius: 8,
+  },
+  lateAlertBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+    padding: 12,
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+    borderRadius: 10,
   },
   previewHeaderRow: {
     flexDirection: 'row',

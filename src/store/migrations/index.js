@@ -5,7 +5,7 @@
  * Protects against malformed, null, or corrupted persisted state during app hydration.
  */
 
-export const PERSIST_VERSION = 1;
+export const PERSIST_VERSION = 2;
 
 /**
  * Normalizes any persisted state to ensure all expected slice keys,
@@ -34,12 +34,14 @@ export const normalizePersistedState = (state = {}) => {
   const rawProfiles = cleanState.loanProfiles?.profiles;
   cleanState.loanProfiles = {
     schemaVersion: 1,
+    ...(cleanState.loanProfiles || {}),
     profiles: Array.isArray(rawProfiles)
       ? rawProfiles
           .filter((p) => p && typeof p === 'object' && p.id)
           .map((p) => ({
             ...p,
             status: p.status || 'active',
+            rateType: p.rateType === 'fixed' ? 'fixed' : 'floating',
             isPrimary: Boolean(p.isPrimary),
             ledgerVersion: Number(p.ledgerVersion) || 1,
             currentOutstandingPrincipal: Number(p.currentOutstandingPrincipal) || 0,
@@ -48,7 +50,6 @@ export const normalizePersistedState = (state = {}) => {
             emiAmount: Number(p.emiAmount) || 0,
           }))
       : [],
-    ...(cleanState.loanProfiles || {}),
   };
   // Ensure profiles array is clean
   if (!Array.isArray(cleanState.loanProfiles.profiles)) {
@@ -92,7 +93,19 @@ export const normalizePersistedState = (state = {}) => {
     cleanState.loanNotes.notes = [];
   }
 
-  // 6. Loan Private Details Slice Normalization
+  // 6. Loan Rate Revisions Slice Normalization
+  const rawRevisions = cleanState.loanRateRevisions?.revisions;
+  cleanState.loanRateRevisions = {
+    revisions: Array.isArray(rawRevisions)
+      ? rawRevisions.filter((r) => r && typeof r === 'object' && r.id && r.loanId)
+      : [],
+    ...(cleanState.loanRateRevisions || {}),
+  };
+  if (!Array.isArray(cleanState.loanRateRevisions.revisions)) {
+    cleanState.loanRateRevisions.revisions = [];
+  }
+
+  // 7. Loan Private Details Slice Normalization
   const rawDetails = cleanState.loanPrivateDetails?.detailsByLoanId;
   cleanState.loanPrivateDetails = {
     detailsByLoanId: rawDetails && typeof rawDetails === 'object' && !Array.isArray(rawDetails)
@@ -104,7 +117,7 @@ export const normalizePersistedState = (state = {}) => {
     cleanState.loanPrivateDetails.detailsByLoanId = {};
   }
 
-  // 7. Rewards Slice Normalization
+  // 8. Rewards Slice Normalization
   const rawRewards = cleanState.rewards && typeof cleanState.rewards === 'object' ? cleanState.rewards : {};
   const safePoints = Number(rawRewards.points);
   const safeStreak = Number(rawRewards.currentStreak);
@@ -128,7 +141,7 @@ export const normalizePersistedState = (state = {}) => {
     schemaVersion: 1,
   };
 
-  // 8. Saved Calculations Slice Normalization
+  // 9. Saved Calculations Slice Normalization
   const rawSaved = cleanState.savedCalculations?.savedCalculations;
   cleanState.savedCalculations = {
     schemaVersion: 1,
@@ -154,6 +167,10 @@ export const migrations = {
   },
   1: (state) => {
     // Version 1: Baseline robust normalization across all slices
+    return normalizePersistedState(state);
+  },
+  2: (state) => {
+    // Version 2: Loan rate revisions slice & loan profile rateType normalization
     return normalizePersistedState(state);
   },
 };

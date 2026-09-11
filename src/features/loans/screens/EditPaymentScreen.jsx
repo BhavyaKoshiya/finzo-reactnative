@@ -14,7 +14,9 @@ import {
 } from '../../../store/slices/loanPaymentsSlice';
 import { useLoanPaymentForm } from '../hooks/useLoanPaymentForm';
 import LoanPaymentForm from '../components/LoanPaymentForm';
+import { PAYMENT_TYPES } from '../constants/loanPaymentConstants';
 import { recalculateLoanBalanceFromPayments } from '../utils/paymentBalanceUtils';
+import { applyPrepaymentStrategy } from '../utils/applyPrepaymentStrategy';
 
 export const EditPaymentScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -67,17 +69,32 @@ export const EditPaymentScreen = ({ route, navigation }) => {
       dispatch(updateLoanPaymentsForLoan({ loanId: loan.id, payments: updatedPayments }));
     }
 
+    const resolvedNewBalance = payload.balanceSource === 'bank_confirmed' && payload.actualClosingBalance !== null
+      ? payload.actualClosingBalance
+      : finalEstimatedBalance;
+
+    // Apply prepayment strategy updates if prepayment
+    let strategyUpdates = {};
+    if (payload.paymentType === PAYMENT_TYPES.PREPAYMENT && payload.prepaymentStrategy) {
+      strategyUpdates = applyPrepaymentStrategy({
+        loan,
+        newBalance: resolvedNewBalance,
+        strategy: payload.prepaymentStrategy,
+        exactNewEmi: payload.exactNewEmi,
+        exactNewTenureMonths: payload.exactNewTenureMonths,
+      });
+    }
+
     dispatch(
       updateLoanProfile({
         id: loan.id,
-        currentOutstandingPrincipal: payload.balanceSource === 'bank_confirmed' && payload.actualClosingBalance !== null
-          ? payload.actualClosingBalance
-          : finalEstimatedBalance,
+        currentOutstandingPrincipal: resolvedNewBalance,
         userConfirmedBalance: payload.balanceSource === 'bank_confirmed' && payload.actualClosingBalance !== null
           ? payload.actualClosingBalance
           : loan.userConfirmedBalance,
         balanceSource: payload.balanceSource,
         lastBalanceConfirmationDate: payload.balanceSource === 'bank_confirmed' ? payload.paymentDate : loan.lastBalanceConfirmationDate,
+        ...strategyUpdates,
       })
     );
 

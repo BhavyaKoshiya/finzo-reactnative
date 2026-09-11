@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { validateLoanPaymentInput } from '../utils/loanPaymentValidation';
 import { createLoanPayment } from '../types/loanPaymentTypes';
-import { PAYMENT_TYPES, BALANCE_SOURCES } from '../constants/loanPaymentConstants';
+import { PAYMENT_TYPES, BALANCE_SOURCES, PREPAYMENT_STRATEGIES } from '../constants/loanPaymentConstants';
 import { calculateEmiBreakdown } from '../utils/loanBalanceUtils';
 import { createPaymentPreview } from '../utils/paymentBalanceUtils';
 
@@ -27,6 +27,24 @@ export const useLoanPaymentForm = ({
     initialType === PAYMENT_TYPES.REGULAR_EMI && setEmiAmount > 0 && String(defaultInitialAmount) === String(setEmiAmount)
   );
   const [amount, setAmount] = useState(defaultInitialAmount);
+  const [prepaymentStrategy, setPrepaymentStrategy] = useState(
+    initialValues.prepaymentStrategy || PREPAYMENT_STRATEGIES.REDUCE_TENURE
+  );
+  const [brokenPeriodInterest, setBrokenPeriodInterest] = useState(
+    initialValues.brokenPeriodInterest !== undefined && initialValues.brokenPeriodInterest !== null
+      ? initialValues.brokenPeriodInterest
+      : ''
+  );
+  const [exactNewEmi, setExactNewEmi] = useState(
+    initialValues.exactNewEmi !== undefined && initialValues.exactNewEmi !== null
+      ? String(initialValues.exactNewEmi)
+      : ''
+  );
+  const [exactNewTenureMonths, setExactNewTenureMonths] = useState(
+    initialValues.exactNewTenureMonths !== undefined && initialValues.exactNewTenureMonths !== null
+      ? String(initialValues.exactNewTenureMonths)
+      : ''
+  );
   const [paymentDate, setPaymentDate] = useState(initialValues.paymentDate || new Date().toISOString().split('T')[0]);
   const [dueDate, setDueDate] = useState(initialValues.dueDate || '');
 
@@ -46,7 +64,49 @@ export const useLoanPaymentForm = ({
 
   const [principalAmount, setPrincipalAmount] = useState(initialValues.principalAmount !== undefined && initialValues.principalAmount !== null ? initialValues.principalAmount : '');
   const [interestAmount, setInterestAmount] = useState(initialValues.interestAmount !== undefined && initialValues.interestAmount !== null ? initialValues.interestAmount : '');
-  const [feesAmount, setFeesAmount] = useState(initialValues.feesAmount !== undefined && initialValues.feesAmount !== null ? initialValues.feesAmount : '');
+  const [feesAmount, setFeesAmount] = useState(
+    initialValues.feesAmount !== undefined && initialValues.feesAmount !== null
+      ? initialValues.feesAmount
+      : (initialValues.penaltyAmount !== undefined && initialValues.penaltyAmount !== null ? initialValues.penaltyAmount : '')
+  );
+  const [penaltyAmount, setPenaltyAmount] = useState(
+    initialValues.penaltyAmount !== undefined && initialValues.penaltyAmount !== null
+      ? initialValues.penaltyAmount
+      : (initialValues.feesAmount !== undefined && initialValues.feesAmount !== null ? initialValues.feesAmount : '')
+  );
+  const [penaltyReason, setPenaltyReason] = useState(
+    initialValues.penaltyReason || ''
+  );
+
+  // Late payment detection based on paymentDate vs dueDate
+  const timelinessInfo = useMemo(() => {
+    if (!dueDate || !paymentDate) {
+      return { isLate: false, daysLate: 0 };
+    }
+    try {
+      const dDue = new Date(dueDate);
+      const dPay = new Date(paymentDate);
+      const diffMs = dPay.getTime() - dDue.getTime();
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      return {
+        isLate: diffDays > 0,
+        daysLate: Math.max(0, diffDays),
+      };
+    } catch {
+      return { isLate: false, daysLate: 0 };
+    }
+  }, [dueDate, paymentDate]);
+
+  // Sync feesAmount and penaltyAmount
+  const handlePenaltyAmountChange = (val) => {
+    setPenaltyAmount(val);
+    setFeesAmount(val);
+  };
+
+  const handleFeesAmountChange = (val) => {
+    setFeesAmount(val);
+    setPenaltyAmount(val);
+  };
 
   const [balanceUpdated, setBalanceUpdated] = useState(
     initialValues.balanceUpdated !== undefined ? initialValues.balanceUpdated : true
@@ -175,23 +235,43 @@ export const useLoanPaymentForm = ({
       estimatedClosingBalance: preview.estimatedClosingBalance,
     };
 
+    // For prepayments with broken period interest, adjust principal/interest split
+    const numBrokenPeriod = paymentType === PAYMENT_TYPES.PREPAYMENT && brokenPeriodInterest !== '' && Number(brokenPeriodInterest) > 0
+      ? Number(brokenPeriodInterest)
+      : 0;
+    const numAmount = Number(amount) || 0;
+    const prepayPrincipal = paymentType === PAYMENT_TYPES.PREPAYMENT
+      ? Math.max(0, numAmount - numBrokenPeriod)
+      : (actualPrincipal !== '' ? Number(actualPrincipal) : preview.estimatedPrincipal);
+    const prepayInterest = paymentType === PAYMENT_TYPES.PREPAYMENT
+      ? numBrokenPeriod
+      : (actualInterest !== '' ? Number(actualInterest) : preview.estimatedInterest);
+
     return createLoanPayment({
       id: initialValues.id,
       schemaVersion: initialValues.schemaVersion,
       loanId,
-      amount: Number(amount) || 0,
+      amount: numAmount,
       paymentDate,
       dueDate: dueDate || null,
       paymentType,
-      principalAmount: actualPrincipal !== '' ? Number(actualPrincipal) : preview.estimatedPrincipal,
-      interestAmount: actualInterest !== '' ? Number(actualInterest) : preview.estimatedInterest,
-      feesAmount: feesAmount !== '' ? Number(feesAmount) : 0,
+      principalAmount: prepayPrincipal,
+      interestAmount: prepayInterest,
+      feesAmount: penaltyAmount !== '' ? Number(penaltyAmount) : (feesAmount !== '' ? Number(feesAmount) : 0),
+      penaltyAmount: penaltyAmount !== '' ? Number(penaltyAmount) : (feesAmount !== '' ? Number(feesAmount) : null),
+      penaltyReason: penaltyReason || (timelinessInfo.isLate ? 'late_payment' : null),
+      isLatePayment: timelinessInfo.isLate,
+      daysLate: timelinessInfo.daysLate,
       outstandingBefore: balanceUpdated ? preview.openingBalance : null,
       outstandingAfter: balanceUpdated ? finalClosing : null,
       actualClosingBalance: isActualClosingProvided ? Number(actualClosingBalance) : null,
       balanceSource: finalBalanceSource,
       balanceUpdated,
       calculationSnapshot,
+      prepaymentStrategy: paymentType === PAYMENT_TYPES.PREPAYMENT ? prepaymentStrategy : null,
+      brokenPeriodInterest: numBrokenPeriod > 0 ? numBrokenPeriod : null,
+      exactNewEmi: paymentType === PAYMENT_TYPES.PREPAYMENT && exactNewEmi !== '' && Number(exactNewEmi) > 0 ? Number(exactNewEmi) : null,
+      exactNewTenureMonths: paymentType === PAYMENT_TYPES.PREPAYMENT && exactNewTenureMonths !== '' && Number(exactNewTenureMonths) > 0 ? Math.round(Number(exactNewTenureMonths)) : null,
       note,
       createdAt: initialValues.createdAt,
       updatedAt: new Date().toISOString(),
@@ -206,6 +286,9 @@ export const useLoanPaymentForm = ({
     actualPrincipal,
     actualInterest,
     feesAmount,
+    penaltyAmount,
+    penaltyReason,
+    timelinessInfo,
     balanceUpdated,
     actualClosingBalance,
     isBankConfirmed,
@@ -225,6 +308,14 @@ export const useLoanPaymentForm = ({
       setUseScheduledEmi(true);
     } else {
       setUseScheduledEmi(false);
+    }
+
+    // Reset prepayment-specific fields when switching away from prepayment
+    if (type !== PAYMENT_TYPES.PREPAYMENT) {
+      setPrepaymentStrategy(PREPAYMENT_STRATEGIES.REDUCE_TENURE);
+      setBrokenPeriodInterest('');
+      setExactNewEmi('');
+      setExactNewTenureMonths('');
     }
   };
 
@@ -268,6 +359,14 @@ export const useLoanPaymentForm = ({
     setDueDate,
     paymentType,
     setPaymentType: handlePaymentTypeChange,
+    prepaymentStrategy,
+    setPrepaymentStrategy,
+    brokenPeriodInterest,
+    setBrokenPeriodInterest,
+    exactNewEmi,
+    setExactNewEmi,
+    exactNewTenureMonths,
+    setExactNewTenureMonths,
     principalAmount,
     setPrincipalAmount,
     interestAmount,
@@ -281,7 +380,13 @@ export const useLoanPaymentForm = ({
     isBankConfirmed,
     setIsBankConfirmed,
     feesAmount,
-    setFeesAmount,
+    setFeesAmount: handleFeesAmountChange,
+    penaltyAmount,
+    setPenaltyAmount: handlePenaltyAmountChange,
+    penaltyReason,
+    setPenaltyReason,
+    isLatePayment: timelinessInfo.isLate,
+    daysLate: timelinessInfo.daysLate,
     balanceUpdated,
     setBalanceUpdated,
     outstandingBefore,

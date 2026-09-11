@@ -47,6 +47,9 @@ export const ROUTES = {
   // Private Loan Details & Local Privacy (Phase 16.13 & Phase 25)
   LOAN_PRIVATE_DETAILS: 'LoanPrivateDetails',
   LOAN_NOTES: 'LoanNotes',
+  LOAN_RATE_REVISIONS: 'LoanRateRevisions',
+  ADD_RATE_REVISION: 'AddRateRevision',
+  EDIT_RATE_REVISION: 'EditRateRevision',
   LOCAL_DATA_PRIVACY: 'LocalDataPrivacy',
   PRIVACY_POLICY: 'PrivacyPolicy',
 };

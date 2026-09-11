@@ -41,6 +41,9 @@ import {
   LoanGoalDetailsScreen,
   LoanPrivateDetailsScreen,
   LoanNotesScreen,
+  LoanRateRevisionsScreen,
+  AddRateRevisionScreen,
+  EditRateRevisionScreen,
 } from '../features/loans';
 import { LocalDataPrivacyScreen } from '../features/privacy/screens/LocalDataPrivacyScreen';
 import { PrivacyPolicyScreen } from '../features/privacy/screens/PrivacyPolicyScreen';
@@ -96,6 +99,9 @@ export const RootNavigator = () => {
       <Stack.Screen name={ROUTES.LOAN_GOAL_DETAILS} component={LoanGoalDetailsScreen} />
       <Stack.Screen name={ROUTES.LOAN_PRIVATE_DETAILS} component={LoanPrivateDetailsScreen} />
       <Stack.Screen name={ROUTES.LOAN_NOTES} component={LoanNotesScreen} />
+      <Stack.Screen name={ROUTES.LOAN_RATE_REVISIONS} component={LoanRateRevisionsScreen} />
+      <Stack.Screen name={ROUTES.ADD_RATE_REVISION} component={AddRateRevisionScreen} />
+      <Stack.Screen name={ROUTES.EDIT_RATE_REVISION} component={EditRateRevisionScreen} />
       <Stack.Screen name={ROUTES.LOCAL_DATA_PRIVACY} component={LocalDataPrivacyScreen} />
       <Stack.Screen name={ROUTES.PRIVACY_POLICY} component={PrivacyPolicyScreen} />
 

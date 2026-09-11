@@ -22,6 +22,10 @@ export const LoanPaymentCard = ({ payment, onPress, style }) => {
     formattedOutstandingAfter,
     formattedPrincipal,
     formattedInterest,
+    formattedPenalty,
+    isLatePayment,
+    daysLate,
+    lateLabel,
     balanceSource,
     note,
     accessibilityLabel,
@@ -56,6 +60,13 @@ export const LoanPaymentCard = ({ payment, onPress, style }) => {
                     </AppText>
                   </View>
                 )}
+                {isLatePayment && (
+                  <View style={[styles.confirmedChip, { backgroundColor: '#FEF3C7', borderColor: '#F59E0B' }]}>
+                    <AppText variant="caption" color="#B45309" style={{ fontSize: 10, fontWeight: '700' }}>
+                      {lateLabel || 'Late'}
+                    </AppText>
+                  </View>
+                )}
               </View>
               <AppText variant="titleMedium" color={currentTheme.textPrimary} style={styles.amountText}>
                 {formattedAmount}
@@ -78,7 +89,7 @@ export const LoanPaymentCard = ({ payment, onPress, style }) => {
               ) : null}
             </View>
 
-            {(formattedInterest || formattedPrincipal) && (
+            {(formattedInterest || formattedPrincipal || formattedPenalty) && (
               <View style={styles.breakdownRow}>
                 {formattedInterest ? (
                   <AppText variant="caption" color={currentTheme.textMuted} style={{ marginRight: 8 }}>
@@ -86,8 +97,13 @@ export const LoanPaymentCard = ({ payment, onPress, style }) => {
                   </AppText>
                 ) : null}
                 {formattedPrincipal ? (
-                  <AppText variant="caption" color={currentTheme.textMuted}>
+                  <AppText variant="caption" color={currentTheme.textMuted} style={{ marginRight: 8 }}>
                     Prin: {formattedPrincipal}
+                  </AppText>
+                ) : null}
+                {formattedPenalty ? (
+                  <AppText variant="caption" color="#EF4444" style={{ fontWeight: '700' }}>
+                    Penalty: {formattedPenalty}
                   </AppText>
                 ) : null}
               </View>

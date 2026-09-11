@@ -82,3 +82,36 @@ export const getPaymentTypeConfig = (type) => {
       };
   }
 };
+
+export const PREPAYMENT_STRATEGIES = {
+  REDUCE_TENURE: 'reduce_tenure',
+  REDUCE_EMI: 'reduce_emi',
+};
+
+export const PREPAYMENT_STRATEGY_OPTIONS = [
+  {
+    value: PREPAYMENT_STRATEGIES.REDUCE_TENURE,
+    label: 'Reduce Tenure',
+    description: 'Keep EMI same, pay off sooner',
+  },
+  {
+    value: PREPAYMENT_STRATEGIES.REDUCE_EMI,
+    label: 'Reduce EMI',
+    description: 'Keep tenure same, lower monthly payment',
+  },
+];
+
+export const PAYMENT_TIMELINESS = {
+  ON_TIME: 'on_time',
+  LATE: 'late',
+  UNKNOWN: 'unknown',
+};
+
+export const PENALTY_REASONS = {
+  LATE_PAYMENT: 'late_payment',
+  EMI_BOUNCE: 'emi_bounce',
+  PREPAYMENT_PENALTY: 'prepayment_penalty',
+  OTHER: 'other',
+};
+
+

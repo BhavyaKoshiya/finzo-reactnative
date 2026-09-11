@@ -11,6 +11,7 @@ export const useLoanProfileForm = (initialProfile = null, onSuccess = null) => {
 
   const [name, setName] = useState(initialProfile?.name || '');
   const [loanType, setLoanType] = useState(initialProfile?.loanType || 'home_loan');
+  const [rateType, setRateType] = useState(initialProfile?.rateType || 'floating');
   const [lenderName, setLenderName] = useState(initialProfile?.lenderName || '');
   const [originalPrincipal, setOriginalPrincipal] = useState(
     initialProfile?.originalPrincipal ? String(initialProfile.originalPrincipal) : ''
@@ -68,6 +69,7 @@ export const useLoanProfileForm = (initialProfile = null, onSuccess = null) => {
     if (initialProfile) {
       setName(initialProfile.name || '');
       setLoanType(initialProfile.loanType || 'home_loan');
+      setRateType(initialProfile.rateType || 'floating');
       setLenderName(initialProfile.lenderName || '');
       setOriginalPrincipal(initialProfile.originalPrincipal ? String(initialProfile.originalPrincipal) : '');
       setCurrentOutstandingPrincipal(initialProfile.currentOutstandingPrincipal ? String(initialProfile.currentOutstandingPrincipal) : '');
@@ -94,6 +96,7 @@ export const useLoanProfileForm = (initialProfile = null, onSuccess = null) => {
     initialProfile && (
       name !== (initialProfile.name || '') ||
       loanType !== (initialProfile.loanType || 'home_loan') ||
+      rateType !== (initialProfile.rateType || 'floating') ||
       lenderName !== (initialProfile.lenderName || '') ||
       originalPrincipal !== (initialProfile.originalPrincipal ? String(initialProfile.originalPrincipal) : '') ||
       annualInterestRate !== (initialProfile.annualInterestRate ? String(initialProfile.annualInterestRate) : '') ||
@@ -114,6 +117,7 @@ export const useLoanProfileForm = (initialProfile = null, onSuccess = null) => {
     return {
       name,
       loanType,
+      rateType,
       lenderName,
       originalPrincipal: Number(originalPrincipal) || 0,
       currentOutstandingPrincipal: isEditMode
@@ -136,6 +140,7 @@ export const useLoanProfileForm = (initialProfile = null, onSuccess = null) => {
   }, [
     name,
     loanType,
+    rateType,
     lenderName,
     originalPrincipal,
     currentOutstandingPrincipal,
@@ -217,6 +222,8 @@ export const useLoanProfileForm = (initialProfile = null, onSuccess = null) => {
     setName,
     loanType,
     setLoanType,
+    rateType,
+    setRateType,
     lenderName,
     setLenderName,
     originalPrincipal,

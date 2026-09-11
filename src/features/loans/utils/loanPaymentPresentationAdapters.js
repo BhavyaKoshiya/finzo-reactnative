@@ -44,6 +44,14 @@ export const adaptLoanPaymentForDisplay = (payment) => {
     ? formatCurrency(payment.feesAmount)
     : null;
 
+  const penaltyVal = payment.penaltyAmount !== null && payment.penaltyAmount !== undefined
+    ? Number(payment.penaltyAmount)
+    : (payment.feesAmount !== null && payment.feesAmount !== undefined && Number(payment.feesAmount) > 0 ? Number(payment.feesAmount) : null);
+  const formattedPenalty = penaltyVal !== null && penaltyVal > 0 ? formatCurrency(penaltyVal) : null;
+  const isLate = Boolean(payment.isLatePayment);
+  const daysLate = Number(payment.daysLate) || 0;
+  const lateLabel = isLate ? `Late by ${daysLate}d` : null;
+
   return {
     ...payment,
     typeLabel: typeConfig.label,
@@ -57,8 +65,12 @@ export const adaptLoanPaymentForDisplay = (payment) => {
     formattedPrincipal,
     formattedInterest,
     formattedFees,
+    formattedPenalty,
+    isLatePayment: isLate,
+    daysLate,
+    lateLabel,
     accessibilityLabel: `${typeConfig.label} of ${formattedAmount} on ${formattedDate}.${
       formattedOutstandingAfter ? ` Outstanding balance after payment: ${formattedOutstandingAfter}.` : ''
-    }`,
+    }${formattedPenalty ? ` Includes penalty of ${formattedPenalty}.` : ''}`,
   };
 };

@@ -12,6 +12,9 @@ export { default as LoanGoalsScreen } from './screens/LoanGoalsScreen';
 export { default as LoanGoalDetailsScreen } from './screens/LoanGoalDetailsScreen';
 export { default as LoanPrivateDetailsScreen } from './screens/LoanPrivateDetailsScreen';
 export { default as LoanNotesScreen } from './screens/LoanNotesScreen';
+export { default as LoanRateRevisionsScreen } from './screens/LoanRateRevisionsScreen';
+export { default as AddRateRevisionScreen } from './screens/AddRateRevisionScreen';
+export { default as EditRateRevisionScreen } from './screens/EditRateRevisionScreen';
 export { default as ManualBalanceUpdateModal } from './screens/ManualBalanceUpdateModal';
 
 export { default as LoanProfileCard } from './components/LoanProfileCard';
@@ -23,17 +26,20 @@ export { default as UpcomingPaymentCard } from './components/UpcomingPaymentCard
 export { default as LoanReminderSettingsModal } from './components/LoanReminderSettingsModal';
 export { default as LoanInsightsPreviewCard } from './components/LoanInsightsPreviewCard';
 export { default as LoanInsightsTrendChart } from './components/LoanInsightsTrendChart';
+export { default as RateRevisionPreviewCard } from './components/RateRevisionPreviewCard';
 export { default as LoanGoalCard } from './components/LoanGoalCard';
 export { default as SaveGoalModal } from './components/SaveGoalModal';
 
 export { useLoanProfileForm } from './hooks/useLoanProfileForm';
 export { useLoanPaymentForm } from './hooks/useLoanPaymentForm';
+export { useRateRevisionForm } from './hooks/useRateRevisionForm';
 
 export * from './types/loanProfileTypes';
 export * from './types/loanPaymentTypes';
 export * from './types/loanGoalTypes';
 export * from './types/loanPrivateDetailsTypes';
 export * from './types/loanNoteTypes';
+export * from './types/rateRevisionTypes';
 export * from './constants/loanConstants';
 export * from './constants/loanPaymentConstants';
 export * from './utils/loanProfileValidation';
@@ -45,8 +51,11 @@ export * from './utils/loanPresentationAdapters';
 export * from './utils/loanPaymentPresentationAdapters';
 export * from './utils/paymentBalanceUtils';
 export * from './utils/loanPrepaymentSimulation';
+export * from './utils/applyRateRevision';
+export * from './utils/applyPrepaymentStrategy';
 export * from './utils/loanScenarioEngine';
 export * from './utils/loanGoalUtils';
 export * from './utils/accountNumberMaskingUtils';
 export * from './utils/loanReminderUtils';
 export { default as loanReminderService } from './services/loanReminderService';
+

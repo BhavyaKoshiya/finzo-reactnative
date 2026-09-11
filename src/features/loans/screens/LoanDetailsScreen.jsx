@@ -38,6 +38,10 @@ import {
 import { selectActiveLoanGoalsByLoanId, deleteGoalsForLoan } from '../../../store/slices/loanGoalsSlice';
 import { selectLoanNotesByLoanId, deleteNotesForLoan } from '../../../store/slices/loanNotesSlice';
 import {
+  selectRateRevisionsByLoanId,
+  deleteRevisionsForLoan,
+} from '../../../store/slices/loanRateRevisionsSlice';
+import {
   selectPrivateDetailsByLoanId,
   deleteLoanPrivateDetails,
 } from '../../../store/slices/loanPrivateDetailsSlice';
@@ -56,6 +60,7 @@ import LoanInsightsPreviewCard from '../components/LoanInsightsPreviewCard';
 import QuickActionsGrid from '../components/QuickActionsGrid';
 import LoanGoalPreviewCard from '../components/LoanGoalPreviewCard';
 import LoanNotesPreviewCard from '../components/LoanNotesPreviewCard';
+import RateRevisionPreviewCard from '../components/RateRevisionPreviewCard';
 import LoanPrivateDetailsPreviewCard from '../components/LoanPrivateDetailsPreviewCard';
 import ManageLoanCard from '../components/ManageLoanCard';
 import ManualBalanceUpdateModal from './ManualBalanceUpdateModal';
@@ -85,6 +90,7 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
   const activeGoals = useSelector((state) => selectActiveLoanGoalsByLoanId(state, loanId));
   const notes = useSelector((state) => selectLoanNotesByLoanId(state, loanId));
   const privateDetails = useSelector((state) => selectPrivateDetailsByLoanId(state, loanId));
+  const revisions = useSelector((state) => selectRateRevisionsByLoanId(state, loanId));
 
   const profile = adaptLoanProfileForDisplay(rawProfile, payments);
   const paymentStats = getPaymentStats(payments, loanId);
@@ -126,6 +132,7 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
             await loanReminderService.cancelLoanReminders(profile.id);
             dispatch(deletePaymentsForLoan(profile.id));
             dispatch(deleteNotesForLoan(profile.id));
+            dispatch(deleteRevisionsForLoan(profile.id));
             dispatch(deleteGoalsForLoan(profile.id));
             dispatch(deleteLoanPrivateDetails(profile.id));
             await securePrivateStorageService
@@ -296,11 +303,14 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
           onViewGoals={() => navigation.navigate(ROUTES.LOAN_GOALS, { loanId: profile.id })}
         />
 
-        {/* 5. QUICK ACTIONS GRID (2-Column Layout) */}
+        {/* 5. QUICK ACTIONS GRID */}
         <QuickActionsGrid
           onRecordPayment={() => navigation.navigate(ROUTES.ADD_PAYMENT, { loanId: profile.id })}
           onSimulatePrepayment={() =>
             navigation.navigate(ROUTES.LOAN_PREPAYMENT_SIMULATOR, { loanId: profile.id })
+          }
+          onRateRevision={() =>
+            navigation.navigate(ROUTES.ADD_RATE_REVISION, { loanId: profile.id })
           }
           onPayoffGoals={() => navigation.navigate(ROUTES.LOAN_GOALS, { loanId: profile.id })}
           onLoanInsights={() => navigation.navigate(ROUTES.LOAN_INSIGHTS, { loanId: profile.id })}
@@ -446,7 +456,15 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
           )}
         </AppCard>
 
-        {/* 8. NOTES CARD (1-Tap Entry) */}
+        {/* 8. RATE REVISION PREVIEW CARD */}
+        <RateRevisionPreviewCard
+          loan={rawProfile}
+          revisions={revisions}
+          onViewRevisions={() => navigation.navigate(ROUTES.LOAN_RATE_REVISIONS, { loanId: profile.id })}
+          onLogRevision={() => navigation.navigate(ROUTES.ADD_RATE_REVISION, { loanId: profile.id })}
+        />
+
+        {/* 9. NOTES CARD (1-Tap Entry) */}
         <LoanNotesPreviewCard
           notes={notes}
           onViewNotes={() => navigation.navigate(ROUTES.LOAN_NOTES, { loanId: profile.id })}

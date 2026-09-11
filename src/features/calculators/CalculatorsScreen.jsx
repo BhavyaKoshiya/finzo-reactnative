@@ -5,6 +5,7 @@ import { Search } from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
 import AppIcon from '../../components/common/AppIcon';
+import AppCard from '../../components/cards/AppCard';
 import CalculatorCard from '../../components/cards/CalculatorCard';
 import InfoCard from '../../components/cards/InfoCard';
 import { useAppTheme } from '../../hooks/useAppTheme';
@@ -65,8 +66,8 @@ export const CalculatorsScreen = ({ navigation }) => {
               {cat.description}
             </AppText>
 
-            <View style={styles.calculatorList}>
-              {cat.calculators.map((calc) => (
+            <AppCard style={styles.groupedCard}>
+              {cat.calculators.map((calc, calcIdx) => (
                 <CalculatorCard
                   key={calc.id}
                   title={calc.name}
@@ -77,10 +78,11 @@ export const CalculatorsScreen = ({ navigation }) => {
                   onPress={
                     calc.route ? () => navigation.navigate(calc.route) : null
                   }
-                  style={styles.calcCardMargin}
+                  isGrouped={true}
+                  hasDivider={calcIdx < cat.calculators.length - 1}
                 />
               ))}
-            </View>
+            </AppCard>
 
             {idx === 0 && (
               <AdPlacement
@@ -158,11 +160,11 @@ const styles = StyleSheet.create({
   categoryDesc: {
     marginBottom: 12,
   },
-  calculatorList: {
+  groupedCard: {
+    padding: 0,
+    overflow: 'hidden',
     marginTop: 4,
-  },
-  calcCardMargin: {
-    marginBottom: 10,
+    marginBottom: 8,
   },
   infoCard: {
     marginTop: 8,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Plus, Sparkles, Target, TrendingUp } from 'lucide-react-native';
+import { Plus, Sparkles, Target, TrendingUp, Percent, ChevronRight } from 'lucide-react-native';
 import AppText from '../../../components/common/AppText';
 import AppIcon from '../../../components/common/AppIcon';
 import { useAppTheme } from '../../../hooks/useAppTheme';
@@ -8,6 +8,7 @@ import { useAppTheme } from '../../../hooks/useAppTheme';
 export const QuickActionsGrid = ({
   onRecordPayment,
   onSimulatePrepayment,
+  onRateRevision,
   onPayoffGoals,
   onLoanInsights,
   style,
@@ -34,6 +35,15 @@ export const QuickActionsGrid = ({
       accessibilityLabel: 'Simulate prepayment',
     },
     {
+      id: 'rate_revision',
+      title: 'Rate Revision',
+      subtitle: 'Track repo / EBLR resets',
+      icon: Percent,
+      isPrimary: false,
+      onPress: onRateRevision,
+      accessibilityLabel: 'Log interest rate revision',
+    },
+    {
       id: 'payoff_goals',
       title: 'Payoff Goals',
       subtitle: 'Track your targets',
@@ -44,8 +54,8 @@ export const QuickActionsGrid = ({
     },
     {
       id: 'loan_insights',
-      title: 'Loan Insights',
-      subtitle: 'Analytics & schedule',
+      title: 'Loan Insights & Schedule',
+      subtitle: 'Comprehensive analytics, charts & full amortization schedule',
       icon: TrendingUp,
       isPrimary: false,
       onPress: onLoanInsights,
@@ -53,61 +63,105 @@ export const QuickActionsGrid = ({
     },
   ];
 
+  const renderTile = (action) => {
+    const bg = action.isPrimary ? currentTheme.primary : currentTheme.card;
+    const titleColor = action.isPrimary ? '#FFFFFF' : currentTheme.textPrimary;
+    const subtitleColor = action.isPrimary
+      ? 'rgba(255, 255, 255, 0.85)'
+      : currentTheme.textMuted;
+    const iconColor = action.isPrimary ? '#FFFFFF' : currentTheme.primary;
+    const borderColor = action.isPrimary ? currentTheme.primary : currentTheme.cardBorder;
+
+    return (
+      <TouchableOpacity
+        key={action.id}
+        onPress={action.onPress}
+        activeOpacity={0.8}
+        accessibilityRole="button"
+        accessibilityLabel={action.accessibilityLabel}
+        style={[
+          styles.actionTile,
+          {
+            backgroundColor: bg,
+            borderColor,
+            shadowOpacity: isDark ? 0 : 0.05,
+          },
+        ]}
+      >
+        <View style={styles.tileHeader}>
+          <View
+            style={[
+              styles.iconCircle,
+              {
+                backgroundColor: action.isPrimary
+                  ? 'rgba(255, 255, 255, 0.2)'
+                  : `${currentTheme.primary}15`,
+              },
+            ]}
+          >
+            <AppIcon icon={action.icon} size={18} color={iconColor} />
+          </View>
+        </View>
+        <AppText variant="bodyMedium" color={titleColor} style={styles.actionTitle} numberOfLines={1}>
+          {action.title}
+        </AppText>
+        <AppText variant="caption" color={subtitleColor} style={styles.actionSubtitle} numberOfLines={1}>
+          {action.subtitle}
+        </AppText>
+      </TouchableOpacity>
+    );
+  };
+
+  const row1 = actions.slice(0, 2);
+  const row2 = actions.slice(2, 4);
+  const wideAction = actions[4];
+
   return (
     <View style={[styles.container, style]}>
       <AppText variant="cardTitle" style={styles.sectionTitle}>
         Quick Actions
       </AppText>
       <View style={styles.gridRow}>
-        {actions.map((action) => {
-          const bg = action.isPrimary
-            ? currentTheme.primary
-            : isDark
-            ? currentTheme.surfaceSubtle
-            : '#FFFFFF';
-          const titleColor = action.isPrimary ? '#FFFFFF' : currentTheme.textPrimary;
-          const subtitleColor = action.isPrimary
-            ? 'rgba(255, 255, 255, 0.85)'
-            : currentTheme.textMuted;
-          const iconColor = action.isPrimary ? '#FFFFFF' : currentTheme.primary;
-          const borderColor = action.isPrimary ? currentTheme.primary : currentTheme.border;
-
-          return (
-            <TouchableOpacity
-              key={action.id}
-              onPress={action.onPress}
-              activeOpacity={0.8}
-              accessibilityRole="button"
-              accessibilityLabel={action.accessibilityLabel}
-              style={[
-                styles.actionTile,
-                { backgroundColor: bg, borderColor },
-              ]}
-            >
-              <View style={styles.tileHeader}>
-                <View
-                  style={[
-                    styles.iconCircle,
-                    {
-                      backgroundColor: action.isPrimary
-                        ? 'rgba(255, 255, 255, 0.2)'
-                        : `${currentTheme.primary}15`,
-                    },
-                  ]}
-                >
-                  <AppIcon icon={action.icon} size={18} color={iconColor} />
-                </View>
-              </View>
-              <AppText variant="bodyMedium" color={titleColor} style={styles.actionTitle} numberOfLines={1}>
-                {action.title}
-              </AppText>
-              <AppText variant="caption" color={subtitleColor} style={styles.actionSubtitle} numberOfLines={1}>
-                {action.subtitle}
-              </AppText>
-            </TouchableOpacity>
-          );
-        })}
+        {row1.map(renderTile)}
       </View>
+      <View style={styles.gridRow}>
+        {row2.map(renderTile)}
+      </View>
+      {wideAction && (
+        <TouchableOpacity
+          key={wideAction.id}
+          onPress={wideAction.onPress}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel={wideAction.accessibilityLabel}
+          style={[
+            styles.wideActionTile,
+            {
+              backgroundColor: currentTheme.card,
+              borderColor: currentTheme.cardBorder,
+              shadowOpacity: isDark ? 0 : 0.05,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.iconCircle,
+              { backgroundColor: `${currentTheme.primary}15`, marginRight: 12 },
+            ]}
+          >
+            <AppIcon icon={wideAction.icon} size={18} color={currentTheme.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <AppText variant="bodyMedium" color={currentTheme.textPrimary} style={{ fontWeight: '700' }}>
+              {wideAction.title}
+            </AppText>
+            <AppText variant="caption" color={currentTheme.textMuted} numberOfLines={1}>
+              {wideAction.subtitle}
+            </AppText>
+          </View>
+          <AppIcon icon={ChevronRight} size={18} color={currentTheme.textMuted} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -122,19 +176,31 @@ const styles = StyleSheet.create({
   },
   gridRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: 10,
+    marginBottom: 10,
   },
-  actionTile: {
-    width: '48.5%',
+  wideActionTile: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 12,
     borderRadius: 12,
     borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
     shadowRadius: 2,
-    elevation: 1,
+    elevation: 0,
+    marginBottom: 6,
+  },
+  actionTile: {
+    flex: 1,
+    minHeight: 100,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 2,
+    elevation: 0,
   },
   tileHeader: {
     marginBottom: 8,

@@ -2,13 +2,14 @@ import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ArrowLeft, Sparkles, ChevronDown, ChevronUp, Info, ShieldCheck, Plus } from 'lucide-react-native';
+import { ArrowLeft, Sparkles, ChevronDown, ChevronUp, Info, ShieldCheck, Plus, Target, CheckCircle, FileText } from 'lucide-react-native';
 import ScreenContainer from '../../../components/containers/ScreenContainer';
 import AppHeader from '../../../components/navigation/AppHeader';
 import AppText from '../../../components/common/AppText';
 import AppIcon from '../../../components/common/AppIcon';
 import AppCard from '../../../components/cards/AppCard';
 import PrimaryButton from '../../../components/buttons/PrimaryButton';
+import SecondaryButton from '../../../components/buttons/SecondaryButton';
 import MoneyInput from '../../../components/forms/MoneyInput';
 import { useAppTheme } from '../../../hooks/useAppTheme';
 import { ROUTES } from '../../../navigation/routes';
@@ -69,6 +70,51 @@ export const LoanPrepaymentSimulatorScreen = ({ route, navigation }) => {
 
   const isBankConfirmed = simulation?.assumptions?.isBankConfirmed;
 
+  // Phase C: Foreclosure ("Close Loan Today") Estimation
+  const foreclosure = useMemo(() => {
+    if (!loan) return null;
+    const balance = simulation?.before?.outstandingBalance || Number(loan.currentOutstandingPrincipal) || Number(loan.originalPrincipal) || 0;
+    if (balance <= 0) return null;
+
+    const rate = Number(loan.annualInterestRate) || 0;
+    const today = new Date();
+    const dueDay = Number(loan.dueDay) || 5;
+
+    let lastDueDate = new Date(today.getFullYear(), today.getMonth(), dueDay);
+    if (lastDueDate > today) {
+      lastDueDate = new Date(today.getFullYear(), today.getMonth() - 1, dueDay);
+    }
+
+    const diffMs = today.getTime() - lastDueDate.getTime();
+    const daysSinceLastEmi = Math.max(1, Math.min(31, Math.floor(diffMs / (1000 * 60 * 60 * 24))));
+
+    const dailyRate = (rate / 100) / 365;
+    const accruedInterest = Math.round(balance * dailyRate * daysSinceLastEmi);
+    const totalAmount = balance + accruedInterest;
+
+    return {
+      outstandingPrincipal: balance,
+      accruedInterest,
+      daysSinceLastEmi,
+      totalAmount,
+      isFixedRate: loan.rateType === 'fixed',
+    };
+  }, [loan, simulation]);
+
+  const handleRecordForeclosure = () => {
+    if (!foreclosure) return;
+    navigation.navigate(ROUTES.ADD_PAYMENT, {
+      loanId: loan.id,
+      initialValues: {
+        paymentType: PAYMENT_TYPES.FULL_PAYMENT,
+        amount: String(foreclosure.totalAmount),
+        principalAmount: String(foreclosure.outstandingPrincipal),
+        interestAmount: String(foreclosure.accruedInterest),
+        note: 'Full loan settlement / Foreclosure',
+      },
+    });
+  };
+
   const handleRecordPrepayment = () => {
     const numAmount = Number(prepaymentAmount) || 0;
     navigation.navigate(ROUTES.ADD_PAYMENT, {
@@ -76,6 +122,7 @@ export const LoanPrepaymentSimulatorScreen = ({ route, navigation }) => {
       initialValues: {
         paymentType: PAYMENT_TYPES.PREPAYMENT,
         amount: numAmount > 0 ? String(numAmount) : '',
+        prepaymentStrategy: strategy,
       },
     });
   };
@@ -372,6 +419,77 @@ export const LoanPrepaymentSimulatorScreen = ({ route, navigation }) => {
         )}
       </AppCard>
 
+      {/* SECTION: Close Loan Today (Foreclosure Calculator) */}
+      {foreclosure && (
+        <AppCard style={styles.foreclosureCard}>
+          <View style={styles.foreclosureHeaderRow}>
+            <View style={[styles.foreclosureIconBox, { backgroundColor: `${currentTheme.primary}18` }]}>
+              <AppIcon icon={Target} size={18} color={currentTheme.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <AppText variant="bodyMedium" style={{ fontWeight: '700' }}>
+                Close Loan Today (Foreclosure)
+              </AppText>
+              <AppText variant="caption" color={currentTheme.textSecondary}>
+                Full settlement payoff amount if closed today
+              </AppText>
+            </View>
+          </View>
+
+          <View style={styles.foreclosureDetails}>
+            <View style={styles.foreclosureRow}>
+              <AppText variant="caption" color={currentTheme.textSecondary}>Outstanding Principal</AppText>
+              <AppText variant="bodySmall" style={{ fontWeight: '600' }}>
+                {formatCurrency(foreclosure.outstandingPrincipal)}
+              </AppText>
+            </View>
+
+            <View style={styles.foreclosureRow}>
+              <AppText variant="caption" color={currentTheme.textSecondary}>
+                Accrued Interest (~{foreclosure.daysSinceLastEmi} days)
+              </AppText>
+              <AppText variant="bodySmall" style={{ fontWeight: '600' }}>
+                {formatCurrency(foreclosure.accruedInterest)}
+              </AppText>
+            </View>
+
+            <View style={[styles.foreclosureRow, styles.foreclosureTotalRow, { borderColor: currentTheme.border }]}>
+              <AppText variant="bodyMedium" style={{ fontWeight: '700' }}>Estimated Foreclosure Amt</AppText>
+              <AppText variant="titleMedium" color={currentTheme.primary} style={{ fontWeight: '800' }}>
+                {formatCurrency(foreclosure.totalAmount)}
+              </AppText>
+            </View>
+          </View>
+
+          {foreclosure.isFixedRate ? (
+            <View style={[styles.foreclosureNotice, { backgroundColor: '#FEF3C7' }]}>
+              <AppIcon icon={Info} size={12} color="#B45309" style={{ marginRight: 6, marginTop: 1 }} />
+              <AppText variant="caption" color="#92400E" style={{ flex: 1, fontSize: 11 }}>
+                Fixed-rate loans may have 2–4% foreclosure charges per bank policy. (Floating-rate loans have 0% charges per RBI).
+              </AppText>
+            </View>
+          ) : (
+            <View style={[styles.foreclosureNotice, { backgroundColor: '#ECFDF5' }]}>
+              <AppIcon icon={CheckCircle} size={12} color="#10B981" style={{ marginRight: 6, marginTop: 1 }} />
+              <AppText variant="caption" color="#047857" style={{ flex: 1, fontSize: 11 }}>
+                0% foreclosure penalty for individual floating-rate loans per RBI guidelines.
+              </AppText>
+            </View>
+          )}
+
+          <TouchableOpacity
+            style={[styles.foreclosureActionBtn, { borderColor: currentTheme.primary }]}
+            onPress={handleRecordForeclosure}
+            activeOpacity={0.8}
+          >
+            <AppIcon icon={CheckCircle} size={16} color={currentTheme.primary} style={{ marginRight: 6 }} />
+            <AppText variant="bodySmall" color={currentTheme.primary} style={{ fontWeight: '700' }}>
+              Record Full Settlement
+            </AppText>
+          </TouchableOpacity>
+        </AppCard>
+      )}
+
       {/* Action Button: Record this prepayment */}
       <View style={styles.actionContainer}>
         <PrimaryButton
@@ -559,6 +677,53 @@ const styles = StyleSheet.create({
   },
   actionContainer: {
     marginBottom: 16,
+  },
+  foreclosureCard: {
+    padding: 16,
+    marginBottom: 20,
+    borderRadius: 14,
+  },
+  foreclosureHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  foreclosureIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  foreclosureDetails: {
+    gap: 8,
+  },
+  foreclosureRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  foreclosureTotalRow: {
+    paddingTop: 10,
+    marginTop: 4,
+    borderTopWidth: 1,
+  },
+  foreclosureNotice: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 12,
+  },
+  foreclosureActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    marginTop: 14,
   },
 });
 
