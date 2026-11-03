@@ -91,12 +91,16 @@ class AdService {
         if (provider && typeof provider.initialize === 'function') {
           const result = await provider.initialize(options);
           this.isInitialized = Boolean(result);
+          if (!result) {
+            this.initPromise = null; // allow a later retry (e.g. after reconnecting)
+          }
           return result;
         }
         this.isInitialized = true;
         return true;
       } catch (err) {
         logger.warn('AdService async initialization error:', { error: err?.message });
+        this.initPromise = null;
         return false;
       }
     })();
@@ -124,6 +128,32 @@ class AdService {
 
   isConfigured() {
     return this.getProvider().isConfigured();
+  }
+
+  /**
+   * Whether the user must be offered a "Privacy choices" entry to change ad consent.
+   * @returns {boolean}
+   */
+  isPrivacyOptionsRequired() {
+    const provider = this.getProvider();
+    return typeof provider.isPrivacyOptionsRequired === 'function'
+      ? Boolean(provider.isPrivacyOptionsRequired())
+      : false;
+  }
+
+  /**
+   * Shows the ad consent privacy options form.
+   * @returns {Promise<boolean>} Whether the form was shown
+   */
+  async showPrivacyOptionsForm() {
+    try {
+      const provider = this.getProvider();
+      if (typeof provider.showPrivacyOptionsForm !== 'function') return false;
+      return Boolean(await provider.showPrivacyOptionsForm());
+    } catch (err) {
+      logger.warn('AdService.showPrivacyOptionsForm failed', { error: err?.message });
+      return false;
+    }
   }
 
   /**

@@ -19,6 +19,22 @@ export class BaseAdProvider {
   }
 
   /**
+   * Whether the user must be offered a "Privacy choices" entry (ad consent regions).
+   * @returns {boolean}
+   */
+  isPrivacyOptionsRequired() {
+    return false;
+  }
+
+  /**
+   * Shows the ad consent privacy options form.
+   * @returns {Promise<boolean>} Whether the form was shown
+   */
+  async showPrivacyOptionsForm() {
+    return false;
+  }
+
+  /**
    * Preload supported ad inventory (Banner, Native, Interstitial, Rewarded).
    * @returns {Promise<{ success: boolean }>}
    */

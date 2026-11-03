@@ -108,6 +108,7 @@ describe('Phase 21 — Real Marketing Plugin Integration', () => {
       baseUrl: 'https://ad-config-test.loanpilotapp.com/api',
       bundleId: 'com.loanpilot.app',
       enableAppOpenOnResume: false, // Must be strictly disabled
+      requestConsent: true,
     });
   });
 

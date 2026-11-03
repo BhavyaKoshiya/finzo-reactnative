@@ -11,27 +11,35 @@ class RealtimeConfigService {
     this.listeners = new Set();
     this.rtdbUnsubscribe = null;
     this.isInitialized = false;
+    this.initPromise = null;
   }
 
   /**
    * Initializes the configuration service:
    * 1. Loads persisted Last-Known-Good configuration from AsyncStorage.
-   * 2. Attaches single RTDB listener at root '/'.
+   * 2. Attaches single RTDB listener at '/config'.
+   * Safe to call repeatedly (e.g. on startup and again after reconnecting).
    */
-  async initialize() {
-    if (this.isInitialized) return this.activeConfig;
+  initialize() {
+    if (this.isInitialized) return Promise.resolve(this.activeConfig);
+    if (this.initPromise) return this.initPromise;
 
-    // 1. Load Last Known Good config
-    const lastKnown = await this.getLastKnownGoodConfig();
-    if (lastKnown) {
-      this.activeConfig = lastKnown;
-      this.notifyListeners();
-    }
+    this.initPromise = (async () => {
+      // 1. Load Last Known Good config
+      const lastKnown = await this.getLastKnownGoodConfig();
+      if (lastKnown) {
+        this.activeConfig = lastKnown;
+        this.notifyListeners();
+      }
 
-    // 2. Attach RTDB Listener if available
-    await this._attachRtdbListener();
+      // 2. Attach RTDB Listener if available
+      await this._attachRtdbListener();
 
-    return this.activeConfig;
+      this.initPromise = null;
+      return this.activeConfig;
+    })();
+
+    return this.initPromise;
   }
 
   /**
@@ -188,6 +196,7 @@ class RealtimeConfigService {
     }
     this.listeners.clear();
     this.isInitialized = false;
+    this.initPromise = null;
   }
 }
 

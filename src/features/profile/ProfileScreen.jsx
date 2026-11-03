@@ -17,6 +17,7 @@ import {
   Bell,
   ShieldAlert,
   FileText,
+  SlidersHorizontal,
 } from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
@@ -58,6 +59,7 @@ import { useAppTheme } from '../../hooks/useAppTheme';
 import { ROUTES } from '../../navigation/routes';
 import { navigateToMyLoans } from '../../navigation/navigationHelpers';
 import AdPlacement from '../../components/ads/AdPlacement';
+import adService from '../../services/adService';
 import { AD_PLACEMENTS } from '../../services/ads/adPlacementConstants';
 import appStoreService from '../../services/appStoreService';
 import DeviceInfo from 'react-native-device-info';
@@ -367,6 +369,17 @@ export const ProfileScreen = ({ navigation }) => {
           onPress={() => navigation.navigate(ROUTES.PRIVACY_POLICY)}
           accessibilityLabel="Read full Privacy Policy"
         />
+        {/* Required by Google for users in consent regions (EEA, UK, CH, some US states) */}
+        {adService.isPrivacyOptionsRequired() && (
+          <ProfileRow
+            icon={SlidersHorizontal}
+            title="Ad Privacy Choices"
+            subtitle="Review or change your ad personalization consent"
+            onPress={() => adService.showPrivacyOptionsForm()}
+            accessibilityLabel="Review or change ad privacy choices"
+            style={styles.topMargin}
+          />
+        )}
       </ProfileSection>
 
       {/* 5. About LoanPilot Section */}
@@ -538,6 +551,9 @@ const styles = StyleSheet.create({
   },
   rowMargin: {
     marginBottom: 10,
+  },
+  topMargin: {
+    marginTop: 10,
   },
 });
 

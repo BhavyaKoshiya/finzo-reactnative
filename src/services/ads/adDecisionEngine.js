@@ -31,6 +31,8 @@ export const PROTECTED_FINANCIAL_SCREENS = [
   'edit_loan',
   'loan_private_details',
   'loan_notes',
+  'add_rate_revision',
+  'edit_rate_revision',
   'loan_prepayment_simulator',
   'loan_payoff_planner',
   'loan_goals',
@@ -47,7 +49,8 @@ export const PROTECTED_FINANCIAL_SCREENS = [
  */
 export const isProtectedScreen = (screen) => {
   if (!screen || typeof screen !== 'string') return false;
-  const normalized = screen.toLowerCase().trim();
+  // Route names are PascalCase ('AddPayment'); the list above is snake_case ('add_payment')
+  const normalized = screen.trim().replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
   return PROTECTED_FINANCIAL_SCREENS.includes(normalized);
 };
 

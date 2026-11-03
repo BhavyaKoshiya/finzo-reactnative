@@ -224,6 +224,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
         baseUrl: 'https://binarykode-technologies.web.app/adconfigs',
         bundleId: 'com.loanpilot.app',
         enableAppOpenOnResume: false,
+        requestConsent: true,
       });
 
       await provider.preloadAds();

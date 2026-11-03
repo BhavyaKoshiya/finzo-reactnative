@@ -12,6 +12,7 @@ import {
   interstitialAdManager,
   rewardedAdManager,
   MyAds,
+  ConfigFetcher,
 } from 'react-native-marketing-plugin';
 import logger from '../logger';
 
@@ -23,6 +24,7 @@ import logger from '../logger';
  * Guarantees:
  * 1. Financial data firewall: zero financial data is passed to the SDK.
  * 2. enableAppOpenOnResume is strictly false.
+ * 2a. Consent is gathered with Google's UMP before any ad is requested (GDPR / US states).
  * 3. LoanPilot adDecisionEngine remains authoritative for frequency, cooldowns, and screening.
  * 4. Preloaded ads NEVER automatically display; they remain cached for user-triggered / authorized requests.
  */
@@ -64,7 +66,25 @@ export class MarketingAdProvider extends BaseAdProvider {
           baseUrl: this.config.baseUrl,
           bundleId: this.config.bundleId,
           enableAppOpenOnResume: false,
+          requestConsent: true,
         });
+
+        // No ad may be requested until consent allows it; initialize() is retried later.
+        if (!this._canRequestAds()) {
+          throw new Error('Ad consent not obtained');
+        }
+
+        // The plugin fetches its config only once; if that fetch failed it would stay
+        // without ads for the whole session, so fetch it again ourselves.
+        if (!marketingPlugin.adModel) {
+          const loaded = await this._loadMissingAdModel();
+          if (!loaded) {
+            throw new Error('Ad configuration unavailable');
+          }
+          this.isInitialized = true;
+          await this.preloadAds();
+        }
+
         this.isInitialized = true;
         if (__DEV__) {
           logger.info('MarketingAdProvider initialized successfully, preloading active', { isAdEnabled });
@@ -75,11 +95,45 @@ export class MarketingAdProvider extends BaseAdProvider {
           logger.warn('MarketingAdProvider initialization failed:', { error: error.message });
         }
         this.isInitialized = false;
+        this.initPromise = null; // allow a later retry (e.g. after reconnecting)
         return false;
       }
     })();
 
     return this.initPromise;
+  }
+
+  /**
+   * Plugin versions without consent support do not expose `canRequestAds`.
+   * @returns {boolean}
+   */
+  _canRequestAds() {
+    return marketingPlugin.canRequestAds !== false;
+  }
+
+  isPrivacyOptionsRequired() {
+    return Boolean(marketingPlugin.isPrivacyOptionsRequired);
+  }
+
+  async showPrivacyOptionsForm() {
+    if (typeof marketingPlugin.showPrivacyOptionsForm !== 'function') return false;
+    return marketingPlugin.showPrivacyOptionsForm();
+  }
+
+  /**
+   * Re-fetches the remote ad configuration and hands it to the plugin's ad managers.
+   * @returns {Promise<boolean>} Whether a configuration was loaded
+   */
+  async _loadMissingAdModel() {
+    const adModel = await ConfigFetcher.fetchData(this.config.baseUrl, this.config.bundleId);
+    if (!adModel) return false;
+
+    marketingPlugin.adModel = adModel;
+    bannerAdManager.adModel = adModel;
+    nativeAdManager.adModel = adModel;
+    interstitialAdManager.adModel = adModel;
+    rewardedAdManager.adModel = adModel;
+    return true;
   }
 
   /**
@@ -305,9 +359,8 @@ export class MarketingAdProvider extends BaseAdProvider {
 
   // 4. REWARDED AD API
   isRewardedAvailable(_placementId) {
-    if (!marketingPlugin.adModel) {
-      return true;
-    }
+    // Without a config the plugin refuses to show rewarded ads, so report unavailable
+    // and let callers keep polling until the config arrives.
     return Boolean(marketingPlugin.adModel?.isad && marketingPlugin.adModel?.isrewarded);
   }
 

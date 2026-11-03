@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useDispatch } from 'react-redux';
 import BootSplash from 'react-native-bootsplash';
@@ -13,6 +13,7 @@ export const AD_STARTUP_TIMEOUT_MS = 5000;
 export const AppStartupGate = ({ children }) => {
   const dispatch = useDispatch();
   const [isStartupReady, setIsStartupReady] = useState(false);
+  const startupDoneRef = useRef(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -72,6 +73,7 @@ export const AppStartupGate = ({ children }) => {
           logger.warn('AppStartupGate: Tolerated startup initialization error', { error: err?.message });
         }
       } finally {
+        startupDoneRef.current = true;
         if (isMounted) {
           setIsStartupReady(true);
           // 3. Hide BootSplash only after startup initialization wait completes
@@ -90,6 +92,12 @@ export const AppStartupGate = ({ children }) => {
     const unsubscribe = connectivityService.subscribeToConnectivity((connState) => {
       if (isMounted) {
         dispatch(setConnectivityState(connState));
+      }
+      // Startup skips ads and remote config when offline; start them once we reconnect.
+      // Both calls are no-ops when already initialized or in progress.
+      if (isMounted && connState?.isConnected && startupDoneRef.current) {
+        adService.initialize();
+        realtimeConfigService.initialize();
       }
     });
 
