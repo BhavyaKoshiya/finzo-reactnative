@@ -1,10 +1,10 @@
-# PDF Report Architecture — FINZO Phase 16.9
+# PDF Report Architecture — LOANPILOT Phase 16.9
 
 ## 1. Overview
-Finzo Phase 16.9 introduces a 100% offline, local, professional PDF report generation and native sharing system (`src/features/reports/`).
+LoanPilot Phase 16.9 introduces a 100% offline, local, professional PDF report generation and native sharing system (`src/features/reports/`).
 
 It supports exporting:
-- **Calculator Reports**: Saved and live calculations across all 10 Finzo calculators (EMI with 360-month amortization schedule, SIP with yearly growth table, FD, RD, CAGR, ROI, GST, Simple Interest, Compound Interest, Percentage).
+- **Calculator Reports**: Saved and live calculations across all 10 LoanPilot calculators (EMI with 360-month amortization schedule, SIP with yearly growth table, FD, RD, CAGR, ROI, GST, Simple Interest, Compound Interest, Percentage).
 - **Loan Summary Report**: Loan account configuration, lender info, current balance position, and interest method.
 - **Loan Statement Report**: Complete payment transaction ledger, prepayments, balance corrections, and historical snapshot preservation.
 - **Loan Insights Report**: Principal progress, remaining interest/tenure, payoff date, prepayment impact, and latest payment breakdown.
@@ -99,6 +99,6 @@ Calculator and Loan business logic is decoupled from HTML rendering using a norm
 ## 8. PRIVATE DETAILS & PDF PRIVACY (PHASE 16.13)
 
 - **Excluded by Default**: Normal loan statement and summary PDFs exclude private details and notes by default.
-- **Explicit Opt-In**: Including private details requires explicit user selection and presents warning: *"This report contains private information. Once shared outside Finzo, it may no longer be under your control."*
+- **Explicit Opt-In**: Including private details requires explicit user selection and presents warning: *"This report contains private information. Once shared outside LoanPilot, it may no longer be under your control."*
 - **Account Reference Masking**: Loan account and reference numbers are masked (`XXXX1234`) by default in PDF reports.
 - **Strict Credential Exclusion**: Highly sensitive credentials stored in Keychain are **NEVER** included in PDF reports under any circumstances.

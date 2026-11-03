@@ -1,6 +1,6 @@
-# Finzo — Advertising Provider Architecture (Phase 21)
+# LoanPilot — Advertising Provider Architecture (Phase 21)
 
-This document specifies the technical integration of **react-native-marketing-plugin v0.4.0** (backed by `react-native-google-mobile-ads` and `react-native-device-info`) as Finzo's official advertising provider adapter.
+This document specifies the technical integration of **react-native-marketing-plugin v0.4.0** (backed by `react-native-google-mobile-ads` and `react-native-device-info`) as LoanPilot's official advertising provider adapter.
 
 ---
 
@@ -8,12 +8,12 @@ This document specifies the technical integration of **react-native-marketing-pl
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ Finzo UI & Financial Workflows (AdPlacement / useInterstitial)│
+│ LoanPilot UI & Financial Workflows (AdPlacement / useInterstitial)│
 └──────────────────────────────┬──────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Finzo adService & adDecisionEngine (Authoritative Engine)    │
+│ LoanPilot adService & adDecisionEngine (Authoritative Engine)    │
 │  - interstitialFrequencyService (adTime Opportunity Counter) │
 │  - 3/Session Limit - 15 Protected Screens - Ad-Free Timer    │
 │  - Offline Gating  - 5 Rewarded/Day Cap                      │
@@ -67,10 +67,10 @@ MarketingAdProvider.showInterstitial()
 ### Environment Endpoints
 The marketing plugin resolves its configuration JSON via `baseUrl` and `bundleId`:
 - **Development (`__DEV__ === true`)**:
-  - Connects to development configuration endpoint (`https://ad-config-dev.finzocalculator.com/api` or configured test URL).
+  - Connects to development configuration endpoint (`https://ad-config-dev.loanpilotapp.com/api` or configured test URL).
   - Uses test ad unit IDs (`TestIds.BANNER`, `TestIds.INTERSTITIAL`, `TestIds.REWARDED`).
 - **Production (`__DEV__ === false`)**:
-  - Connects to production configuration endpoint (`https://ad-config.finzocalculator.com/api` or remote RTDB config).
+  - Connects to production configuration endpoint (`https://ad-config.loanpilotapp.com/api` or remote RTDB config).
   - Serves live production ad units according to remote JSON model.
 
 ---

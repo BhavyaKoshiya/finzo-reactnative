@@ -53,7 +53,7 @@ export const InternetRequiredScreen = ({ onRetry }) => {
             <AppText variant="cardTitle">Why Internet is Required</AppText>
           </View>
           <AppText variant="bodySmall" color={currentTheme.textSecondary} style={styles.cardBodyText}>
-            Finzo is supported by advertising to keep all financial calculators, loan tracking, and payoff tools freely accessible. An active internet connection is required to load app configuration and advertising services. Advertising networks may process standard technical advertising identifiers.
+            LoanPilot is supported by advertising to keep all financial calculators, loan tracking, and payoff tools freely accessible. An active internet connection is required to load app configuration and advertising services. Advertising networks may process standard technical advertising identifiers.
           </AppText>
         </AppCard>
 
@@ -66,7 +66,7 @@ export const InternetRequiredScreen = ({ onRetry }) => {
             </AppText>
           </View>
           <AppText variant="bodySmall" color={currentTheme.textSecondary} style={styles.cardBodyText}>
-            Your loan records, balances, EMIs, payment history, calculations, private details, and notes remain strictly on your device. Finzo does not upload, synchronize, or back up your financial data to Firebase or any external servers.
+            Your loan records, balances, EMIs, payment history, calculations, private details, and notes remain strictly on your device. LoanPilot does not upload, synchronize, or back up your financial data to Firebase or any external servers.
           </AppText>
         </AppCard>
 

@@ -114,7 +114,7 @@ export const getDailyCheckInCopy = (currentStreak, hasCheckedInToday, config) =>
     ? (ui.newUserSubtitle || 'Check in every day to unlock bigger rewards.')
     : isMaxReward
     ? (ui.maxRewardMessage || "You're earning the maximum daily reward!")
-    : (ui.subtitle || 'Keep your streak going and earn more Finzo Points.');
+    : (ui.subtitle || 'Keep your streak going and earn more LoanPilot Points.');
 
   const streakBadge = interpolateRewardCopy(ui.streakTitle || '{count} Day Streak', { count: currentStreak });
   const claimBtn = interpolateRewardCopy(ui.claimButtonText || 'Claim {points} Points', { points: todayPoints });

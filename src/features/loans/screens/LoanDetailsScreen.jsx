@@ -136,7 +136,7 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
             dispatch(deleteGoalsForLoan(profile.id));
             dispatch(deleteLoanPrivateDetails(profile.id));
             await securePrivateStorageService
-              .deleteSecureValue(`finzo.loan.${profile.id}.sensitive.credential`)
+              .deleteSecureValue(`loanpilot.loan.${profile.id}.sensitive.credential`)
               .catch(() => {});
             dispatch(deleteLoanProfile(profile.id));
             Alert.alert('Loan Deleted', `"${profile.name}" has been removed.`);
@@ -226,7 +226,7 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
                   color={isBankConfirmed ? '#86EFAC' : '#FDE68A'}
                   style={{ fontWeight: '700', fontSize: 11 }}
                 >
-                  {isBankConfirmed ? 'Bank Confirmed' : 'Finzo Estimate'}
+                  {isBankConfirmed ? 'Bank Confirmed' : 'LoanPilot Estimate'}
                 </AppText>
               </TouchableOpacity>
             </View>
@@ -375,7 +375,7 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
           placementId={AD_PLACEMENTS.LOAN_DETAILS_NATIVE}
           adType="native"
           headline="Financial Planning & Prepayments"
-          description="Simulate early loan pay-offs and evaluate interest savings offline with Finzo tools."
+          description="Simulate early loan pay-offs and evaluate interest savings offline with LoanPilot tools."
         />
 
         {/* 7. LOAN OVERVIEW */}
@@ -476,19 +476,19 @@ export const LoanDetailsScreen = ({ route, navigation }) => {
           onViewPrivateDetails={() => navigation.navigate(ROUTES.LOAN_PRIVATE_DETAILS, { loanId: profile.id })}
         />
 
-        {/* 10. HOW FINZO CALCULATES THIS */}
+        {/* 10. HOW LOANPILOT CALCULATES THIS */}
         <AppCard style={styles.assumptionsCard}>
           <TouchableOpacity
             onPress={() => setShowAssumptions(!showAssumptions)}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel="How Finzo calculates loan metrics expandable section"
+            accessibilityLabel="How LoanPilot calculates loan metrics expandable section"
             style={styles.assumptionsHeader}
           >
             <View style={styles.titleWithIcon}>
               <AppIcon icon={Calculator} size={16} color={currentTheme.primary} style={{ marginRight: 8 }} />
               <AppText variant="bodyMedium" style={{ fontWeight: '700' }}>
-                How Finzo calculates this
+                How LoanPilot calculates this
               </AppText>
             </View>
             <AppIcon

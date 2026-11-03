@@ -115,18 +115,18 @@ export const buildCalculationPdfHtml = (exportModel, mode = 'quick') => {
       </head>
       <body>
         <div class="running-header">
-          <div>FINZO • ${title}</div>
+          <div>LOANPILOT • ${title}</div>
           <div>${formattedDate}</div>
         </div>
 
         <div class="running-footer">
-          <div>Calculated with Finzo • Offline Financial Utility</div>
+          <div>Calculated with LoanPilot • Offline Financial Utility</div>
           <div>Report</div>
         </div>
 
         <div class="header">
           <div>
-            <div class="brand-title">FINZO</div>
+            <div class="brand-title">LOANPILOT</div>
             <div class="brand-sub">Financial Planning Utility</div>
           </div>
           <div class="report-info">
@@ -161,7 +161,7 @@ export const buildCalculationPdfHtml = (exportModel, mode = 'quick') => {
         ${sectionsHtml}
 
         <div class="footer">
-          Calculated with Finzo • Offline Financial Utility
+          Calculated with LoanPilot • Offline Financial Utility
         </div>
       </body>
     </html>

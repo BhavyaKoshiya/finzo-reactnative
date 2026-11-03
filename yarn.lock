@@ -3949,9 +3949,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"Finzo@workspace:.":
+"LoanPilot@workspace:.":
   version: 0.0.0-use.local
-  resolution: "Finzo@workspace:."
+  resolution: "LoanPilot@workspace:."
   dependencies:
     "@babel/core": ^7.25.2
     "@babel/preset-env": ^7.25.3
@@ -4001,7 +4001,6 @@ __metadata:
     react-native-screens: 4.15.0
     react-native-svg: ^15.15.5
     react-native-worklets: 0.11.4
-    react-native-worklets-core: ^1.6.3
     react-redux: ^9.3.0
     react-test-renderer: 19.2.0
     redux-persist: ^6.0.0
@@ -9199,18 +9198,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-worklets-core@npm:^1.6.3":
-  version: 1.6.3
-  resolution: "react-native-worklets-core@npm:1.6.3"
-  dependencies:
-    string-hash-64: ^1.0.3
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 608a5f06371f61af99d39437d5ea64fa46d8df376e02a09f21b5518a69187c738e02d295d291f00a9fec777851b6fba25c75421744dafc893edfe27bfa4197fc
-  languageName: node
-  linkType: hard
-
 "react-native-worklets@npm:0.11.4":
   version: 0.11.4
   resolution: "react-native-worklets@npm:0.11.4"
@@ -10155,13 +10142,6 @@ __metadata:
   version: 2.0.0
   resolution: "strict-uri-encode@npm:2.0.0"
   checksum: eaac4cf978b6fbd480f1092cab8b233c9b949bcabfc9b598dd79a758f7243c28765ef7639c876fa72940dac687181b35486ea01ff7df3e65ce3848c64822c581
-  languageName: node
-  linkType: hard
-
-"string-hash-64@npm:^1.0.3":
-  version: 1.0.3
-  resolution: "string-hash-64@npm:1.0.3"
-  checksum: 79de8431b4fa3e85a2429cd52a34f7948221ff167b7a094e05d6bcfd0173474b232e0c9845c96f74b0d7b6b0c8bbe2c3532a4cacb21635293ef0cf3cc8e77f06
   languageName: node
   linkType: hard
 

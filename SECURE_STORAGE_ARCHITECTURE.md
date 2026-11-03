@@ -1,6 +1,6 @@
-# Finzo — Secure Storage & Credential Architecture (Phase 19)
+# LoanPilot — Secure Storage & Credential Architecture (Phase 19)
 
-This document specifies the hardware-backed secure storage boundaries, Keychain/Keystore integration, and credential isolation policies for **Finzo**.
+This document specifies the hardware-backed secure storage boundaries, Keychain/Keystore integration, and credential isolation policies for **LoanPilot**.
 
 ---
 
@@ -28,7 +28,7 @@ This document specifies the hardware-backed secure storage boundaries, Keychain/
 - **iOS**: Apple Keychain Services with `ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY`.
 - **Android**: Android Keystore Provider with hardware-backed RSA/AES encryption.
 - **Library**: `react-native-keychain`.
-- **Service**: [`src/services/securePrivateStorageService.js`](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/src/services/securePrivateStorageService.js).
+- **Service**: [`src/services/securePrivateStorageService.js`](file:///Users/bhavyakoshiya/Documents/ReactNative/LoanPilot/src/services/securePrivateStorageService.js).
 
 ---
 
@@ -36,7 +36,7 @@ This document specifies the hardware-backed secure storage boundaries, Keychain/
 
 Each loan credential uses a deterministic, isolated key:
 ```
-finzo.loan.${loanId}.sensitive.credential
+loanpilot.loan.${loanId}.sensitive.credential
 ```
 
 ---
@@ -54,6 +54,6 @@ If the device Keystore or Keychain throws an error (e.g. biometric lockout, hard
 
 When a loan is deleted by the user:
 ```js
-await securePrivateStorageService.deleteSecureValue(`finzo.loan.${loanId}.sensitive.credential`);
+await securePrivateStorageService.deleteSecureValue(`loanpilot.loan.${loanId}.sensitive.credential`);
 ```
 This ensures no orphaned credentials remain in the device hardware enclave after loan deletion.

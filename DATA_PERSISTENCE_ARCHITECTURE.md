@@ -1,12 +1,12 @@
-# Finzo — Data Persistence & Storage Architecture (Phase 19)
+# LoanPilot — Data Persistence & Storage Architecture (Phase 19)
 
-This document outlines the local-first storage boundaries, persistence policies, and source-of-truth invariants for the **Finzo** financial planning application.
+This document outlines the local-first storage boundaries, persistence policies, and source-of-truth invariants for the **LoanPilot** financial planning application.
 
 ---
 
 ## 1. Core Storage Philosophy
 
-Finzo is an **offline-first, zero-cloud-sync financial tool**.
+LoanPilot is an **offline-first, zero-cloud-sync financial tool**.
 1. **Local-Only Financial Records**: Loans, payments, ledger snapshots, notes, payoff goals, and calculation histories live exclusively on the user's physical device.
 2. **Zero Financial Data in Firebase**: Firebase Realtime Database is used strictly for public app configuration (`/config`). Zero loan or user data is ever written to or read from the cloud.
 3. **Hardware-Backed Credential Security**: Sensitive credentials (PINs, portal passwords) are never stored in Redux or AsyncStorage; they reside exclusively in the platform Keystore (Android) / Keychain (iOS).
@@ -15,7 +15,7 @@ Finzo is an **offline-first, zero-cloud-sync financial tool**.
 
 ## 2. Redux Slice Persistence Inventory
 
-All durable slices are managed centrally via `redux-persist` with `@react-native-async-storage/async-storage` as the storage engine under the root key `finzo_root`.
+All durable slices are managed centrally via `redux-persist` with `@react-native-async-storage/async-storage` as the storage engine under the root key `loanpilot_root`.
 
 | Redux Slice | Whitelisted in Redux-Persist? | Storage Location | Sensitivity | Source of Truth |
 |---|---|---|---|---|
@@ -55,7 +55,7 @@ To prevent cross-loan contamination:
    dispatch(deleteNotesForLoan(loanId));
    dispatch(deleteGoalsForLoan(loanId));
    dispatch(deleteLoanPrivateDetails(loanId));
-   await securePrivateStorageService.deleteSecureValue(`finzo.loan.${loanId}.sensitive.credential`);
+   await securePrivateStorageService.deleteSecureValue(`loanpilot.loan.${loanId}.sensitive.credential`);
    dispatch(deleteLoanProfile(loanId));
    ```
 
@@ -63,7 +63,7 @@ To prevent cross-loan contamination:
 
 ## 5. Storage Summary & File References
 
-- **Redux Persist Root**: [`src/store/index.js`](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/src/store/index.js)
-- **Migrations & Normalization**: [`src/store/migrations/index.js`](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/src/store/migrations/index.js)
-- **Secure Storage Service**: [`src/services/securePrivateStorageService.js`](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/src/services/securePrivateStorageService.js)
-- **Reminder Service**: [`src/features/loans/services/loanReminderService.js`](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/src/features/loans/services/loanReminderService.js)
+- **Redux Persist Root**: [`src/store/index.js`](file:///Users/bhavyakoshiya/Documents/ReactNative/LoanPilot/src/store/index.js)
+- **Migrations & Normalization**: [`src/store/migrations/index.js`](file:///Users/bhavyakoshiya/Documents/ReactNative/LoanPilot/src/store/migrations/index.js)
+- **Secure Storage Service**: [`src/services/securePrivateStorageService.js`](file:///Users/bhavyakoshiya/Documents/ReactNative/LoanPilot/src/services/securePrivateStorageService.js)
+- **Reminder Service**: [`src/features/loans/services/loanReminderService.js`](file:///Users/bhavyakoshiya/Documents/ReactNative/LoanPilot/src/features/loans/services/loanReminderService.js)

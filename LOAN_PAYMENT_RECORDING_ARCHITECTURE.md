@@ -1,7 +1,7 @@
 # LOAN PAYMENT RECORDING ARCHITECTURE
 
 ## 1. Executive Overview
-This document specifies the real-world payment recording, preview, calculation, and correction architecture in **Finzo**. It builds upon the Phase 16.3 **Loan Ledger Hardening** foundation.
+This document specifies the real-world payment recording, preview, calculation, and correction architecture in **LoanPilot**. It builds upon the Phase 16.3 **Loan Ledger Hardening** foundation.
 
 ---
 
@@ -24,7 +24,7 @@ Before saving, payment forms invoke `createPaymentPreview()` using `getCurrentLo
 - **Opening Balance**: Determined by active balance anchor + historical replay.
 - **Estimated Interest & Principal**: Calculated dynamically according to monthly-reducing strategy.
 - **Estimated Closing Balance**: Opening balance minus principal reduction.
-- **UI Label**: Explicitly labeled **"Finzo Estimate"** to prevent confusion with bank statements.
+- **UI Label**: Explicitly labeled **"LoanPilot Estimate"** to prevent confusion with bank statements.
 
 ---
 
@@ -34,7 +34,7 @@ Before saving, payment forms invoke `createPaymentPreview()` using `getCurrentLo
   - `actualPrincipal`
   - `actualClosingBalance`
 - Toggling **"Is this the balance shown by your bank?"** sets `balanceSource = 'bank_confirmed'`, establishing a trusted anchor for subsequent calculations.
-- Actual bank values are stored in `actualPaymentDetails` and do **NOT** overwrite original Finzo calculation snapshots (`calculationSnapshot`).
+- Actual bank values are stored in `actualPaymentDetails` and do **NOT** overwrite original LoanPilot calculation snapshots (`calculationSnapshot`).
 
 ---
 

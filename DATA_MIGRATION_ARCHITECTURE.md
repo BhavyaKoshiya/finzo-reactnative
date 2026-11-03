@@ -1,4 +1,4 @@
-# Finzo — Data Migration & Recovery Architecture (Phase 19)
+# LoanPilot — Data Migration & Recovery Architecture (Phase 19)
 
 This document specifies the migration pipeline, schema versioning, and corruption recovery rules for persisted local state.
 
@@ -6,7 +6,7 @@ This document specifies the migration pipeline, schema versioning, and corruptio
 
 ## 1. Migration Overview
 
-Finzo utilizes `createMigrate` from `redux-persist` to apply schema updates without resetting user data or forcing users back to an empty database.
+LoanPilot utilizes `createMigrate` from `redux-persist` to apply schema updates without resetting user data or forcing users back to an empty database.
 
 ```
 AsyncStorage (raw JSON)
@@ -26,7 +26,7 @@ Rehydrated Redux Store
 
 ## 2. Schema Versions & Migration Manifest
 
-The migration manifest is maintained centrally in [`src/store/migrations/index.js`](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/src/store/migrations/index.js).
+The migration manifest is maintained centrally in [`src/store/migrations/index.js`](file:///Users/bhavyakoshiya/Documents/ReactNative/LoanPilot/src/store/migrations/index.js).
 
 ### Current Version: `PERSIST_VERSION = 1`
 

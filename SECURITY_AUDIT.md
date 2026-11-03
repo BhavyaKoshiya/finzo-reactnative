@@ -1,6 +1,6 @@
-# Finzo — Comprehensive Security & Privacy Audit (Phase 20)
+# LoanPilot — Comprehensive Security & Privacy Audit (Phase 20)
 
-This document provides the security audit results across all data paths, storage mechanisms, network boundaries, and logging systems in **Finzo**.
+This document provides the security audit results across all data paths, storage mechanisms, network boundaries, and logging systems in **LoanPilot**.
 
 ---
 
@@ -18,7 +18,7 @@ This document provides the security audit results across all data paths, storage
 
 | Check | Result | Verification Detail |
 |---|---|---|
-| **Platform Keystore / Keychain** | **PASSED** | Managed via `react-native-keychain` under scoped keys `finzo.loan.${loanId}.sensitive.credential`. |
+| **Platform Keystore / Keychain** | **PASSED** | Managed via `react-native-keychain` under scoped keys `loanpilot.loan.${loanId}.sensitive.credential`. |
 | **Redux Credential Isolation** | **PASSED** | Redux stores boolean flag `hasSecureCredential: true` only. Plaintext secrets are never dispatched. |
 | **Hardware Failure Policy** | **PASSED** | Throws typed error to UI. Zero fallback to plaintext AsyncStorage or Redux. |
 | **Orphaned Credential Purge** | **PASSED** | Deleting a loan profile cascades to `deleteSecureValue` in Keychain. |
@@ -57,7 +57,7 @@ This document provides the security audit results across all data paths, storage
 ## 6. Firebase Analytics, Crashlytics & Messaging Security Boundary (Part 11)
 
 - **Parameter Sanitization**: `firebaseAnalyticsService.js` and `firebaseCrashlyticsService.js` actively filter out all forbidden financial keys (`amount`, `loanAmount`, `outstandingBalance`, `emi`, `interestRate`, `lenderName`, `accountNumber`, `notes`, `credentials`, `password`, `pin`).
-- **No User Account Serialization**: Finzo does not assign or invent user IDs for Crashlytics or Analytics. Redux state is NEVER serialized or attached to crash reports.
+- **No User Account Serialization**: LoanPilot does not assign or invent user IDs for Crashlytics or Analytics. Redux state is NEVER serialized or attached to crash reports.
 - **FCM Token Privacy**: Device push tokens are strictly isolated and NEVER saved into Redux financial state, loan models, or Firebase RTDB.
 - **Payload Privacy**: FCM push message handlers strictly sanitize incoming data payloads, ensuring no financial records or balances are exposed in notification content.
 - **Non-blocking Startup**: Firebase services initialize asynchronously; any service failure or network drop will not impede app startup or navigation.

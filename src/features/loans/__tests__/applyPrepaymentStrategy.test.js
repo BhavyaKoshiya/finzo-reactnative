@@ -118,4 +118,30 @@ describe('applyPrepaymentStrategy', () => {
       },
     });
   });
+
+  test('derives remaining tenure when the loan has none stored (Add Loan form)', () => {
+    const newlyAddedLoan = {
+      ...baseLoan,
+      annualInterestRate: 8.5,
+      emiAmount: 30374,
+      currentOutstandingPrincipal: 3230000,
+      remainingTenure: { value: 0, unit: 'months' },
+    };
+
+    const reduceEmi = applyPrepaymentStrategy({
+      loan: newlyAddedLoan,
+      newBalance: 3130000,
+      strategy: PREPAYMENT_STRATEGIES.REDUCE_EMI,
+    });
+    expect(reduceEmi.emiAmount).toBeLessThan(30374);
+    expect(reduceEmi.emiAmount).toBeGreaterThan(29000);
+
+    const reduceTenure = applyPrepaymentStrategy({
+      loan: newlyAddedLoan,
+      newBalance: 3130000,
+      strategy: PREPAYMENT_STRATEGIES.REDUCE_TENURE,
+    });
+    expect(reduceTenure.remainingTenure.value).toBeLessThan(199);
+    expect(reduceTenure.remainingTenure.value).toBeGreaterThan(180);
+  });
 });

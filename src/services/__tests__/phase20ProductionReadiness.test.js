@@ -1,5 +1,5 @@
 /**
- * FINZO — PHASE 20 — Production Release Readiness & Security Audit Tests
+ * LOANPILOT — PHASE 20 — Production Release Readiness & Security Audit Tests
  *
  * Validates production environment safety, zero real ad SDKs, zero Firebase writes,
  * startup gates, offline enforcement, multi-loan isolation, and credential boundaries.
@@ -132,7 +132,7 @@ describe('Phase 20 — Production Release Readiness & Security Audit', () => {
     Keychain.setGenericPassword.mockRejectedValue(new Error('Hardware Keystore Error'));
 
     await expect(
-      securePrivateStorageService.setSecureValue('finzo.loan.123.sensitive.credential', 'secret_pin')
+      securePrivateStorageService.setSecureValue('loanpilot.loan.123.sensitive.credential', 'secret_pin')
     ).rejects.toThrow("Sensitive information couldn't be securely stored on this device.");
   });
 

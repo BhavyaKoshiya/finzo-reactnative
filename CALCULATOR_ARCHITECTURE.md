@@ -1,12 +1,12 @@
-# FINZO — CALCULATOR ARCHITECTURE & EXTENSION GUIDE
+# LOANPILOT — CALCULATOR ARCHITECTURE & EXTENSION GUIDE
 
-This document serves as the developer guide and architectural reference for the Finzo calculator platform.
+This document serves as the developer guide and architectural reference for the LoanPilot calculator platform.
 
 ---
 
 ## 1. Architectural Philosophy
 
-Finzo enforces strict separation between calculation math, metadata, state management, and UI rendering:
+LoanPilot enforces strict separation between calculation math, metadata, state management, and UI rendering:
 
 ```text
 Pure Math & Logic (`src/calculations/`)

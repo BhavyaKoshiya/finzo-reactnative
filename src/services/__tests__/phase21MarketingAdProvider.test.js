@@ -1,5 +1,5 @@
 /**
- * FINZO — PHASE 21 — Real Marketing Plugin Integration Tests
+ * LOANPILOT — PHASE 21 — Real Marketing Plugin Integration Tests
  *
  * Validates real marketing plugin integration in DEV + PRODUCTION,
  * environment-aware JSON configuration, fail-safe error recovery,
@@ -98,15 +98,15 @@ describe('Phase 21 — Real Marketing Plugin Integration', () => {
   // ============================================================
   test('4. MarketingAdProvider initializes with enableAppOpenOnResume strictly set to false', async () => {
     const provider = new MarketingAdProvider({
-      baseUrl: 'https://ad-config-test.finzocalculator.com/api',
-      bundleId: 'com.finzo.financecalculator',
+      baseUrl: 'https://ad-config-test.loanpilotapp.com/api',
+      bundleId: 'com.loanpilot.app',
     });
 
     const success = await provider.initialize();
     expect(success).toBe(true);
     expect(marketingPlugin.initialize).toHaveBeenCalledWith({
-      baseUrl: 'https://ad-config-test.finzocalculator.com/api',
-      bundleId: 'com.finzo.financecalculator',
+      baseUrl: 'https://ad-config-test.loanpilotapp.com/api',
+      bundleId: 'com.loanpilot.app',
       enableAppOpenOnResume: false, // Must be strictly disabled
     });
   });

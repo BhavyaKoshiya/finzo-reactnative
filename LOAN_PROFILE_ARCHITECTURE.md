@@ -1,16 +1,16 @@
-# LOAN PROFILE ARCHITECTURE — FINZO
+# LOAN PROFILE ARCHITECTURE — LOANPILOT
 
-This document details the architectural boundaries, data model, state management, validation rules, presentation adapters, and privacy policies for the **Real User Loan Profiles, Payment History & Balance Correction Correction System** in Finzo.
+This document details the architectural boundaries, data model, state management, validation rules, presentation adapters, and privacy policies for the **Real User Loan Profiles, Payment History & Balance Correction Correction System** in LoanPilot.
 
 ---
 
 ## 1. ARCHITECTURAL SEPARATION & DOMAIN BOUNDARIES
 
-Finzo maintains a strict separation between two distinct financial domains:
+LoanPilot maintains a strict separation between two distinct financial domains:
 
 ```
                   ┌─────────────────────────────────────────────────┐
-                  │                 FINZO APP                       │
+                  │                 LOANPILOT APP                       │
                   └────────────────────────┬────────────────────────┘
                                            │
              ┌─────────────────────────────┴─────────────────────────────┐
@@ -33,7 +33,7 @@ Finzo maintains a strict separation between two distinct financial domains:
 
 ### Key Policy Laws:
 1. **Separation of Concerns**: `src/features/calculators/loans/` and `src/features/loans/` operate as separate modules with zero cross-side-effect dependencies.
-2. **User Data Authority & Bank Confirmation**: Finzo distinguishes between `bank_confirmed` balance and `estimated` balance. When a user enters an actual bank balance, it overrides Finzo's estimate and serves as the starting balance for future payments.
+2. **User Data Authority & Bank Confirmation**: LoanPilot distinguishes between `bank_confirmed` balance and `estimated` balance. When a user enters an actual bank balance, it overrides LoanPilot's estimate and serves as the starting balance for future payments.
 3. **Local-First Privacy**: User loan profiles and payment histories exist strictly on the user's physical device via `redux-persist` + `@react-native-async-storage/async-storage`. Firebase RTDB remains configuration-only. No user loan data is ever uploaded to any cloud backend or analytics.
 
 ---

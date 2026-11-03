@@ -1,7 +1,7 @@
 import { validateRealtimeConfig } from '../realtimeConfigSchema';
 import DEFAULT_REALTIME_CONFIG from '../realtimeConfigDefaults';
 
-describe('Finzo Realtime Config Hardening & Provisioning Tests', () => {
+describe('LoanPilot Realtime Config Hardening & Provisioning Tests', () => {
   // 1. Valid production payload validation
   test('1. Valid default realtime config payload passes schema validation', () => {
     const { valid, errors } = validateRealtimeConfig(DEFAULT_REALTIME_CONFIG);

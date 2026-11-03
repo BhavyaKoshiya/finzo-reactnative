@@ -17,7 +17,7 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
-target 'Finzo' do
+target 'LoanPilot' do
   config = use_native_modules!
 
   pod 'GoogleUtilities', :modular_headers => true
@@ -48,6 +48,10 @@ target 'Finzo' do
         config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++20'
         config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
         config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_CFG_NO_COROUTINES=1'
+        # Newer Xcode rejects pod targets (e.g. resource bundles) below its minimum deployment target.
+        if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < min_ios_version_supported.to_f
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = min_ios_version_supported
+        end
       end
     end
   end

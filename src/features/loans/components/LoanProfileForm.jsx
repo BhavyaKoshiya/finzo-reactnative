@@ -234,7 +234,7 @@ export const LoanProfileForm = ({
         />
 
         <AppText variant="bodySmall" color={currentTheme.textMuted} style={styles.dueDayHint}>
-          If a month has fewer days, Finzo automatically uses the last available day of that month.
+          If a month has fewer days, LoanPilot automatically uses the last available day of that month.
         </AppText>
       </AppCard>
 

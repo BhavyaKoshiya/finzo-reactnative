@@ -1,12 +1,12 @@
-# Finzo — UX & Visual Standards Specification (Phase 18)
+# LoanPilot — UX & Visual Standards Specification (Phase 18)
 
-This document specifies Finzo's UI hierarchy, empty states, loading indicators, error handling, typography, spacing, card design tokens, accessibility rules, and terminology.
+This document specifies LoanPilot's UI hierarchy, empty states, loading indicators, error handling, typography, spacing, card design tokens, accessibility rules, and terminology.
 
 ---
 
 ## 1. Unified Terminology Standards
 
-To maintain coherent product communication, Finzo strictly uses the following vocabulary across all screens:
+To maintain coherent product communication, LoanPilot strictly uses the following vocabulary across all screens:
 
 - **`Outstanding Principal`**: Current unpaid balance on a loan profile (Primary metric).
 - **`Total Loan Amount`**: Historical original principal borrowed (Secondary metric).
@@ -15,7 +15,7 @@ To maintain coherent product communication, Finzo strictly uses the following vo
 - **`Payment`**: Any recorded payment transaction.
 - **`Prepayment`**: Lump-sum payment applied directly to reduce principal.
 - **`Bank Confirmed`**: Balance anchor updated directly from official lender statements.
-- **`Finzo Estimate`**: Outstanding balance calculated automatically from payment ledger history.
+- **`LoanPilot Estimate`**: Outstanding balance calculated automatically from payment ledger history.
 - **`Ad-Free`**: Active entitlement pausing ordinary banner/native/interstitial ads.
 
 ---

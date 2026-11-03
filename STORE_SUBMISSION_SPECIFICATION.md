@@ -1,6 +1,6 @@
-# Finzo — Store Submission & Launch Readiness Specification (Phase 26)
+# LoanPilot — Store Submission & Launch Readiness Specification (Phase 26)
 
-This document provides the definitive, production-audited submission specifications, store listings, and Data Safety declarations for **Finzo** across Google Play Console and Apple App Store Connect.
+This document provides the definitive, production-audited submission specifications, store listings, and Data Safety declarations for **LoanPilot** across Google Play Console and Apple App Store Connect.
 
 ---
 
@@ -8,12 +8,12 @@ This document provides the definitive, production-audited submission specificati
 
 | Platform | Attribute | Production Value |
 |---|---|---|
-| **Android** | Package / Application ID | `com.finzo.financecalculator` |
+| **Android** | Package / Application ID | `com.loanpilot.app` |
 | **Android** | Version Name | `1.0.0` |
 | **Android** | Version Code | `1` |
 | **Android** | Min SDK / Target SDK | `24` / `34` |
 | **Android** | Build Artifact | Android App Bundle (`bundleRelease`) |
-| **iOS** | Bundle Identifier | `com.finzo.financecalculator` |
+| **iOS** | Bundle Identifier | `com.loanpilot.app` |
 | **iOS** | Marketing Version | `1.0.0` |
 | **iOS** | Current Project Version (Build) | `1` |
 | **iOS** | Deployment Target | iOS `15.1+` |
@@ -24,11 +24,11 @@ This document provides the definitive, production-audited submission specificati
 
 ## 2. Google Play Store Listing Metadata
 
-- **App Name**: Finzo — Loan EMI & Financial Calculator
+- **App Name**: LoanPilot — Loan EMI & Financial Calculator
 - **Short Description** *(Max 80 chars)*: Track loans, plan prepayments, calculate EMIs & manage finances locally.
 - **Full Description**:
 ```text
-Finzo is an offline-first financial calculator and personal loan planning utility designed to give you clarity and control over your borrowings and investments.
+LoanPilot is an offline-first financial calculator and personal loan planning utility designed to give you clarity and control over your borrowings and investments.
 
 KEY FEATURES:
 
@@ -53,17 +53,17 @@ KEY FEATURES:
 • Everyday & Business: GST, Simple Interest, Compound Interest, Percentage
 
 AD-SUPPORTED WITH REWARDED AD-FREE MODE:
-Finzo is supported by advertising to keep all tools free. Earn 30 minutes of ad-free application usage by completing rewarded ads. All core financial management workflows (recording payments, editing loans, viewing notes) remain strictly ad-free.
+LoanPilot is supported by advertising to keep all tools free. Earn 30 minutes of ad-free application usage by completing rewarded ads. All core financial management workflows (recording payments, editing loans, viewing notes) remain strictly ad-free.
 
 DISCLAIMER:
-Finzo is a calculation and planning utility. Finzo does not offer loans, approve credit, process banking transactions, or provide financial advice.
+LoanPilot is a calculation and planning utility. LoanPilot does not offer loans, approve credit, process banking transactions, or provide financial advice.
 ```
 
 - **Category**: Finance
 - **Content Rating**: Everyone / PEGI 3 / 3+
 - **Developer / Organization**: BinaryKode Technologies
 - **Contact Email**: `bhavyakoshiya.work@gmail.com`
-- **Privacy Policy URL**: `https://binarykode-technologies.web.app/pages/finzo-privacy-policy.html`
+- **Privacy Policy URL**: `https://varnicreations.blogspot.com/2026/11/loanpilot-privacy-policy.html`
 
 ---
 
@@ -110,7 +110,7 @@ Based on the actual audited codebase implementation:
 
 The application binary and source code are feature-complete and release-hardened. The following administrative actions must be completed by the publisher:
 
-1. **Organization Details & Privacy Policy**: **COMPLETED** (Configured as `BinaryKode Technologies`, `bhavyakoshiya.work@gmail.com`, and hosted at `https://binarykode-technologies.web.app/pages/finzo-privacy-policy.html`).
-2. **Apple App Store ID**: Once the App Store Connect record is created, obtain the numeric Apple App ID (e.g. `6740000000`) and replace `FINZO_IOS_APP_ID_PLACEHOLDER` in `src/services/appStoreService.js`.
+1. **Organization Details & Privacy Policy**: **COMPLETED** (Configured as `BinaryKode Technologies`, `bhavyakoshiya.work@gmail.com`, and hosted at `https://varnicreations.blogspot.com/2026/11/loanpilot-privacy-policy.html`).
+2. **Apple App Store ID**: Once the App Store Connect record is created, obtain the numeric Apple App ID (e.g. `6740000000`) and replace `LOANPILOT_IOS_APP_ID_PLACEHOLDER` in `src/services/appStoreService.js`.
 3. **Google Play Release Signing**: Sign the generated Android App Bundle (`bundleRelease`) using the organization's production upload keystore.
 4. **Apple Distribution Certificate & Provisioning Profile**: Archive and sign the iOS application in Xcode using the organization's Apple Developer Team.

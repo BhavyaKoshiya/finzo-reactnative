@@ -1,15 +1,15 @@
-# LOAN LEDGER ARCHITECTURE — FINZO
+# LOAN LEDGER ARCHITECTURE — LOANPILOT
 
-This document details the architectural specifications, balance anchor models, ledger versioning, historical calculation snapshots, and current reconstruction engine for **Loan Ledger Hardening** in Finzo.
+This document details the architectural specifications, balance anchor models, ledger versioning, historical calculation snapshots, and current reconstruction engine for **Loan Ledger Hardening** in LoanPilot.
 
 ---
 
 ## 1. ARCHITECTURAL PRINCIPLES & SOURCE OF TRUTH
 
-Finzo distinguishes between three distinct data categories:
+LoanPilot distinguishes between three distinct data categories:
 1. **User Facts**: User-reported inputs such as original loan amount, loan start date, interest rate, and configured EMI.
 2. **Bank-Confirmed Anchors**: Explicit bank balance entries (`balanceSource: 'bank_confirmed'`) verified by the user.
-3. **Finzo Estimates**: Finzo's chronological calculation projections (`balanceSource: 'estimated'`) based on payment history replay.
+3. **LoanPilot Estimates**: LoanPilot's chronological calculation projections (`balanceSource: 'estimated'`) based on payment history replay.
 
 ---
 
@@ -18,7 +18,7 @@ Finzo distinguishes between three distinct data categories:
 | Field | Type | Description |
 | :--- | :--- | :--- |
 | `originalPrincipal` | `number` | Original principal loan amount entered during profile setup. |
-| `currentOutstandingPrincipal` | `number` | Current active balance (bank-confirmed if available, otherwise Finzo estimate). |
+| `currentOutstandingPrincipal` | `number` | Current active balance (bank-confirmed if available, otherwise LoanPilot estimate). |
 | `userConfirmedBalance` | `number \| null` | Most recent bank-confirmed balance entered by user. |
 | `balanceSource` | `'bank_confirmed' \| 'estimated'` | Indicator of current balance confidence. |
 | `lastBalanceConfirmationDate` | `string \| null` | ISO date of last balance confirmation. |
@@ -35,7 +35,7 @@ A **Balance Anchor** is a trusted balance checkpoint that serves as the starting
        ↓
 [ Chronological Payments / Prepayments Replay ]
        ↓
-[ Finzo Estimated Outstanding Balance ]
+[ LoanPilot Estimated Outstanding Balance ]
 ```
 
 ### Anchor Resolution Hierarchy (`getPaymentBalanceAnchor`):
@@ -104,7 +104,7 @@ Users may optionally provide actual bank statement figures:
 - `actualPrincipal`: Bank statement principal deduction.
 - `actualClosingBalance`: Exact closing balance on bank receipt.
 - **Bank-Confirmed Toggle**: Explicit user confirmation sets `balanceSource = 'bank_confirmed'`, establishing a new active balance anchor for future payment replays.
-- **Preservation of Estimates**: Finzo's original `calculationSnapshot` is never overwritten when actual bank values are entered; both remain preserved and auditable.
+- **Preservation of Estimates**: LoanPilot's original `calculationSnapshot` is never overwritten when actual bank values are entered; both remain preserved and auditable.
 
 ---
 

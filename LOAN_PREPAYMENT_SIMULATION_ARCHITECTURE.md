@@ -13,7 +13,7 @@ It supports two distinct prepayment strategies:
 The simulation engine is **100% read-only and hypothetical**:
 - Simulating prepayments **NEVER** mutates `loanProfilesSlice`, `loanPaymentsSlice`, or `AsyncStorage`.
 - Closing or navigating away from `LoanPrepaymentSimulatorScreen` discards the scenario without affecting stored loan state.
-- Only when the user explicitly taps **"Record this prepayment"** does Finzo transition to the existing Phase 16.4 payment recording flow (`AddPaymentScreen`), where the user confirms and saves the transaction into the durable ledger.
+- Only when the user explicitly taps **"Record this prepayment"** does LoanPilot transition to the existing Phase 16.4 payment recording flow (`AddPaymentScreen`), where the user confirms and saves the transaction into the durable ledger.
 
 ---
 
@@ -25,7 +25,7 @@ The simulator resolves the loan's current starting balance using `getCurrentLoan
          │
          ├──> Active 'bank_confirmed' payment anchor present?
          │         ├── YES ──> Use bank-confirmed closing balance (Label: "Bank Confirmed")
-         │         └── NO  ──> Use userConfirmedBalance / currentOutstandingPrincipal (Label: "Finzo Estimate")
+         │         └── NO  ──> Use userConfirmedBalance / currentOutstandingPrincipal (Label: "LoanPilot Estimate")
 ```
 
 ---

@@ -1,5 +1,5 @@
 # ============================================================================
-# Finzo – ProGuard / R8 rules for React Native + Hermes + Firebase
+# LoanPilot – ProGuard / R8 rules for React Native + Hermes + Firebase
 # ============================================================================
 
 # ---------- React Native Core ----------

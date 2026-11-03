@@ -1,7 +1,7 @@
-# LOAN_INSIGHTS_ARCHITECTURE.md — Finzo Loan Insights & Financial Health Architecture
+# LOAN_INSIGHTS_ARCHITECTURE.md — LoanPilot Loan Insights & Financial Health Architecture
 
 ## 1. Overview
-Finzo Loan Insights (Phase 16.8) provides read-only financial analytics for loan accounts. It enables users to visualize principal repayment progress, total recorded payments, cumulative interest paid, estimated remaining interest, estimated payoff dates, prepayment impacts, and historical trend series without modifying the financial ledger or profile parameters.
+LoanPilot Loan Insights (Phase 16.8) provides read-only financial analytics for loan accounts. It enables users to visualize principal repayment progress, total recorded payments, cumulative interest paid, estimated remaining interest, estimated payoff dates, prepayment impacts, and historical trend series without modifying the financial ledger or profile parameters.
 
 ---
 
@@ -15,7 +15,7 @@ Finzo Loan Insights (Phase 16.8) provides read-only financial analytics for loan
 ### 2.2 Facts vs. Estimates Policy
 - **Facts**: Recorded payment amounts, bank-confirmed actual closing balances, original loan principal, and user-entered initial loan parameters.
 - **Estimates**: Future remaining interest, estimated payoff date, remaining tenure, interest avoided, and projected amortization paths.
-- **Labeling Rules**: Every projected metric is explicitly tagged as **"Finzo Estimate"** or **"Estimated"**. Guaranteed outcomes are never claimed unless backed by bank-confirmed data.
+- **Labeling Rules**: Every projected metric is explicitly tagged as **"LoanPilot Estimate"** or **"Estimated"**. Guaranteed outcomes are never claimed unless backed by bank-confirmed data.
 
 ---
 

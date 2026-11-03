@@ -69,7 +69,7 @@ export const LoanPrivateDetailsScreen = ({ route, navigation }) => {
   const [sensitiveSecret, setSensitiveSecret] = useState('');
   const [loadedSecret, setLoadedSecret] = useState('');
 
-  const secretStorageKey = `finzo.loan.${loanId}.sensitive.credential`;
+  const secretStorageKey = `loanpilot.loan.${loanId}.sensitive.credential`;
 
   useEffect(() => {
     if (existingDetails) {
@@ -194,7 +194,7 @@ export const LoanPrivateDetailsScreen = ({ route, navigation }) => {
             </AppText>
           </View>
           <AppText variant="bodySmall" color={currentTheme.textSecondary} style={{ marginBottom: 10, lineHeight: 18 }}>
-            Loan details, notes and private information are stored locally on this device and are not uploaded to Finzo or Firebase.
+            Loan details, notes and private information are stored locally on this device and are not uploaded to LoanPilot or Firebase.
           </AppText>
           <TouchableOpacity onPress={() => navigation.navigate(ROUTES.LOCAL_DATA_PRIVACY)}>
             <AppText variant="bodySmall" color={currentTheme.primary} style={{ fontWeight: '700' }}>
@@ -212,7 +212,7 @@ export const LoanPrivateDetailsScreen = ({ route, navigation }) => {
             </AppText>
           </View>
           <AppText variant="bodySmall" color={currentTheme.textPrimary} style={{ fontSize: 12, lineHeight: 17 }}>
-            For your security, avoid storing banking passwords, PINs, OTPs or card security codes in Finzo.
+            For your security, avoid storing banking passwords, PINs, OTPs or card security codes in LoanPilot.
           </AppText>
         </AppCard>
 

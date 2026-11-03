@@ -70,7 +70,7 @@ describe('Phase 16.4 — Real-World Loan Payment Recording Tests', () => {
   });
 
   // 4. Actual Bank Values difference calculation
-  test('4. calculatePaymentDifference computes exact variance between Finzo estimate and bank receipt', () => {
+  test('4. calculatePaymentDifference computes exact variance between LoanPilot estimate and bank receipt', () => {
     const estimated = { estimatedInterest: 10000, estimatedPrincipal: 12244, estimatedClosingBalance: 987756 };
     const actual = { actualInterest: 10050, actualPrincipal: 12194, actualClosingBalance: 987806 };
 
@@ -161,7 +161,7 @@ describe('Phase 16.4 — Real-World Loan Payment Recording Tests', () => {
 
     const warningRes = validatePaymentInput({ amount: 600000, currentBalance: 500000 });
     expect(warningRes.valid).toBe(true);
-    expect(warningRes.warnings.amount).toContain('exceeds Finzo\'s estimated outstanding balance');
+    expect(warningRes.warnings.amount).toContain('exceeds LoanPilot\'s estimated outstanding balance');
   });
 
   // 8. Multi-loan isolation

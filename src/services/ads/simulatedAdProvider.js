@@ -70,7 +70,7 @@ export class SimulatedAdProvider extends BaseAdProvider {
       provider: this.getType(),
       adData: {
         headline: 'Example Sponsor',
-        body: 'Simulated native advertisement — Finzo swappable ad architecture',
+        body: 'Simulated native advertisement — LoanPilot swappable ad architecture',
         callToAction: 'Learn More',
         advertiser: 'Sponsored',
         isSimulated: true,

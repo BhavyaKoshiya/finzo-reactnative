@@ -128,10 +128,10 @@ export const LoanGoalDetailsScreen = ({ route, navigation }) => {
         ],
         assumptions: [
           'Personal Goal — Not an actual payment instruction or bank transaction.',
-          'Goal progress is calculated from actual recorded payments in Finzo.',
+          'Goal progress is calculated from actual recorded payments in LoanPilot.',
           'Calculations run 100% locally and do not alter your real loan profile or interest rates.',
         ],
-        disclaimer: 'Finzo Goal Tracker — Informational personal planning tool.',
+        disclaimer: 'LoanPilot Goal Tracker — Informational personal planning tool.',
       };
 
       await generateAndShareReport(reportModel);

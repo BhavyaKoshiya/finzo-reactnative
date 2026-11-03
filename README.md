@@ -1,6 +1,6 @@
-# Finzo — EMI, SIP & Finance Calculator
+# LoanPilot — EMI, SIP & Finance Calculator
 
-Finzo is an offline-first financial calculator and financial planning utility built with React Native for Android and iOS.
+LoanPilot is an offline-first financial calculator and financial planning utility built with React Native for Android and iOS.
 
 ---
 
@@ -19,8 +19,8 @@ Finzo is an offline-first financial calculator and financial planning utility bu
 
 1. **Clone repository & install dependencies**:
    ```bash
-   git clone https://github.com/BhavyaKoshiya/finzo-reactnative.git
-   cd Finzo
+   git clone https://github.com/BhavyaKoshiya/loanpilot-reactnative.git
+   cd LoanPilot
    npm install
    ```
 
@@ -80,6 +80,6 @@ npm run ios
 
 ## App Package Information
 
-- **Android Package & Namespace**: `com.finzo.financecalculator`
-- **iOS Bundle Identifier**: `com.finzo.financecalculator`
+- **Android Package & Namespace**: `com.loanpilot.app`
+- **iOS Bundle Identifier**: `com.loanpilot.app`
 - **React Native Version**: `0.83.10`

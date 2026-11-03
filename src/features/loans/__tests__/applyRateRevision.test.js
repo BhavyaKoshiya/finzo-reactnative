@@ -145,4 +145,39 @@ describe('applyRateRevision', () => {
       expect(result.warning).toBeDefined();
     });
   });
+
+  describe('Loans saved without a remaining tenure (Add Loan form)', () => {
+    // The Add Loan form stores remainingTenure as 0; tenure must come from balance, rate and EMI.
+    const newlyAddedLoan = {
+      id: 'loan_new',
+      originalPrincipal: 3500000,
+      currentOutstandingPrincipal: 3230000,
+      annualInterestRate: 8.5,
+      emiAmount: 30374,
+      remainingTenure: { value: 0, unit: 'months' },
+    };
+
+    test('adjust EMI keeps the derived remaining tenure and lowers EMI on a rate cut', () => {
+      const result = applyRateRevision({
+        loan: newlyAddedLoan,
+        newRate: 8.25,
+        strategy: RATE_ADJUSTMENT_STRATEGIES.ADJUST_EMI,
+      });
+      expect(result.isValid).toBe(true);
+      expect(result.appliedNewTenureMonths).toBe(199);
+      expect(result.appliedNewEmi).toBeLessThan(30374);
+      expect(result.appliedNewEmi).toBeGreaterThan(29500);
+    });
+
+    test('adjust tenure reports the change against the derived remaining tenure', () => {
+      const result = applyRateRevision({
+        loan: newlyAddedLoan,
+        newRate: 9,
+        strategy: RATE_ADJUSTMENT_STRATEGIES.ADJUST_TENURE,
+      });
+      expect(result.isValid).toBe(true);
+      expect(result.appliedNewTenureMonths).toBeGreaterThan(199);
+      expect(result.deltaTenureMonths).toBe(result.appliedNewTenureMonths - 199);
+    });
+  });
 });

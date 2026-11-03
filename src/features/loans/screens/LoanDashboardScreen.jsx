@@ -129,7 +129,7 @@ export const LoanDashboardScreen = ({ navigation }) => {
               title={tab === 'active' ? 'Track Your Loans' : 'No Archived Loans'}
               description={
                 tab === 'active'
-                  ? 'Add your existing home, personal, or car loans to Finzo to view outstanding balance, monthly EMI, and upcoming payment dates.'
+                  ? 'Add your existing home, personal, or car loans to LoanPilot to view outstanding balance, monthly EMI, and upcoming payment dates.'
                   : 'Loans you archive will appear here safely stored.'
               }
             />

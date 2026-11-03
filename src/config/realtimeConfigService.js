@@ -3,7 +3,7 @@ import { DEFAULT_REALTIME_CONFIG } from './realtimeConfigDefaults';
 import { validateRealtimeConfig } from './realtimeConfigSchema';
 import logger from '../services/logger';
 
-const LAST_KNOWN_CONFIG_KEY = '@finzo_last_known_config';
+const LAST_KNOWN_CONFIG_KEY = '@loanpilot_last_known_config';
 
 class RealtimeConfigService {
   constructor() {
@@ -42,8 +42,8 @@ class RealtimeConfigService {
   async _attachRtdbListener(retryCount = 0) {
     try {
       const { getDatabase, ref } = require('@react-native-firebase/database');
-      const db = getDatabase(undefined, 'https://finzo-app-calc-default-rtdb.firebaseio.com');
-      const rootRef = ref(db, '/');
+      const db = getDatabase(undefined, 'https://loanpilot-56c75-default-rtdb.asia-southeast1.firebasedatabase.app');
+      const rootRef = ref(db, '/config');
 
       const onValueChange = rootRef.on('value', (snapshot) => {
         const val = snapshot.val();

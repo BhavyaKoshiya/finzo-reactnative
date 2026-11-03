@@ -1,6 +1,6 @@
 # LOAN REMINDER & DUE TRACKING ARCHITECTURE (PHASE 16.6 & 16.6.1)
 
-This document specifies the architectural model, rules, and privacy boundaries for Finzo's **Loan Payment Reminders & Payment Due Tracking** system using `@notifee/react-native`.
+This document specifies the architectural model, rules, and privacy boundaries for LoanPilot's **Loan Payment Reminders & Payment Due Tracking** system using `@notifee/react-native`.
 
 ---
 

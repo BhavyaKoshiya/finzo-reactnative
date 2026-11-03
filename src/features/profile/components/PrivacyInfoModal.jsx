@@ -61,7 +61,7 @@ export const PrivacyInfoModal = ({ visible, onClose }) => {
                 Privacy & Data
               </AppText>
               <AppText variant="caption" color={currentTheme.textSecondary}>
-                Finzo is designed to keep your financial data on your device.
+                LoanPilot is designed to keep your financial data on your device.
               </AppText>
             </View>
             <TouchableOpacity

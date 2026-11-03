@@ -1,5 +1,5 @@
 /**
- * Central configuration constants for Finzo Rewards system.
+ * Central configuration constants for LoanPilot Rewards system.
  */
 export const DAILY_CHECKIN_POINTS = 20;
 export const MAX_REWARD_HISTORY = 100;
@@ -27,7 +27,7 @@ export const REDEEMABLE_REWARDS = [
     id: 'ad_free_1h',
     type: 'ad_free',
     title: '1 Hour Ad-Free',
-    description: 'Enjoy Finzo completely ad-free for 1 hour.',
+    description: 'Enjoy LoanPilot completely ad-free for 1 hour.',
     durationMinutes: 60,
     pointsCost: 50,
   },
@@ -35,7 +35,7 @@ export const REDEEMABLE_REWARDS = [
     id: 'ad_free_6h',
     type: 'ad_free',
     title: '6 Hours Ad-Free',
-    description: 'Enjoy Finzo completely ad-free for 6 hours.',
+    description: 'Enjoy LoanPilot completely ad-free for 6 hours.',
     durationMinutes: 360,
     pointsCost: 150,
   },
@@ -43,7 +43,7 @@ export const REDEEMABLE_REWARDS = [
     id: 'ad_free_24h',
     type: 'ad_free',
     title: '24 Hours Ad-Free',
-    description: 'Enjoy Finzo completely ad-free for 24 hours.',
+    description: 'Enjoy LoanPilot completely ad-free for 24 hours.',
     durationMinutes: 1440,
     pointsCost: 400,
   },

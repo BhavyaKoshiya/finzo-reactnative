@@ -1,5 +1,5 @@
 /**
- * Print-Friendly CSS Stylesheet for Finzo HTML-to-PDF Reports.
+ * Print-Friendly CSS Stylesheet for LoanPilot HTML-to-PDF Reports.
  * Provides clean typography, executive branding, responsive layout,
  * aligned numeric columns, and repeated headers for paginated schedules.
  */

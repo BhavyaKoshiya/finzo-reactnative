@@ -31,12 +31,12 @@ import PrimaryButton from '../../../components/buttons/PrimaryButton';
 import { useAppTheme } from '../../../hooks/useAppTheme';
 
 export const PUBLIC_PRIVACY_POLICY_URL =
-  'https://binarykode-technologies.web.app/pages/finzo-privacy-policy.html';
+  'https://varnicreations.blogspot.com/2026/11/loanpilot-privacy-policy.html';
 
 /**
  * In-App Privacy Policy Screen.
- * Authoritative alignment with the public Finzo Privacy Policy:
- * https://binarykode-technologies.web.app/pages/finzo-privacy-policy.html
+ * Authoritative alignment with the public LoanPilot Privacy Policy:
+ * https://varnicreations.blogspot.com/2026/11/loanpilot-privacy-policy.html
  */
 export const PrivacyPolicyScreen = ({ navigation }) => {
   const { currentTheme } = useAppTheme();
@@ -58,7 +58,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
       header={
         <AppHeader
           title="Privacy Policy"
-          subtitle="Finzo — Personal Finance & Loan Calculator"
+          subtitle="LoanPilot — Personal Finance & Loan Calculator"
           leftAction={{
             icon: ArrowLeft,
             onPress: () => navigation.goBack(),
@@ -98,7 +98,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
                 color={currentTheme.textSecondary}
                 style={{ marginTop: 2 }}
               >
-                Operated by BinaryKode Technologies
+                Operated by Varni Creation
               </AppText>
             </View>
           </View>
@@ -122,14 +122,14 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
           >
             Welcome to{' '}
             <AppText variant="bodySmall" style={{ fontWeight: '700' }}>
-              Finzo
+              LoanPilot
             </AppText>
             , developed and operated by{' '}
             <AppText variant="bodySmall" style={{ fontWeight: '700' }}>
-              BinaryKode Technologies
+              Varni Creation
             </AppText>{' '}
-            (&quot;BinaryKode&quot;, &quot;we&quot;, &quot;our&quot;, or
-            &quot;us&quot;). Finzo is a personal finance and loan management /
+            (&quot;we&quot;, &quot;our&quot;, or
+            &quot;us&quot;). LoanPilot is a personal finance and loan management /
             calculator mobile application created to help you calculate,
             organize, and plan your loans, payment schedules, and payoff goals.
           </AppText>
@@ -139,7 +139,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             style={styles.paragraph}
           >
             This Privacy Policy explains how information is stored, processed,
-            and handled when you use the Finzo mobile application.
+            and handled when you use the LoanPilot mobile application.
           </AppText>
         </AppCard>
 
@@ -161,7 +161,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={styles.paragraph}
           >
-            Finzo is built with a{' '}
+            LoanPilot is built with a{' '}
             <AppText variant="bodySmall" style={{ fontWeight: '700' }}>
               local-first architecture
             </AppText>{' '}
@@ -188,7 +188,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
               </AppText>
               We do not make misleading claims that &quot;no data is
               collected&quot; or that &quot;nothing leaves your device.&quot;
-              While your financial records remain stored on your device, Finzo
+              While your financial records remain stored on your device, LoanPilot
               utilizes standard third-party services for technical analytics,
               crash diagnostics, notifications, and advertising support as
               explained throughout this policy.
@@ -214,7 +214,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={styles.paragraph}
           >
-            When you use Finzo, you may voluntarily input detailed financial
+            When you use LoanPilot, you may voluntarily input detailed financial
             information to perform calculations and organize your records,
             including:
           </AppText>
@@ -253,7 +253,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             <AppText variant="bodySmall" style={{ fontWeight: '700' }}>
               primarily stored locally on your device
             </AppText>
-            . Finzo does not intentionally synchronize, copy, or upload your
+            . LoanPilot does not intentionally synchronize, copy, or upload your
             personal financial records to our remote database or configuration
             infrastructure.
           </AppText>
@@ -275,8 +275,8 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={styles.paragraph}
           >
-            Finzo stores your saved calculations, loans, payment logs, and user
-            preferences locally within sandboxed storage allocated to Finzo on
+            LoanPilot stores your saved calculations, loans, payment logs, and user
+            preferences locally within sandboxed storage allocated to LoanPilot on
             your device.
           </AppText>
           <AppText
@@ -284,7 +284,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={styles.paragraph}
           >
-            Where supported, Finzo uses platform security features provided by
+            Where supported, LoanPilot uses platform security features provided by
             your mobile operating system to protect sensitive information stored
             on the device. While industry-standard mobile security protections
             are utilized, no electronic storage environment can guarantee
@@ -310,7 +310,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={styles.paragraph}
           >
-            Finzo may use remote application configuration services to retrieve
+            LoanPilot may use remote application configuration services to retrieve
             general application settings, feature availability, advertising
             settings, and application update requirements.
           </AppText>
@@ -344,7 +344,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={styles.paragraph}
           >
-            Finzo may use analytics services (such as Google Firebase Analytics)
+            LoanPilot may use analytics services (such as Google Firebase Analytics)
             to understand how the application is used, improve features, and
             measure application performance. These services may process
             technical and usage information such as app interactions, device
@@ -355,7 +355,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textPrimary}
             style={[styles.paragraph, { fontWeight: '600' }]}
           >
-            Finzo does not intentionally send your loan balances, payment
+            LoanPilot does not intentionally send your loan balances, payment
             records, loan amounts, interest rates, private notes, credentials,
             or other sensitive financial records to analytics services.
           </AppText>
@@ -377,7 +377,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={styles.paragraph}
           >
-            Finzo may use crash-reporting services (such as Google Firebase
+            LoanPilot may use crash-reporting services (such as Google Firebase
             Crashlytics) to identify crashes, errors, and technical problems.
             These services process diagnostic data such as device type,
             operating system, application version, and technical crash stack
@@ -388,7 +388,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={styles.paragraph}
           >
-            Finzo does not intentionally attach your financial records,
+            LoanPilot does not intentionally attach your financial records,
             credentials, or private notes to crash diagnostic reports.
           </AppText>
         </AppCard>
@@ -409,7 +409,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={styles.paragraph}
           >
-            If you choose to enable notifications, Finzo may use a notification
+            If you choose to enable notifications, LoanPilot may use a notification
             service (such as Firebase Cloud Messaging) to deliver operational
             notices and informational notifications to your device. The service
             processes technical tokens necessary to route messages to your
@@ -420,7 +420,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={styles.paragraph}
           >
-            Finzo does not intentionally include sensitive financial credentials
+            LoanPilot does not intentionally include sensitive financial credentials
             or confidential loan details in notification payloads.
           </AppText>
         </AppCard>
@@ -441,7 +441,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={styles.paragraph}
           >
-            Finzo is supported in part by digital advertising. The application
+            LoanPilot is supported in part by digital advertising. The application
             may display banner, native, interstitial, and rewarded
             advertisements.
           </AppText>
@@ -457,7 +457,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
           </AppText>
           <View style={styles.bulletList}>
             <AppText variant="bodySmall" color={currentTheme.textPrimary}>
-              • Finzo does not intentionally provide your financial records,
+              • LoanPilot does not intentionally provide your financial records,
               payment history, loan balances, private notes, or credentials to
               advertising providers.
             </AppText>
@@ -486,7 +486,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={styles.paragraph}
           >
-            Finzo requires an active internet connection for certain application
+            LoanPilot requires an active internet connection for certain application
             functionality, including advertising delivery, application
             configuration, checking for app updates, and receiving
             notifications.
@@ -517,7 +517,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={styles.paragraph}
           >
-            Finzo allows you to generate PDF reports containing your loan
+            LoanPilot allows you to generate PDF reports containing your loan
             calculations and schedules. These PDF documents are generated
             locally on your device. Credentials and private secrets are not
             intentionally included in exported files.
@@ -550,7 +550,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textPrimary}
             style={[styles.paragraph, { fontWeight: '700' }]}
           >
-            Finzo does not sell your personal financial records.
+            LoanPilot does not sell your personal financial records.
           </AppText>
           <AppText
             variant="bodySmall"
@@ -608,7 +608,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
                 Storage Reset / Uninstall:
               </AppText>{' '}
               Clearing application storage via your device settings or
-              uninstalling Finzo deletes locally stored app records according to
+              uninstalling LoanPilot deletes locally stored app records according to
               your operating system.
             </AppText>
           </View>
@@ -617,7 +617,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={[styles.paragraph, { marginTop: 10 }]}
           >
-            Because Finzo does not operate an account-based cloud database for
+            Because LoanPilot does not operate an account-based cloud database for
             your financial records, there is no remote server copy retained once
             records are removed from your device.
           </AppText>
@@ -641,11 +641,11 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={styles.paragraph}
           >
-            Finzo is designed for general audiences managing personal or
+            LoanPilot is designed for general audiences managing personal or
             business finances and is not specifically directed to children under
             13. We do not knowingly collect personal information from children.
             If you believe a child has provided personal information to us,
-            please contact us at bhavyakoshiya.work@gmail.com.
+            please contact us at play.varni@gmail.com.
           </AppText>
         </AppCard>
 
@@ -665,7 +665,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={styles.paragraph}
           >
-            Finzo integrates third-party services to support technical
+            LoanPilot integrates third-party services to support technical
             operations, diagnostics, and app monetization:
           </AppText>
           <View style={styles.bulletList}>
@@ -703,7 +703,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={styles.paragraph}
           >
-            You have full control over your privacy when using Finzo:
+            You have full control over your privacy when using LoanPilot:
           </AppText>
           <View style={styles.bulletList}>
             <AppText variant="bodySmall" color={currentTheme.textPrimary}>
@@ -736,7 +736,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
                 Uninstall Application:
               </AppText>{' '}
               Completely remove all locally stored app data by uninstalling
-              Finzo from your device.
+              LoanPilot from your device.
             </AppText>
           </View>
         </AppCard>
@@ -795,18 +795,11 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             ]}
           >
             <AppText variant="bodyMedium" style={{ fontWeight: '800' }}>
-              BinaryKode Technologies
-            </AppText>
-            <AppText
-              variant="bodySmall"
-              color={currentTheme.textSecondary}
-              style={{ marginTop: 2 }}
-            >
-              Surat, Gujarat, India - 394101
+              Varni Creation
             </AppText>
             <TouchableOpacity
               onPress={() =>
-                Linking.openURL('mailto:bhavyakoshiya.work@gmail.com')
+                Linking.openURL('mailto:play.varni@gmail.com')
               }
               activeOpacity={0.7}
               style={{ marginTop: 6 }}
@@ -816,7 +809,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
                 color={currentTheme.primary}
                 style={{ fontWeight: '700' }}
               >
-                📧 bhavyakoshiya.work@gmail.com
+                📧 play.varni@gmail.com
               </AppText>
             </TouchableOpacity>
             <AppText
@@ -824,7 +817,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
               color={currentTheme.textSecondary}
               style={{ marginTop: 4 }}
             >
-              Application: Finzo — Personal Finance & Loan Calculator
+              Application: LoanPilot — Personal Finance & Loan Calculator
             </AppText>
           </View>
         </AppCard>
@@ -885,7 +878,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
                 ANALYTICS
               </AppText>
               <AppText variant="caption" color={currentTheme.textSecondary}>
-                Used to understand app usage & improve Finzo; financial data is
+                Used to understand app usage & improve LoanPilot; financial data is
                 strictly excluded.
               </AppText>
             </View>
@@ -951,7 +944,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
                 ADVERTISING
               </AppText>
               <AppText variant="caption" color={currentTheme.textSecondary}>
-                Used to support Finzo; networks process device data, not your
+                Used to support LoanPilot; networks process device data, not your
                 financial entries.
               </AppText>
             </View>

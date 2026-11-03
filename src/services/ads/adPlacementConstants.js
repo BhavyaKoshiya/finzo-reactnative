@@ -1,5 +1,5 @@
 /**
- * Centralized Placement IDs for Finzo Advertising Architecture.
+ * Centralized Placement IDs for LoanPilot Advertising Architecture.
  * Prevents string literal scattering across UI components.
  * Future real ad unit IDs (AdMob / AppLovin / Unity) map centrally to these placement IDs.
  */

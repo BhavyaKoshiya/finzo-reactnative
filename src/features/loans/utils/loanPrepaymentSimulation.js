@@ -69,6 +69,39 @@ export const simulateSchedule = ({ balance, annualRate, monthlyEmi, maxMonths = 
 };
 
 /**
+ * Resolves a loan's remaining tenure in months from its balance, rate and EMI.
+ * The stored remainingTenure is only a fallback: the Add Loan form saves it as 0 and
+ * recorded EMIs never decrement it, so it is missing or stale for most loans.
+ * @param {Object} loan - Loan profile
+ * @param {number|null} [balance=null] - Opening balance; defaults to the loan's current outstanding principal
+ * @returns {number} Remaining months (0 when it cannot be determined)
+ */
+export const resolveRemainingTenureMonths = (loan, balance = null) => {
+  if (!loan) return 0;
+
+  const openingBalance = balance !== null && balance !== undefined
+    ? Number(balance) || 0
+    : (Number(loan.currentOutstandingPrincipal) || Number(loan.originalPrincipal) || 0);
+  const emi = Number(loan.emiAmount) || 0;
+
+  if (openingBalance > 0 && emi > 0) {
+    const schedule = simulateSchedule({
+      balance: openingBalance,
+      annualRate: loan.annualInterestRate,
+      monthlyEmi: emi,
+      maxMonths: 600,
+    });
+    if (!schedule.warning && schedule.months > 0) {
+      return schedule.months;
+    }
+  }
+
+  const stored = loan.remainingTenure || {};
+  const storedValue = Number(stored.value) || 0;
+  return stored.unit === 'years' ? storedValue * 12 : storedValue;
+};
+
+/**
  * Recalculates required monthly EMI for a remaining principal and tenure.
  * @param {number} principal
  * @param {number} annualRate

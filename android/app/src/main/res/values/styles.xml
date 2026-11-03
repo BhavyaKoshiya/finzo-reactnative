@@ -3,7 +3,7 @@
         <!-- Customize your theme here. -->
         <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
         <!-- Prevent MIUI/Android Force Dark from overriding ad SDK views.
-             Finzo already handles dark mode natively via DayNight theme,
+             LoanPilot already handles dark mode natively via DayNight theme,
              so Force Dark is unnecessary and causes ad content to render invisible. -->
         <item name="android:forceDarkAllowed">false</item>
     </style>

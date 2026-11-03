@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { RATE_ADJUSTMENT_STRATEGIES, createRateRevision } from '../types/rateRevisionTypes';
 import { applyRateRevision } from '../utils/applyRateRevision';
+import { resolveRemainingTenureMonths } from '../utils/loanPrepaymentSimulation';
 
 export const useRateRevisionForm = ({
   loan = null,
@@ -10,11 +11,8 @@ export const useRateRevisionForm = ({
 
   const currentRate = Number(loan?.annualInterestRate) || 0;
   const currentEmi = Number(loan?.emiAmount) || 0;
-  const remainingTenure = loan?.remainingTenure || {};
-  const currentRemainingTenureMonths = remainingTenure.unit === 'years'
-    ? (Number(remainingTenure.value) || 0) * 12
-    : (Number(remainingTenure.value) || 0);
   const currentOutstanding = Number(loan?.currentOutstandingPrincipal) || Number(loan?.originalPrincipal) || 0;
+  const currentRemainingTenureMonths = resolveRemainingTenureMonths(loan, currentOutstanding);
 
   // Form states
   const [newRate, setNewRate] = useState(

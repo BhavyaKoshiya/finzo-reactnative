@@ -1,12 +1,12 @@
-# Google Play Data Safety Console Guide — Finzo
+# Google Play Data Safety Console Guide — LoanPilot
 
-This document contains the exact declarations and evidence required to manually complete the **Data Safety** questionnaire in Google Play Console for **Finzo** (`com.finzo.financecalculator`).
+This document contains the exact declarations and evidence required to manually complete the **Data Safety** questionnaire in Google Play Console for **LoanPilot** (`com.loanpilot.app`).
 
 ---
 
 ## 1. Executive Summary & Core Architectural Principle
 
-Finzo is an **offline-first financial calculator and planning utility**.
+LoanPilot is an **offline-first financial calculator and planning utility**.
 * **Financial Data**: 100% stored locally on-device (`@react-native-async-storage/async-storage` and `react-native-keychain`). **Zero financial records, loan amounts, account numbers, or notes are transmitted to any backend, server, or third party.**
 * **Remote Services**: Used strictly for configuration (`Firebase RTDB` - read-only), analytics (`Firebase Analytics`), crash reporting (`Firebase Crashlytics`), notifications (`Firebase Cloud Messaging`), and advertising (`Google Mobile Ads` / `react-native-marketing-plugin`).
 
@@ -27,9 +27,9 @@ Finzo is an **offline-first financial calculator and planning utility**.
 ### A. Financial Info
 | Data Type | Collected? | Shared? | Processing | Purpose | Code Verification |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **User payment info (Credit/Debit Card)** | **NO** | **NO** | N/A | N/A | Finzo does not process payments or collect payment card info. |
+| **User payment info (Credit/Debit Card)** | **NO** | **NO** | N/A | N/A | LoanPilot does not process payments or collect payment card info. |
 | **Purchase history** | **NO** | **NO** | N/A | N/A | No in-app purchases. |
-| **Credit score / Credit info** | **NO** | **NO** | N/A | N/A | Finzo is not a lender or credit bureau. |
+| **Credit score / Credit info** | **NO** | **NO** | N/A | N/A | LoanPilot is not a lender or credit bureau. |
 | **Other financial info (Loans, Balances)** | **NO (Not collected off-device)** | **NO** | **On-device only** | App Functionality (Local Only) | Financial records are stored exclusively in SQLite / AsyncStorage on device. Actively filtered from telemetry. |
 
 > **IMPORTANT**: Under Google Play policies, data that is stored and processed exclusively on the user's device and never transmitted off the device does **NOT** count as "Collected" for Data Safety disclosure.
@@ -47,7 +47,7 @@ Finzo is an **offline-first financial calculator and planning utility**.
 ### C. Personal Info
 | Data Type | Collected? | Shared? | Purpose | Code Verification |
 | :--- | :--- | :--- | :--- | :--- |
-| **Name, Email, Address, Phone Number** | **NO** | **NO** | N/A | Finzo has no user registration, login, or user profiles on a server. |
+| **Name, Email, Address, Phone Number** | **NO** | **NO** | N/A | LoanPilot has no user registration, login, or user profiles on a server. |
 | **User IDs / Account Identifiers** | **NO** | **NO** | N/A | No user accounts. |
 
 ---

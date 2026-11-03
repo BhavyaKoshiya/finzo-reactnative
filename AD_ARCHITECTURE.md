@@ -1,6 +1,6 @@
-# Finzo — Advertising Architecture & Provider Specification (Feature-Frozen)
+# LoanPilot — Advertising Architecture & Provider Specification (Feature-Frozen)
 
-This document outlines the provider-agnostic, moderate, privacy-first advertising architecture for the **Finzo** application.
+This document outlines the provider-agnostic, moderate, privacy-first advertising architecture for the **LoanPilot** application.
 
 > **⚠️ ARCHITECTURE & PLACEMENT FREEZE (Phase 23)**: The advertising architecture, placement map, and `adTime` opportunity engine are **FEATURE-FROZEN**. Do NOT introduce new ad placements, ad networks, or alternative frequency models.
 
@@ -8,7 +8,7 @@ This document outlines the provider-agnostic, moderate, privacy-first advertisin
 
 ## 1. Overview & Core Philosophy
 
-Finzo is an offline-first financial calculator and loan tracking utility.
+LoanPilot is an offline-first financial calculator and loan tracking utility.
 - **Financial Integrity**: Financial workflows (recording payments, editing loans, balance correction, private notes, credentials, PDF exports) are **100% AD-FREE**.
 - **Privacy First**: Zero financial data (loan amounts, EMIs, interest rates, account numbers, balances, payment history) is ever passed to the advertising layer or external services.
 - **Swappable Infrastructure**: React Native screens do not depend directly on any specific advertising SDK (e.g. AdMob, AppLovin, Unity Ads). All screens interact through `adService` and `AdPlacement`.
@@ -17,7 +17,7 @@ Finzo is an offline-first financial calculator and loan tracking utility.
 
 ## 2. Supported Ad Types
 
-Finzo supports 4 standardized ad types built upon a common provider interface:
+LoanPilot supports 4 standardized ad types built upon a common provider interface:
 
 1. **BANNER AD (`banner`)**: Compact, predictable height (~54px) horizontal placement.
 2. **NATIVE AD (`native`)**: Card integrated naturally into content flows, styled with `Sponsored` badge, headline, description, and CTA.
@@ -177,7 +177,7 @@ They **NEVER** receive: loan amounts, EMIs, interest rates, balances, payment hi
 
 ## 10. Real Provider Replacement Path
 
-When Finzo obtains ad network approvals in the future:
+When LoanPilot obtains ad network approvals in the future:
 1. Provision the approved SDK (AdMob / AppLovin / Unity).
 2. Implement `ApprovedAdProvider` methods mapping `placementId` to real ad units.
 3. No UI screen or component changes will be required.

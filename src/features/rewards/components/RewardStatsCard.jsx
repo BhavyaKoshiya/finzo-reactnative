@@ -37,7 +37,7 @@ export const RewardStatsCard = ({
         </View>
         <View style={styles.heroTextGroup}>
           <AppText variant="caption" color={currentTheme.primary} style={styles.heroBadgeTitle}>
-            FINZO POINTS ACCUMULATED
+            LOANPILOT POINTS ACCUMULATED
           </AppText>
           <AppText variant="screenTitle" color={currentTheme.textPrimary} style={styles.pointsValue}>
             {points.toLocaleString('en-IN')}{' '}

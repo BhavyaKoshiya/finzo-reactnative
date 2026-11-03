@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 
 /**
- * Normalized Internal Report Model for Finzo PDF Generation.
+ * Normalized Internal Report Model for LoanPilot PDF Generation.
  * Decouples calculation/loan business logic from PDF HTML rendering.
  */
 
@@ -47,7 +47,7 @@ export const createSection = ({
 });
 
 export const createReportModel = ({
-  title = 'Finzo Financial Report',
+  title = 'LoanPilot Financial Report',
   subtitle = 'Financial Summary',
   reportType = REPORT_TYPES.CALCULATOR,
   calculatorType = null,
@@ -57,13 +57,13 @@ export const createReportModel = ({
   summaryCards = [],
   sections = [],
   assumptions = [],
-  disclaimer = "Finzo estimates are based on the information provided and may differ from your lender's actual calculations, dates, charges, or statements.",
+  disclaimer = "LoanPilot estimates are based on the information provided and may differ from your lender's actual calculations, dates, charges, or statements.",
 }) => {
   const dateObj = generatedAt instanceof Date ? generatedAt : new Date(generatedAt);
   const formattedDate = !isNaN(dateObj.getTime()) ? format(dateObj, 'dd MMM yyyy, hh:mm a') : format(new Date(), 'dd MMM yyyy, hh:mm a');
   const dateISO = !isNaN(dateObj.getTime()) ? format(dateObj, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd');
 
-  const defaultFileName = fileName || `Finzo_${title.replace(/[^a-zA-Z0-9_-]/g, '_')}_${dateISO}.pdf`;
+  const defaultFileName = fileName || `LoanPilot_${title.replace(/[^a-zA-Z0-9_-]/g, '_')}_${dateISO}.pdf`;
 
   return {
     title: String(title).trim(),

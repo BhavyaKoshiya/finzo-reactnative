@@ -19,7 +19,7 @@ export const LocalDataPrivacyScreen = ({ navigation }) => {
       header={
         <AppHeader
           title="Privacy & Local Data"
-          subtitle="How Finzo Protects Your Financial Information"
+          subtitle="How LoanPilot Protects Your Financial Information"
           leftAction={{ icon: ArrowLeft, onPress: () => navigation.goBack() }}
         />
       }

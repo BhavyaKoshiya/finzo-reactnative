@@ -1,12 +1,12 @@
-# Finzo — Local Privacy & Data Firewall Architecture
+# LoanPilot — Local Privacy & Data Firewall Architecture
 
-This document documents Finzo's offline-first privacy model and financial data firewall boundaries.
+This document documents LoanPilot's offline-first privacy model and financial data firewall boundaries.
 
 ---
 
 ## 1. Zero Backend / Offline-First Principles
 
-Finzo operates entirely on the user's device.
+LoanPilot operates entirely on the user's device.
 - **No User Accounts**: No registration, login, or personal profile tracking.
 - **No Remote Database**: User financial data (loan profiles, balances, EMIs, payments, notes, credentials) is saved strictly in local device storage via `@react-native-async-storage/async-storage` and Secure Store.
 

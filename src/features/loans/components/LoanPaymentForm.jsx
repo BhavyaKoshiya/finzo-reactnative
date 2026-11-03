@@ -116,7 +116,7 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
                   label="Bank's Exact New EMI (Optional)"
                   value={form.exactNewEmi}
                   onChangeValue={form.setExactNewEmi}
-                  placeholder="Leave blank for Finzo's estimate"
+                  placeholder="Leave blank for LoanPilot's estimate"
                 />
                 <View style={styles.brokenPeriodHint}>
                   <AppIcon icon={Info} size={12} color={currentTheme.textMuted} style={{ marginRight: 5, marginTop: 1 }} />
@@ -132,7 +132,7 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
                   value={form.exactNewTenureMonths}
                   onChangeText={form.setExactNewTenureMonths}
                   keyboardType="numeric"
-                  placeholder="e.g. 42 (Leave blank for Finzo's estimate)"
+                  placeholder="e.g. 42 (Leave blank for LoanPilot's estimate)"
                 />
                 <View style={styles.brokenPeriodHint}>
                   <AppIcon icon={Info} size={12} color={currentTheme.textMuted} style={{ marginRight: 5, marginTop: 1 }} />
@@ -157,7 +157,7 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
           <View style={styles.warningRow}>
             <AppIcon icon={AlertTriangle} size={14} color={currentTheme.warning} style={{ marginRight: 6 }} />
             <AppText variant="caption" color={currentTheme.warning} style={{ fontWeight: '600', flex: 1 }}>
-              Payment exceeds Finzo's estimated outstanding balance.
+              Payment exceeds LoanPilot's estimated outstanding balance.
             </AppText>
           </View>
         )}
@@ -201,7 +201,7 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
         <View style={styles.previewHeaderRow}>
           <AppIcon icon={Calculator} size={16} color={currentTheme.primary} style={{ marginRight: 6 }} />
           <AppText variant="cardTitle" color={currentTheme.primary} style={{ fontSize: 15, fontWeight: '700' }}>
-            Finzo Calculation Preview
+            LoanPilot Calculation Preview
           </AppText>
         </View>
 
@@ -287,7 +287,7 @@ export const LoanPaymentForm = ({ form, onSave, onCancel, currentLoanOutstanding
         </View>
 
         <AppText variant="caption" color={currentTheme.textMuted} style={styles.disclaimerText}>
-          Based on Finzo's estimate. Exact bank figures may vary slightly.
+          Based on LoanPilot's estimate. Exact bank figures may vary slightly.
         </AppText>
       </AppCard>
 

@@ -110,7 +110,7 @@ export const AppStartupGate = ({ children }) => {
 const styles = StyleSheet.create({
   gateContainer: {
     flex: 1,
-    backgroundColor: '#000B37', // Finzo brand background matching exact Android logo background
+    backgroundColor: '#0055FD', // LoanPilot brand background matching the launcher icon and splash
   },
 });
 

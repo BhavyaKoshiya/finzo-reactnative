@@ -7,7 +7,7 @@ import * as Keychain from 'react-native-keychain';
 class SecurePrivateStorageService {
   /**
    * Stores a sensitive secret value in platform secure storage.
-   * @param {string} key Loan-scoped key e.g. "finzo.loan.loan123.sensitive.password"
+   * @param {string} key Loan-scoped key e.g. "loanpilot.loan.loan123.sensitive.password"
    * @param {string} value Sensitive secret string
    * @returns {Promise<boolean>}
    */
@@ -20,7 +20,7 @@ class SecurePrivateStorageService {
     }
 
     try {
-      const result = await Keychain.setGenericPassword('finzo_secure_user', value, {
+      const result = await Keychain.setGenericPassword('loanpilot_secure_user', value, {
         service: key,
         accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
       });

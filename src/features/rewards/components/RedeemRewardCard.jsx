@@ -35,8 +35,8 @@ export const RedeemRewardCard = ({
     : `Need ${pointsNeeded} More Pts`;
 
   const accessibilityLabelText = isAffordable
-    ? `Redeem ${reward.title} for ${priceInfo.finalPointsCost} Finzo points.`
-    : `${reward.title}. Requires ${priceInfo.finalPointsCost} Finzo points. You need ${pointsNeeded} more points.`;
+    ? `Redeem ${reward.title} for ${priceInfo.finalPointsCost} LoanPilot points.`
+    : `${reward.title}. Requires ${priceInfo.finalPointsCost} LoanPilot points. You need ${pointsNeeded} more points.`;
 
   return (
     <AppCard style={[styles.card, style]}>

@@ -66,7 +66,7 @@ export const RewardCard = ({
               {copy.todayRewardLabel.toUpperCase()}
             </AppText>
             <AppText variant="cardTitle" color={currentTheme.textPrimary} style={styles.todayPointsText}>
-              +{copy.todayPoints} <AppText variant="caption" color={currentTheme.textSecondary}>Finzo Points</AppText>
+              +{copy.todayPoints} <AppText variant="caption" color={currentTheme.textSecondary}>LoanPilot Points</AppText>
             </AppText>
           </View>
           <AppIcon icon={Sparkles} size={20} color={currentTheme.primary} />
@@ -140,7 +140,7 @@ export const RewardCard = ({
         <PrimaryButton
           title={copy.claimButtonText}
           onPress={onClaim}
-          accessibilityLabel={`Claim daily check-in reward. Earn ${copy.todayPoints} Finzo points`}
+          accessibilityLabel={`Claim daily check-in reward. Earn ${copy.todayPoints} LoanPilot points`}
           style={styles.claimButton}
         />
       )}

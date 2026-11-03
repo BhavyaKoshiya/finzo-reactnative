@@ -60,6 +60,12 @@ export const validateLoanProfileInput = (inputs = {}) => {
   const emi = Number(inputs.emiAmount);
   if (isNaN(emi) || emi <= 0) {
     errors.emiAmount = 'Monthly EMI amount must be greater than zero.';
+  } else if (!errors.currentOutstandingPrincipal && !errors.annualInterestRate && outstanding > 0 && rate > 0) {
+    // An EMI that does not cover the first month's interest never pays the loan off
+    const monthlyInterest = Math.ceil((outstanding * rate) / 1200);
+    if (emi <= monthlyInterest) {
+      errors.emiAmount = `EMI must be more than the monthly interest of ₹${monthlyInterest.toLocaleString('en-IN')}. Please check the amount.`;
+    }
   }
 
   // 7. Original Tenure

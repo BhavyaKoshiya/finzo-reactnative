@@ -27,7 +27,7 @@ describe('Phase 11 — Share & PDF Export Subsystem Tests', () => {
       expect(shareText).toContain('My Dream House');
       expect(shareText).toContain('Monthly EMI: ₹43,391');
       expect(shareText).toContain('Loan Amount: ₹50,00,000');
-      expect(shareText).toContain('Calculated with Finzo');
+      expect(shareText).toContain('Calculated with LoanPilot');
     });
   });
 
@@ -108,12 +108,12 @@ describe('Phase 11 — Share & PDF Export Subsystem Tests', () => {
       const html = buildCalculationPdfHtml(model, 'detailed');
 
       expect(html).toContain('<!DOCTYPE html>');
-      expect(html).toContain('FINZO');
+      expect(html).toContain('LOANPILOT');
       expect(html).toContain('My &lt;Test&gt; Loan');
       expect(html).toContain('CALCULATION INPUTS');
       expect(html).toContain('Yearly Repayment Summary');
       expect(html).toContain('Monthly Amortization Schedule');
-      expect(html).toContain('Calculated with Finzo');
+      expect(html).toContain('Calculated with LoanPilot');
     });
   });
 });

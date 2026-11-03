@@ -2,7 +2,7 @@ import getPdfCss from './pdfStyles';
 import { renderTwoPartBreakdownHtml } from '../utils/pdfChartUtils';
 
 /**
- * HTML Template Renderer for Finzo PDF Reports.
+ * HTML Template Renderer for LoanPilot PDF Reports.
  * Converts a normalized reportModel into clean, print-friendly HTML.
  * @param {Object} reportModel Normalized report model
  * @returns {string} Complete HTML string
@@ -125,7 +125,7 @@ export const buildReportPdfHtml = (reportModel) => {
         ${
           assumptions.length > 0
             ? `
-          <div class="assumptions-title">How Finzo calculates these figures</div>
+          <div class="assumptions-title">How LoanPilot calculates these figures</div>
           <ul class="assumptions-list">
             ${assumptions.map((a) => `<li>${a}</li>`).join('')}
           </ul>
@@ -150,7 +150,7 @@ export const buildReportPdfHtml = (reportModel) => {
           <!-- Report Header -->
           <div class="report-header">
             <div>
-              <div class="brand-title">FINZO</div>
+              <div class="brand-title">LOANPILOT</div>
               <div class="brand-tagline">Financial Calculator & Loan Planner</div>
             </div>
             <div class="report-title-box">
@@ -170,7 +170,7 @@ export const buildReportPdfHtml = (reportModel) => {
 
           <!-- Footer -->
           <div class="report-footer">
-            <span>FINZO — Private financial record — generated locally</span>
+            <span>LOANPILOT — Private financial record — generated locally</span>
             <span>Document generated on ${generatedAt}</span>
           </div>
         </div>

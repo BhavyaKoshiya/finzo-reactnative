@@ -1,6 +1,6 @@
-# Finzo — Firebase Services Architecture & Data Firewall
+# LoanPilot — Firebase Services Architecture & Data Firewall
 
-This document outlines the architecture, data boundaries, and strict privacy firewalls governing all Firebase services integrated within **Finzo**.
+This document outlines the architecture, data boundaries, and strict privacy firewalls governing all Firebase services integrated within **LoanPilot**.
 
 ---
 
@@ -19,7 +19,7 @@ This document outlines the architecture, data boundaries, and strict privacy fir
 
 ```
 +-------------------------------------------------------------------------+
-|                              FINZO APPLICATION                          |
+|                              LOANPILOT APPLICATION                          |
 |                                                                         |
 |  +-------------------------------------------------------------------+  |
 |  |                     LOCAL FINANCIAL STORAGE                       |  |
@@ -81,7 +81,7 @@ This document outlines the architecture, data boundaries, and strict privacy fir
 - `environment` (`development` / `production`)
 
 ### Protection Rules
-- **No User Identification**: Finzo does NOT assign or invent user IDs for Crashlytics.
+- **No User Identification**: LoanPilot does NOT assign or invent user IDs for Crashlytics.
 - **No Redux Snapshots**: Redux state is NEVER serialized or attached to crash reports.
 - **Sanitized Context**: Error metadata passes through `sanitizeCrashlyticsAttributes`.
 

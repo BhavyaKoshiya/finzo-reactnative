@@ -4,7 +4,7 @@ import buildReportPdfHtml from '../templates/pdfHtmlRenderer';
 import logger from '../../../services/logger';
 
 /**
- * PDF Report Service for Finzo.
+ * PDF Report Service for LoanPilot.
  * Handles PDF rendering, local temporary file creation, and native system sharing.
  * 100% Offline & Local — No cloud uploads, no external network requests.
  */
@@ -19,9 +19,9 @@ export const generateReportPdf = async (reportModel) => {
     throw new Error('Report model is required for PDF generation.');
   }
 
-  const sanitizedTitle = (reportModel.title || 'Finzo_Report').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const sanitizedTitle = (reportModel.title || 'LoanPilot_Report').replace(/[^a-zA-Z0-9_-]/g, '_');
   const dateSuffix = reportModel.generatedAtISO || new Date().toISOString().split('T')[0];
-  const fileName = reportModel.fileName || `Finzo_${sanitizedTitle}_${dateSuffix}`;
+  const fileName = reportModel.fileName || `LoanPilot_${sanitizedTitle}_${dateSuffix}`;
 
   logger.info('Initiating PDF report generation', { title: reportModel.title, fileName });
 
@@ -56,10 +56,10 @@ export const generateReportPdf = async (reportModel) => {
 /**
  * Invokes native device Share sheet for generated PDF file.
  * @param {string} pdfFilePath File path or file:// URI
- * @param {string} [title='Finzo Financial Report'] Title for share dialog
+ * @param {string} [title='LoanPilot Financial Report'] Title for share dialog
  * @returns {Promise<Object>} { success: boolean, dismissed?: boolean }
  */
-export const shareReportPdf = async (pdfFilePath, title = 'Finzo Financial Report') => {
+export const shareReportPdf = async (pdfFilePath, title = 'LoanPilot Financial Report') => {
   if (!pdfFilePath) {
     throw new Error('PDF file path is required for sharing.');
   }
@@ -102,7 +102,7 @@ export const generateAndShareReport = async (reportModel) => {
   if (!filePath) {
     throw new Error('PDF generation failed to produce a valid file.');
   }
-  return shareReportPdf(filePath, reportModel.title || 'Finzo Report');
+  return shareReportPdf(filePath, reportModel.title || 'LoanPilot Report');
 };
 
 export default {

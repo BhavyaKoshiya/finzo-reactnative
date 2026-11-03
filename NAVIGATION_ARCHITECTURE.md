@@ -1,6 +1,6 @@
-# Finzo — Navigation Architecture & Screen Hierarchy (Phase 18)
+# LoanPilot — Navigation Architecture & Screen Hierarchy (Phase 18)
 
-This document outlines the complete navigation structure, screen responsibilities, stack hierarchy, and entry point policies for **Finzo**.
+This document outlines the complete navigation structure, screen responsibilities, stack hierarchy, and entry point policies for **LoanPilot**.
 
 ---
 

@@ -310,7 +310,7 @@ export const MyLoansScreen = ({ route, navigation }) => {
                   placementId={AD_PLACEMENTS.HOME_NATIVE}
                   adType="native"
                   headline="Smart Loan Insights"
-                  description="Track EMIs, principal reduction & interest allocations offline with Finzo."
+                  description="Track EMIs, principal reduction & interest allocations offline with LoanPilot."
                 />
               </View>
             ) : null
@@ -346,7 +346,7 @@ export const MyLoansScreen = ({ route, navigation }) => {
               <EmptyState
                 icon={ShieldAlert}
                 title="Track Your Loans"
-                description="Add your existing loans to Finzo to keep your loan information organized."
+                description="Add your existing loans to LoanPilot to keep your loan information organized."
               />
               <PrimaryButton
                 title="Add Your First Loan"
@@ -478,7 +478,7 @@ export const MyLoansScreen = ({ route, navigation }) => {
                       screen="myLoans"
                       placementId={AD_PLACEMENTS.HOME_NATIVE}
                       adType="native"
-                      headline="Finzo Smart Calculations"
+                      headline="LoanPilot Smart Calculations"
                       description="Calculate loans, compare interest rates, and plan financial goals offline."
                     />
                   )}

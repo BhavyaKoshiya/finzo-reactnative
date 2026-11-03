@@ -161,7 +161,7 @@ export const LoanPrepaymentSimulatorScreen = ({ route, navigation }) => {
           <View style={[styles.badge, { backgroundColor: isBankConfirmed ? 'rgba(34, 197, 94, 0.12)' : 'rgba(148, 163, 184, 0.15)' }]}>
             <AppIcon icon={isBankConfirmed ? ShieldCheck : Info} size={12} color={isBankConfirmed ? currentTheme.success : currentTheme.textSecondary} style={{ marginRight: 4 }} />
             <AppText variant="caption" color={isBankConfirmed ? currentTheme.success : currentTheme.textSecondary} style={styles.badgeText}>
-              {isBankConfirmed ? 'Bank Confirmed' : 'Finzo Estimate'}
+              {isBankConfirmed ? 'Bank Confirmed' : 'LoanPilot Estimate'}
             </AppText>
           </View>
         </View>
@@ -398,7 +398,7 @@ export const LoanPrepaymentSimulatorScreen = ({ route, navigation }) => {
         {showHowItWorks && (
           <View style={styles.howBody}>
             <AppText variant="bodySmall" color={currentTheme.textSecondary} style={styles.howParagraph}>
-              • Starts from your active balance ({isBankConfirmed ? 'Bank Confirmed' : 'Finzo Estimate'}).
+              • Starts from your active balance ({isBankConfirmed ? 'Bank Confirmed' : 'LoanPilot Estimate'}).
             </AppText>
             <AppText variant="bodySmall" color={currentTheme.textSecondary} style={styles.howParagraph}>
               • Applies hypothetical prepayment 100% to principal reduction.

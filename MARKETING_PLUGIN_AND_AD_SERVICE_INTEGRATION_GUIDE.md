@@ -1,11 +1,11 @@
 # Marketing Plugin & Ad Service Integration Guide
-*A comprehensive guide for implementing the Finzo Ad Architecture & `react-native-marketing-plugin` in other React Native apps.*
+*A comprehensive guide for implementing the LoanPilot Ad Architecture & `react-native-marketing-plugin` in other React Native apps.*
 
 ---
 
 ## 1. Overview & Architectural Philosophy
 
-The Finzo Ad Architecture decouples user interface components and business logic from underlying advertising SDKs using the **Facade & Adapter Pattern**.
+The LoanPilot Ad Architecture decouples user interface components and business logic from underlying advertising SDKs using the **Facade & Adapter Pattern**.
 
 ### Core Architecture Pipeline
 ```

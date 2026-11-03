@@ -1,5 +1,5 @@
 /**
- * Default local fallback configuration for Finzo Realtime Config.
+ * Default local fallback configuration for LoanPilot Realtime Config.
  * Serves as the safe fallback when remote Firebase RTDB is offline, unavailable, or invalid.
  * Authoritative RTDB /config contract compliant.
  */
@@ -8,8 +8,8 @@ export const DEFAULT_APP_UPDATE_CONFIG = {
   forceUpdate: false,
   minimumVersion: '1.0.0',
   latestVersion: '1.0.0',
-  updateTitle: 'Update Finzo',
-  updateMessage: 'A newer version of Finzo is available. Update now to get the latest improvements.',
+  updateTitle: 'Update LoanPilot',
+  updateMessage: 'A newer version of LoanPilot is available. Update now to get the latest improvements.',
 };
 
 export const DEFAULT_ADS_CONFIG = {

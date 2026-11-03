@@ -1,7 +1,7 @@
-# LOAN_PROFILE_EDITING_ARCHITECTURE.md — Finzo Loan Profile Editing & Data Integrity Architecture
+# LOAN_PROFILE_EDITING_ARCHITECTURE.md — LoanPilot Loan Profile Editing & Data Integrity Architecture
 
 ## 1. Overview
-Finzo Phase 16.10 provides a secure, predictable, and audit-safe loan profile editing system (`src/features/loans/services/loanProfileUpdateService.js` & `src/features/loans/utils/loanProfileChangeUtils.js`).
+LoanPilot Phase 16.10 provides a secure, predictable, and audit-safe loan profile editing system (`src/features/loans/services/loanProfileUpdateService.js` & `src/features/loans/utils/loanProfileChangeUtils.js`).
 
 It separates **Profile Metadata** from **Ledger Replay Data** and **Historical Snapshots**, ensuring that updating a loan's name, interest rate, EMI, tenure, due day, or reminder preferences updates future projections without silently rewriting past payment records.
 

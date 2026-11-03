@@ -1,16 +1,16 @@
-# Finzo — App Update Architecture & Version Governance
+# LoanPilot — App Update Architecture & Version Governance
 
-This document specifies the remote-configured application update system for the **Finzo** mobile application.
+This document specifies the remote-configured application update system for the **LoanPilot** mobile application.
 
 ---
 
 ## 1. Overview & Core Philosophy
 
-Finzo implements a remote-configured version governance system powered by Firebase Realtime Database (`/config/appUpdate`).
+LoanPilot implements a remote-configured version governance system powered by Firebase Realtime Database (`/config/appUpdate`).
 
 ### Core Invariants
 1. **Version Policy Only in Firebase**: Firebase RTDB controls version thresholds (`minimumVersion`, `latestVersion`, `enabled`, `updateTitle`, `updateMessage`).
-2. **Store Destinations Belong to Application**: Store URLs and package intents (`com.finzo.financecalculator`) are strictly centralized in `appStoreService.js` and are NEVER stored in Firebase.
+2. **Store Destinations Belong to Application**: Store URLs and package intents (`com.loanpilot.app`) are strictly centralized in `appStoreService.js` and are NEVER stored in Firebase.
 3. **Fail-Safe Operation**: Missing, null, malformed, or unreachable remote configurations default to `UPDATE_TYPES.NONE`, ensuring users are never accidentally locked out of their local financial records.
 4. **Offline Precedence**: When offline (`isOnline === false`), `ConnectivityGate` displays `InternetRequiredScreen`. The update gate is only evaluated when online connectivity is confirmed.
 
@@ -25,8 +25,8 @@ Path in Firebase Realtime Database: `/config/appUpdate`
   "enabled": true,
   "minimumVersion": "1.0.0",
   "latestVersion": "1.0.0",
-  "updateTitle": "Update Finzo",
-  "updateMessage": "A newer version of Finzo is required to continue using the application."
+  "updateTitle": "Update LoanPilot",
+  "updateMessage": "A newer version of LoanPilot is required to continue using the application."
 }
 ```
 
@@ -45,7 +45,7 @@ Path in Firebase Realtime Database: `/config/appUpdate`
 |---|---|---|---|
 | `installed >= latestVersion` | `NONE` | Normal application access | N/A |
 | `installed >= minimum` AND `installed < latest` | `OPTIONAL` | "Update Available" modal with "Update Now" & "Not Now" | YES (session-scoped) |
-| `installed < minimumVersion` | `MANDATORY` | "Update Finzo" locking modal with "Update Now" | NO (Back blocked) |
+| `installed < minimumVersion` | `MANDATORY` | "Update LoanPilot" locking modal with "Update Now" | NO (Back blocked) |
 | `enabled === false` | `NONE` | Normal application access | N/A |
 | Malformed / Unreachable Config | `NONE` | Safe fallback to normal app access | N/A |
 
@@ -78,8 +78,8 @@ Mandatory Update?
 Store URLs are managed exclusively in `src/services/appStoreService.js`:
 
 - **Android**:
-  - Primary Intent: `market://details?id=com.finzo.financecalculator`
-  - Fallback Web: `https://play.google.com/store/apps/details?id=com.finzo.financecalculator`
+  - Primary Intent: `market://details?id=com.loanpilot.app`
+  - Fallback Web: `https://play.google.com/store/apps/details?id=com.loanpilot.app`
 - **iOS**:
-  - Primary Intent: `itms-apps://apps.apple.com/app/id[FINZO_IOS_APP_ID_PLACEHOLDER]`
-  - Fallback Web: `https://apps.apple.com/app/id[FINZO_IOS_APP_ID_PLACEHOLDER]`
+  - Primary Intent: `itms-apps://apps.apple.com/app/id[LOANPILOT_IOS_APP_ID_PLACEHOLDER]`
+  - Fallback Web: `https://apps.apple.com/app/id[LOANPILOT_IOS_APP_ID_PLACEHOLDER]`

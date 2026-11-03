@@ -132,8 +132,8 @@ class AppUpdateService {
       installedVersion,
       minimumVersion: installedVersion,
       latestVersion: installedVersion,
-      title: 'Update Finzo',
-      message: 'A newer version of Finzo is available.',
+      title: 'Update LoanPilot',
+      message: 'A newer version of LoanPilot is available.',
     };
 
     if (!rawConfig || typeof rawConfig !== 'object') {
@@ -164,12 +164,12 @@ class AppUpdateService {
     const title =
       typeof rawConfig.updateTitle === 'string' && rawConfig.updateTitle.trim()
         ? rawConfig.updateTitle.trim()
-        : 'Update Finzo';
+        : 'Update LoanPilot';
 
     const defaultMandatoryMessage =
-      'A newer version of Finzo is required to continue using the app.';
+      'A newer version of LoanPilot is required to continue using the app.';
     const defaultOptionalMessage =
-      'A newer version of Finzo is available with improvements.';
+      'A newer version of LoanPilot is available with improvements.';
 
     const customMessage =
       typeof rawConfig.updateMessage === 'string' &&

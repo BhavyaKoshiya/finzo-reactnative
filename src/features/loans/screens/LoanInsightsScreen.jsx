@@ -169,7 +169,7 @@ export const LoanInsightsScreen = ({ route, navigation }) => {
                 color={isBankConfirmed ? '#86EFAC' : '#FDE68A'}
                 style={{ fontWeight: '700', fontSize: 11 }}
               >
-                {isBankConfirmed ? 'Bank Confirmed' : 'Finzo Estimate'}
+                {isBankConfirmed ? 'Bank Confirmed' : 'LoanPilot Estimate'}
               </AppText>
             </View>
           </View>
@@ -549,13 +549,13 @@ export const LoanInsightsScreen = ({ route, navigation }) => {
         )}
       </AppCard>
 
-      {/* 6. HOW FINZO CALCULATES INSIGHTS (ACCORDION) */}
+      {/* 6. HOW LOANPILOT CALCULATES INSIGHTS (ACCORDION) */}
       <AppCard style={styles.assumptionsCard}>
         <TouchableOpacity
           onPress={() => setShowAssumptions(!showAssumptions)}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel="Toggle how Finzo calculates these insights explanation"
+          accessibilityLabel="Toggle how LoanPilot calculates these insights explanation"
           style={styles.assumptionsHeader}
         >
           <View style={styles.accordionHeaderTitle}>
@@ -569,7 +569,7 @@ export const LoanInsightsScreen = ({ route, navigation }) => {
               variant="bodyMedium"
               style={{ fontWeight: '700', flex: 1 }}
             >
-              How Finzo calculates these insights
+              How LoanPilot calculates these insights
             </AppText>
           </View>
           <AppIcon
@@ -589,7 +589,7 @@ export const LoanInsightsScreen = ({ route, navigation }) => {
               • Balance source:{' '}
               {isBankConfirmed
                 ? 'Bank Confirmed balance'
-                : 'Finzo estimated balance'}{' '}
+                : 'LoanPilot estimated balance'}{' '}
               (principal reduced: {formatCurrency(principalReduced)}).
             </AppText>
             <AppText
@@ -623,7 +623,7 @@ export const LoanInsightsScreen = ({ route, navigation }) => {
                 color={currentTheme.textMuted}
                 style={styles.disclaimerText}
               >
-                Disclaimer: Finzo estimates are for informational planning
+                Disclaimer: LoanPilot estimates are for informational planning
                 purposes. Actual lender statements and calculations may vary.
               </AppText>
             </View>

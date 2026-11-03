@@ -1,6 +1,6 @@
-# MY LOANS ARCHITECTURE — FINZO
+# MY LOANS ARCHITECTURE — LOANPILOT
 
-This document details the architectural design, data domain separation, navigation flows, presentation segments, and privacy policies for the **My Loans Personal Financial Workspace** (Phase 16.1 + 16.2) in Finzo.
+This document details the architectural design, data domain separation, navigation flows, presentation segments, and privacy policies for the **My Loans Personal Financial Workspace** (Phase 16.1 + 16.2) in LoanPilot.
 
 ---
 

@@ -58,13 +58,13 @@ describe('ProfileScreen', () => {
     expect(tree).toBeDefined();
     const jsonString = JSON.stringify(tree.toJSON());
     expect(jsonString).toContain('Profile');
-    expect(jsonString).toContain('Finzo Member');
+    expect(jsonString).toContain('LoanPilot Member');
     expect(jsonString).toContain('Preferences');
     expect(jsonString).toContain('Theme Preference');
     expect(jsonString).toContain('Data & Privacy');
-    expect(jsonString).toContain('About Finzo');
-    expect(jsonString).toContain('Rate Finzo');
-    expect(jsonString).toContain('Share Finzo');
+    expect(jsonString).toContain('About LoanPilot');
+    expect(jsonString).toContain('Rate LoanPilot');
+    expect(jsonString).toContain('Share LoanPilot');
   });
 
   it('should support dispatching setThemeMode', () => {

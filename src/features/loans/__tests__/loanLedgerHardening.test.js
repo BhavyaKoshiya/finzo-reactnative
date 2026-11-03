@@ -19,7 +19,7 @@ import {
 } from '../utils/paymentBalanceUtils';
 import { PAYMENT_TYPES, BALANCE_SOURCES } from '../constants/loanPaymentConstants';
 
-describe('Finzo Loan Ledger Hardening Tests', () => {
+describe('LoanPilot Loan Ledger Hardening Tests', () => {
   let baseLoan;
 
   beforeEach(() => {

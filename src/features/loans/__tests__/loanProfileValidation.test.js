@@ -95,4 +95,14 @@ describe('Loan Profile Validation', () => {
     expect(result.isValid).toBe(false);
     expect(result.errors.loanStartDate).toBeDefined();
   });
+
+  test('13. Fails when EMI does not cover the monthly interest', () => {
+    // 7,50,000 at 8.5% accrues ₹5,313 interest a month
+    const result = validateLoanProfileInput({ ...validBase, emiAmount: 5000 });
+    expect(result.isValid).toBe(false);
+    expect(result.errors.emiAmount).toContain('monthly interest');
+
+    const zeroRate = validateLoanProfileInput({ ...validBase, annualInterestRate: 0, emiAmount: 5000 });
+    expect(zeroRate.errors.emiAmount).toBeUndefined();
+  });
 });

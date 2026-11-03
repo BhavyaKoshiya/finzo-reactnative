@@ -336,7 +336,7 @@ export const AddRateRevisionScreen = ({ route, navigation }) => {
                   value={form.exactNewEmi}
                   onChangeText={form.setExactNewEmi}
                   error={form.errors.exactNewEmi}
-                  helperText="Leave empty to use Finzo's calculated EMI"
+                  helperText="Leave empty to use LoanPilot's calculated EMI"
                 />
               ) : (
                 <TextInputField
@@ -346,7 +346,7 @@ export const AddRateRevisionScreen = ({ route, navigation }) => {
                   value={form.exactNewTenureMonths}
                   onChangeText={form.setExactNewTenureMonths}
                   error={form.errors.exactNewTenureMonths}
-                  helperText="Leave empty to use Finzo's calculated tenure"
+                  helperText="Leave empty to use LoanPilot's calculated tenure"
                 />
               )}
             </View>

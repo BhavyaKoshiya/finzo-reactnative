@@ -44,10 +44,10 @@ export const SimulatedBannerAd = ({ style }) => {
         <AppIcon icon={Info} size={16} color={currentTheme.primary} style={{ marginRight: 8 }} />
         <View style={styles.textColumn}>
           <AppText variant="bodyMedium" style={{ fontWeight: '700', fontSize: 13 }}>
-            Example Sponsor — Finzo Features
+            Example Sponsor — LoanPilot Features
           </AppText>
           <AppText variant="caption" color={currentTheme.textSecondary} style={{ fontSize: 11 }}>
-            Development Simulated Ad • Finzo Swappable Ad Architecture
+            Development Simulated Ad • LoanPilot Swappable Ad Architecture
           </AppText>
         </View>
       </View>

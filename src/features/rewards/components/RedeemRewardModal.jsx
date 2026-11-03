@@ -66,7 +66,7 @@ export const RedeemRewardModal = ({
                 Redeem Reward?
               </AppText>
               <AppText variant="caption" color={currentTheme.textSecondary}>
-                Unlock ad-free access using your Finzo points.
+                Unlock ad-free access using your LoanPilot points.
               </AppText>
             </View>
             <TouchableOpacity

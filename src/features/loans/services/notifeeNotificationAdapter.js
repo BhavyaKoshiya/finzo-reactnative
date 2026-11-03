@@ -123,7 +123,7 @@ export const cancelTriggerNotification = async (id) => {
 };
 
 /**
- * Cancels all scheduled trigger notifications for Finzo.
+ * Cancels all scheduled trigger notifications for LoanPilot.
  */
 export const cancelAllTriggerNotifications = async () => {
   try {
@@ -170,7 +170,7 @@ export const sendTestNotification = async (delaySeconds = 5) => {
       await notifee.createTriggerNotification(
         {
           id: `test_notif_${Date.now()}`,
-          title: '🔔 Finzo Payment Reminder (Test)',
+          title: '🔔 LoanPilot Payment Reminder (Test)',
           body: `Test local notification delivered successfully! (${delaySeconds}s delay)`,
           android: {
             channelId: NOTIFICATION_CHANNEL_ID,

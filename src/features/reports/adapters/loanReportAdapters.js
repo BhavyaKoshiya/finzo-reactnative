@@ -64,7 +64,7 @@ export const buildLoanSummaryReport = ({ loan, payments = [] }) => {
       items: [
         createKeyValueItem({ label: 'Current Outstanding Principal', value: formatMoney(currentBalance), highlight: true }),
         createKeyValueItem({ label: 'Principal Reduced To Date', value: formatMoney(principalPaid) }),
-        createKeyValueItem({ label: 'Balance Verification Status', value: isBankConfirmed ? 'Bank Confirmed' : 'Finzo Estimate', highlight: isBankConfirmed }),
+        createKeyValueItem({ label: 'Balance Verification Status', value: isBankConfirmed ? 'Bank Confirmed' : 'LoanPilot Estimate', highlight: isBankConfirmed }),
         createKeyValueItem({ label: 'Total Payments Recorded', value: `${payments.length} log(s)` }),
       ],
     }),
@@ -78,7 +78,7 @@ export const buildLoanSummaryReport = ({ loan, payments = [] }) => {
     summaryCards,
     sections,
     assumptions: [
-      `Balance verification status: ${isBankConfirmed ? 'Bank Confirmed' : 'Finzo Estimate'}.`,
+      `Balance verification status: ${isBankConfirmed ? 'Bank Confirmed' : 'LoanPilot Estimate'}.`,
       `Future principal calculations assume standard monthly reducing balance math.`,
     ],
   });
@@ -235,7 +235,7 @@ export const buildLoanInsightsReport = ({ loan, payments = [] }) => {
           createKeyValueItem({ label: 'Amount Recorded', value: formatMoney(latestPaymentInsight.amount) }),
           createKeyValueItem({ label: 'Principal Portion', value: formatMoney(latestPaymentInsight.principal) }),
           createKeyValueItem({ label: 'Interest Portion', value: formatMoney(latestPaymentInsight.interest) }),
-          createKeyValueItem({ label: 'Breakdown Source', value: latestPaymentInsight.isBankConfirmed ? 'Bank Confirmed' : 'Finzo Estimate' }),
+          createKeyValueItem({ label: 'Breakdown Source', value: latestPaymentInsight.isBankConfirmed ? 'Bank Confirmed' : 'LoanPilot Estimate' }),
         ],
       })
     );

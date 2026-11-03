@@ -9,8 +9,8 @@ import { formatCurrency, formatINR } from '../../../calculations/core/currency';
 import { calculateAmortization } from '../../../calculations/emi/calculateAmortization';
 
 /**
- * Calculator Report Adapters for Finzo PDF Export.
- * Maps inputs and calculation results from all 10 Finzo calculators into normalized report models.
+ * Calculator Report Adapters for LoanPilot PDF Export.
+ * Maps inputs and calculation results from all 10 LoanPilot calculators into normalized report models.
  */
 
 const formatMoney = (val) => formatINR(val, { symbol: '₹' });

@@ -72,7 +72,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
         tree = ReactTestRenderer.create(
           <Provider store={store}>
             <AppStartupGate>
-              <Text>Finzo App Home</Text>
+              <Text>LoanPilot App Home</Text>
             </AppStartupGate>
           </Provider>
         );
@@ -80,7 +80,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
 
       const textNodes = tree.root.findAllByType(Text);
       expect(textNodes.length).toBeGreaterThan(0);
-      expect(textNodes[0].props.children).toBe('Finzo App Home');
+      expect(textNodes[0].props.children).toBe('LoanPilot App Home');
       expect(BootSplash.hide).toHaveBeenCalledWith({ fade: true });
     });
 
@@ -94,7 +94,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
         tree = ReactTestRenderer.create(
           <Provider store={store}>
             <AppStartupGate>
-              <Text>Finzo App Home</Text>
+              <Text>LoanPilot App Home</Text>
             </AppStartupGate>
           </Provider>
         );
@@ -106,7 +106,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
 
       const textNodes = tree.root.findAllByType(Text);
       expect(textNodes.length).toBeGreaterThan(0);
-      expect(textNodes[0].props.children).toBe('Finzo App Home');
+      expect(textNodes[0].props.children).toBe('LoanPilot App Home');
       expect(BootSplash.hide).toHaveBeenCalledWith({ fade: true });
     });
 
@@ -129,7 +129,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
         tree = ReactTestRenderer.create(
           <Provider store={store}>
             <AppStartupGate>
-              <Text>Finzo App Home</Text>
+              <Text>LoanPilot App Home</Text>
             </AppStartupGate>
           </Provider>
         );
@@ -152,7 +152,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
       // Startup must continue!
       const textNodes = tree.root.findAllByType(Text);
       expect(textNodes.length).toBeGreaterThan(0);
-      expect(textNodes[0].props.children).toBe('Finzo App Home');
+      expect(textNodes[0].props.children).toBe('LoanPilot App Home');
       expect(BootSplash.hide).toHaveBeenCalledWith({ fade: true });
 
       // But ad load was NOT cancelled; it is still running
@@ -185,7 +185,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
         tree = ReactTestRenderer.create(
           <Provider store={store}>
             <AppStartupGate>
-              <Text>Finzo App Home</Text>
+              <Text>LoanPilot App Home</Text>
             </AppStartupGate>
           </Provider>
         );
@@ -222,7 +222,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
       expect(initResult).toBe(true);
       expect(marketingPlugin.initialize).toHaveBeenCalledWith({
         baseUrl: 'https://binarykode-technologies.web.app/adconfigs',
-        bundleId: 'com.finzo.financecalculator',
+        bundleId: 'com.loanpilot.app',
         enableAppOpenOnResume: false,
       });
 
@@ -317,7 +317,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
         tree = ReactTestRenderer.create(
           <Provider store={store}>
             <AppStartupGate>
-              <Text>Finzo App Home</Text>
+              <Text>LoanPilot App Home</Text>
             </AppStartupGate>
           </Provider>
         );
@@ -325,7 +325,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
 
       const textNodes = tree.root.findAllByType(Text);
       expect(textNodes.length).toBeGreaterThan(0);
-      expect(textNodes[0].props.children).toBe('Finzo App Home');
+      expect(textNodes[0].props.children).toBe('LoanPilot App Home');
       expect(BootSplash.hide).toHaveBeenCalledWith({ fade: true });
     });
 
@@ -343,7 +343,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
         tree = ReactTestRenderer.create(
           <Provider store={store}>
             <AppStartupGate>
-              <Text>Finzo App Home</Text>
+              <Text>LoanPilot App Home</Text>
             </AppStartupGate>
           </Provider>
         );
@@ -351,7 +351,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
 
       const textNodes = tree.root.findAllByType(Text);
       expect(textNodes.length).toBeGreaterThan(0);
-      expect(textNodes[0].props.children).toBe('Finzo App Home');
+      expect(textNodes[0].props.children).toBe('LoanPilot App Home');
       expect(adInitSpy).not.toHaveBeenCalled();
       expect(BootSplash.hide).toHaveBeenCalledWith({ fade: true });
     });

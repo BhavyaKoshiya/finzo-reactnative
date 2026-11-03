@@ -1,5 +1,5 @@
 import { RATE_ADJUSTMENT_STRATEGIES } from '../types/rateRevisionTypes';
-import { simulateSchedule, calculateNewEmiForTenure } from './loanPrepaymentSimulation';
+import { simulateSchedule, calculateNewEmiForTenure, resolveRemainingTenureMonths } from './loanPrepaymentSimulation';
 
 /**
  * Pure calculation engine for loan interest rate revisions.
@@ -80,10 +80,7 @@ export const applyRateRevision = ({
   }
 
   const currentEmi = Number(loan.emiAmount) || 0;
-  const remainingTenure = loan.remainingTenure || {};
-  const remainingMonths = remainingTenure.unit === 'years'
-    ? (Number(remainingTenure.value) || 0) * 12
-    : (Number(remainingTenure.value) || 0);
+  const remainingMonths = resolveRemainingTenureMonths(loan, balance);
 
   const safeRemainingMonths = remainingMonths > 0 ? remainingMonths : 1;
 

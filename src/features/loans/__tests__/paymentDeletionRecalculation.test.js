@@ -11,7 +11,7 @@ import { createLoanPayment } from '../types/loanPaymentTypes';
 import { recalculateLoanBalanceFromPayments } from '../utils/paymentBalanceUtils';
 import { PAYMENT_TYPES, BALANCE_SOURCES } from '../constants/loanPaymentConstants';
 
-describe('Finzo Payment Deletion Balance Recalculation Tests', () => {
+describe('LoanPilot Payment Deletion Balance Recalculation Tests', () => {
   let initialLoan;
 
   beforeEach(() => {

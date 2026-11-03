@@ -1,4 +1,4 @@
-# Finzo — Rewards Architecture & Engine Specification
+# LoanPilot — Rewards Architecture & Engine Specification
 
 This document defines the offline-first reward point engine, daily check-in streaks, daily rewarded ad milestones, store catalog, and ad-free entitlement lifecycle.
 

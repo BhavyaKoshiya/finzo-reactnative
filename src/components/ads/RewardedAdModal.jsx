@@ -70,7 +70,7 @@ export const RewardedAdModal = ({
           <View style={[styles.adCanvas, { backgroundColor: isDark ? '#0F172A' : '#F1F5F9' }]}>
             <AppIcon icon={PlayCircle} size={48} color={currentTheme.primary} style={{ marginBottom: 12 }} />
             <AppText variant="titleMedium" style={{ fontWeight: '800', textAlign: 'center', marginBottom: 4 }}>
-              Finzo Simulated Rewarded Ad
+              LoanPilot Simulated Rewarded Ad
             </AppText>
             <AppText variant="caption" color={currentTheme.textSecondary} style={{ textAlign: 'center' }}>
               Experience safe, provider-agnostic ad rewards during local development.

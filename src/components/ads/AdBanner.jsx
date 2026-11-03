@@ -68,7 +68,7 @@ export const AdBanner = ({
               Simulated Advertisement
             </AppText>
             <AppText variant="caption" color={currentTheme.textSecondary}>
-              Development Only — Finzo Swappable Ad Architecture
+              Development Only — LoanPilot Swappable Ad Architecture
             </AppText>
           </View>
         </View>

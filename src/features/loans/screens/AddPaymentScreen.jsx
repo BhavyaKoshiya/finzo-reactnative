@@ -130,7 +130,7 @@ export const AddPaymentScreen = ({ route, navigation }) => {
     } else {
       const formattedPaid = formatCurrency(payload.paymentAmount);
       const formattedBal = formatCurrency(resolvedNewBalance);
-      const sourceText = payload.balanceSource === 'bank_confirmed' ? 'Bank Confirmed' : 'Finzo Estimate';
+      const sourceText = payload.balanceSource === 'bank_confirmed' ? 'Bank Confirmed' : 'LoanPilot Estimate';
 
       let detailMsg = `${formattedPaid} recorded successfully.\nNew Balance: ${formattedBal} (${sourceText}).`;
       if (strategyUpdates.emiAmount) {

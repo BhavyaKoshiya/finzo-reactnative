@@ -62,7 +62,7 @@ export const ComponentShowcaseScreen = () => {
         <View style={styles.headerTitleGroup}>
           <AppText variant="screenTitle">Design System Showcase</AppText>
           <AppText variant="caption" color={currentTheme.textSecondary}>
-            Finzo Phase 1 Component Library
+            LoanPilot Phase 1 Component Library
           </AppText>
         </View>
         <IconButton
@@ -146,7 +146,7 @@ export const ComponentShowcaseScreen = () => {
 
         <InfoCard
           title="Important Notice"
-          message="Finzo is an offline calculator utility."
+          message="LoanPilot is an offline calculator utility."
           icon={Layers}
           type="info"
         />

@@ -18,12 +18,12 @@ import logger from '../logger';
 /**
  * Marketing Plugin Ad Provider Adapter.
  * Adapts react-native-marketing-plugin and react-native-google-mobile-ads
- * strictly behind Finzo's BaseAdProvider interface.
+ * strictly behind LoanPilot's BaseAdProvider interface.
  *
  * Guarantees:
  * 1. Financial data firewall: zero financial data is passed to the SDK.
  * 2. enableAppOpenOnResume is strictly false.
- * 3. Finzo adDecisionEngine remains authoritative for frequency, cooldowns, and screening.
+ * 3. LoanPilot adDecisionEngine remains authoritative for frequency, cooldowns, and screening.
  * 4. Preloaded ads NEVER automatically display; they remain cached for user-triggered / authorized requests.
  */
 export class MarketingAdProvider extends BaseAdProvider {
@@ -31,8 +31,8 @@ export class MarketingAdProvider extends BaseAdProvider {
     super();
     this.config = {
       baseUrl: config.baseUrl || 'https://binarykode-technologies.web.app/adconfigs',
-      bundleId: config.bundleId || 'com.finzo.financecalculator',
-      enableAppOpenOnResume: false, // Strictly disabled in Finzo to protect financial workflows
+      bundleId: config.bundleId || 'com.loanpilot.app',
+      enableAppOpenOnResume: false, // Strictly disabled in LoanPilot to protect financial workflows
       ...config,
     };
     this.isInitialized = false;
@@ -227,7 +227,7 @@ export class MarketingAdProvider extends BaseAdProvider {
       // while the ad is still visible, causing it to disappear.
       const activeAd = interstitialAdManager._admobInterstitial || interstitialAdManager._adManagerInterstitial;
 
-      // Finzo adDecisionEngine has already authorized this show.
+      // LoanPilot adDecisionEngine has already authorized this show.
       // Pass a derived counter matching the plugin's adTime to ensure internal trigger conditions pass.
       const targetCounter = marketingPlugin.adModel?.adTime ?? 2;
 

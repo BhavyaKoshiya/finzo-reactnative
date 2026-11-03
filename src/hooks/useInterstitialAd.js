@@ -6,7 +6,7 @@ import { AD_PLACEMENTS } from '../services/ads/adPlacementConstants';
 import { ROUTES } from '../navigation/routes';
 
 /**
- * Custom React Hook for triggering interstitial ads on screen transitions (Finzo & Cleanzo Model).
+ * Custom React Hook for triggering interstitial ads on screen transitions (LoanPilot & Cleanzo Model).
  *
  * Features:
  * - Triggers interstitial ads on back transitions and waits for ad dismissal before completing navigation.

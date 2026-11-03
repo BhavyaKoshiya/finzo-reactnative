@@ -1,6 +1,6 @@
-# Finzo — Production Readiness & Store Submission Audit (Phase 26)
+# LoanPilot — Production Readiness & Store Submission Audit (Phase 26)
 
-This document provides the definitive pre-release technical evaluation of the **Finzo** offline-first financial calculator and loan planning application for store submission.
+This document provides the definitive pre-release technical evaluation of the **LoanPilot** offline-first financial calculator and loan planning application for store submission.
 
 ---
 
@@ -35,7 +35,7 @@ This document provides the definitive pre-release technical evaluation of the **
 
 ## 3. Storage & Migration Safety
 
-- **Persisted State Root**: `finzo_root` in `AsyncStorage`.
+- **Persisted State Root**: `loanpilot_root` in `AsyncStorage`.
 - **Whitelisted Slices**: `settings`, `savedCalculations`, `rewards`, `loanProfiles`, `loanPayments`, `loanGoals`, `loanPrivateDetails`, `loanNotes`.
 - **Transient State**: `connectivitySlice` remains strictly in-memory.
 - **Hardware Storage**: PINs and passwords reside exclusively in device Keystore/Keychain.

@@ -1,13 +1,13 @@
-# LOAN PAYMENT ARCHITECTURE — FINZO
+# LOAN PAYMENT ARCHITECTURE — LOANPILOT
 
-This document details the architectural principles, data models, state management, balance snapshot policies, interest/principal breakdown calculation models, bank balance correction flows, payment deletion replay algorithms, and local privacy rules for **Loan Payment History & Balance Tracking** in Finzo.
+This document details the architectural principles, data models, state management, balance snapshot policies, interest/principal breakdown calculation models, bank balance correction flows, payment deletion replay algorithms, and local privacy rules for **Loan Payment History & Balance Tracking** in LoanPilot.
 
 ---
 
 ## 1. ARCHITECTURAL PRINCIPLES & BALANCE SOURCE MODEL
 
 1. **Estimated Interest & Principal Allocation**:
-   For regular EMI payments (`regular_emi`) and custom payments (`custom_payment`), Finzo computes:
+   For regular EMI payments (`regular_emi`) and custom payments (`custom_payment`), LoanPilot computes:
    $$\text{Estimated Monthly Interest} = \text{round}\left( \text{Opening Balance} \times \frac{\text{Annual Interest Rate}}{100 \times 12} \right)$$
    $$\text{Estimated Principal Paid} = \max(0, \text{Payment Amount} - \text{Estimated Monthly Interest})$$
    $$\text{Estimated Closing Balance} = \max(0, \text{Opening Balance} - \text{Estimated Principal Paid})$$

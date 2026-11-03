@@ -239,7 +239,7 @@ export const createPaymentPreview = ({
 };
 
 /**
- * Calculates numerical differences between Finzo estimates and actual bank-confirmed values.
+ * Calculates numerical differences between LoanPilot estimates and actual bank-confirmed values.
  * @param {Object} estimated { interest, principal, closing }
  * @param {Object} actual { interest, principal, closing }
  * @returns {Object} Differences object
@@ -281,7 +281,7 @@ export const validatePaymentInput = ({ amount = 0, currentBalance = 0, paymentTy
   }
 
   if (currentBalance > 0 && numAmount > currentBalance) {
-    warnings.amount = 'Payment exceeds Finzo\'s estimated outstanding balance.';
+    warnings.amount = 'Payment exceeds LoanPilot\'s estimated outstanding balance.';
   }
 
   return {

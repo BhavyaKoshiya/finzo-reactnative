@@ -1,6 +1,6 @@
-# FINZO REALTIME CONFIGURATION ARCHITECTURE
+# LOANPILOT REALTIME CONFIGURATION ARCHITECTURE
 
-This document details the design, fallback hierarchy, versioning schema, security boundaries, discount engine, administrative provisioning process, and subscriber pattern for the **Finzo Realtime Configuration System** powered by Firebase Realtime Database (RTDB).
+This document details the design, fallback hierarchy, versioning schema, security boundaries, discount engine, administrative provisioning process, and subscriber pattern for the **LoanPilot Realtime Configuration System** powered by Firebase Realtime Database (RTDB).
 
 ---
 
@@ -11,12 +11,12 @@ The configuration system enforces a strict 3-tier fallback hierarchy to guarante
 ```
 1. Active Valid Firebase RTDB (/config)
              ↓ (Validation Error / Empty / Outage)
-2. Last-Known-Good Configuration (AsyncStorage: @finzo_last_known_config)
+2. Last-Known-Good Configuration (AsyncStorage: @loanpilot_last_known_config)
              ↓ (First Launch / Cleared Storage)
 3. Local Fallback Defaults (src/config/realtimeConfigDefaults.js)
 ```
 
-- **Single Active Source**: Finzo UI components and services access configuration exclusively via `realtimeConfigService` and pure selectors (`realtimeConfigSelectors.js`).
+- **Single Active Source**: LoanPilot UI components and services access configuration exclusively via `realtimeConfigService` and pure selectors (`realtimeConfigSelectors.js`).
 - **Zero User Data in RTDB**: RTDB `/config` contains public-read application configuration only (reward schedules, redemption package pricing, discount rules, feature flags). User points, check-in history, streak counters, loan profiles, payment history, and saved calculations remain strictly on local storage (`AsyncStorage`).
 
 ---
@@ -57,7 +57,7 @@ Target path: `/config`
       "ui": {
         "enabled": true,
         "title": "Daily Check-In",
-        "subtitle": "Keep your streak going and earn more Finzo Points.",
+        "subtitle": "Keep your streak going and earn more LoanPilot Points.",
         "newUserTitle": "Start Your Streak",
         "newUserSubtitle": "Check in every day to unlock bigger rewards.",
         "streakTitle": "{count} Day Streak",
@@ -82,7 +82,7 @@ Target path: `/config`
         "enabled": true,
         "type": "ad_free",
         "title": "1 Hour Ad-Free",
-        "description": "Enjoy Finzo completely ad-free for 1 hour.",
+        "description": "Enjoy LoanPilot completely ad-free for 1 hour.",
         "pointsCost": 50,
         "durationMinutes": 60,
         "order": 1,
@@ -99,7 +99,7 @@ Target path: `/config`
         "enabled": true,
         "type": "ad_free",
         "title": "6 Hours Ad-Free",
-        "description": "Enjoy Finzo completely ad-free for 6 hours.",
+        "description": "Enjoy LoanPilot completely ad-free for 6 hours.",
         "pointsCost": 150,
         "durationMinutes": 360,
         "order": 2,
@@ -116,7 +116,7 @@ Target path: `/config`
         "enabled": true,
         "type": "ad_free",
         "title": "24 Hours Ad-Free",
-        "description": "Enjoy Finzo completely ad-free for 24 hours.",
+        "description": "Enjoy LoanPilot completely ad-free for 24 hours.",
         "pointsCost": 400,
         "durationMinutes": 1440,
         "order": 3,
@@ -139,21 +139,21 @@ Target path: `/config`
         "durationMinutes": 60,
         "pointsCost": 50,
         "title": "1 Hour Ad-Free",
-        "description": "Enjoy Finzo without ads for 1 hour."
+        "description": "Enjoy LoanPilot without ads for 1 hour."
       },
       "ad_free_6h": {
         "enabled": true,
         "durationMinutes": 360,
         "pointsCost": 150,
         "title": "6 Hours Ad-Free",
-        "description": "Enjoy Finzo without ads for 6 hours."
+        "description": "Enjoy LoanPilot without ads for 6 hours."
       },
       "ad_free_24h": {
         "enabled": true,
         "durationMinutes": 1440,
         "pointsCost": 400,
         "title": "24 Hours Ad-Free",
-        "description": "Enjoy Finzo without ads for 24 hours."
+        "description": "Enjoy LoanPilot without ads for 24 hours."
       }
     }
   },
@@ -192,8 +192,8 @@ Before activating any payload received from RTDB, `validateRealtimeConfig(payloa
 ## 4. Administrative Provisioning
 
 Administrative payload file and script:
-- Payload file: [rtdb_config_payload.json](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/scripts/rtdb_config_payload.json)
-- Validation script: [provision_rtdb_config.js](file:///Users/bhavyakoshiya/Documents/ReactNative/Finzo/scripts/provision_rtdb_config.js)
+- Payload file: [rtdb_config_payload.json](file:///Users/bhavyakoshiya/Documents/ReactNative/LoanPilot/scripts/rtdb_config_payload.json)
+- Validation script: [provision_rtdb_config.js](file:///Users/bhavyakoshiya/Documents/ReactNative/LoanPilot/scripts/provision_rtdb_config.js)
 - Firebase CLI provisioning command:
   ```bash
   npx -y firebase-tools@latest database:set /config scripts/rtdb_config_payload.json --force
@@ -206,4 +206,4 @@ Administrative payload file and script:
 - **RTDB Access Rules**:
   - `.read`: `true` for `/config`
   - `.write`: `false` (Deny all client writes)
-- **Privacy Guarantee**: Finzo **NEVER** uploads user points, streaks, loan profiles, payment history, saved calculations, or PDFs to Firebase. RTDB is purely read-only remote configuration.
+- **Privacy Guarantee**: LoanPilot **NEVER** uploads user points, streaks, loan profiles, payment history, saved calculations, or PDFs to Firebase. RTDB is purely read-only remote configuration.

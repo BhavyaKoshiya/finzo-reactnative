@@ -163,17 +163,17 @@ describe('Phase 25 — Release Hardening, Force Update & Privacy Policy QA', () 
   // ============================================================
   describe('3. Centralized Store Redirection', () => {
     test('Android package and store intents match official configuration', () => {
-      expect(ANDROID_PACKAGE_NAME).toBe('com.finzo.financecalculator');
-      expect(ANDROID_PLAY_STORE_INTENT).toBe('market://details?id=com.finzo.financecalculator');
+      expect(ANDROID_PACKAGE_NAME).toBe('com.loanpilot.app');
+      expect(ANDROID_PLAY_STORE_INTENT).toBe('market://details?id=com.loanpilot.app');
       expect(ANDROID_PLAY_STORE_WEB_URL).toBe(
-        'https://play.google.com/store/apps/details?id=com.finzo.financecalculator'
+        'https://play.google.com/store/apps/details?id=com.loanpilot.app'
       );
     });
 
     test('iOS store constants include documented release placeholder', () => {
-      expect(IOS_APP_STORE_ID).toBe('FINZO_IOS_APP_ID_PLACEHOLDER');
-      expect(IOS_APP_STORE_INTENT).toContain('FINZO_IOS_APP_ID_PLACEHOLDER');
-      expect(IOS_APP_STORE_WEB_URL).toContain('FINZO_IOS_APP_ID_PLACEHOLDER');
+      expect(IOS_APP_STORE_ID).toBe('LOANPILOT_IOS_APP_ID_PLACEHOLDER');
+      expect(IOS_APP_STORE_INTENT).toContain('LOANPILOT_IOS_APP_ID_PLACEHOLDER');
+      expect(IOS_APP_STORE_WEB_URL).toContain('LOANPILOT_IOS_APP_ID_PLACEHOLDER');
     });
 
     test('appStoreService.openStore uses native intent when supported', async () => {
@@ -206,7 +206,7 @@ describe('Phase 25 — Release Hardening, Force Update & Privacy Policy QA', () 
     test('PUBLIC_PRIVACY_POLICY_URL matches authoritative hosted public policy', () => {
       const { PUBLIC_PRIVACY_POLICY_URL } = require('../../features/privacy/screens/PrivacyPolicyScreen');
       expect(PUBLIC_PRIVACY_POLICY_URL).toBe(
-        'https://binarykode-technologies.web.app/pages/finzo-privacy-policy.html'
+        'https://varnicreations.blogspot.com/2026/11/loanpilot-privacy-policy.html'
       );
     });
   });

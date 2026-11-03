@@ -69,13 +69,13 @@ export const ManualBalanceUpdateModal = ({ visible, onClose, loan }) => {
           </View>
 
           <AppText variant="caption" color={currentTheme.textSecondary} style={styles.subSubtitle}>
-            Finzo's estimated balance may differ slightly from your lender receipt due to daily interest accrual or bank rounding.
+            LoanPilot's estimated balance may differ slightly from your lender receipt due to daily interest accrual or bank rounding.
           </AppText>
 
           <AppCard style={styles.contentBox}>
             <View style={styles.infoRow}>
               <AppText variant="caption" color={currentTheme.textSecondary}>
-                Finzo Estimated Balance
+                LoanPilot Estimated Balance
               </AppText>
               <AppText variant="bodyMedium" style={styles.estimatedText}>
                 {formatCurrency(currentBal)}
@@ -96,7 +96,7 @@ export const ManualBalanceUpdateModal = ({ visible, onClose, loan }) => {
             {hasValidInput && (
               <View style={styles.comparisonBox}>
                 <View style={styles.compRow}>
-                  <AppText variant="caption" color={currentTheme.textSecondary}>Finzo Estimate:</AppText>
+                  <AppText variant="caption" color={currentTheme.textSecondary}>LoanPilot Estimate:</AppText>
                   <AppText variant="caption" style={styles.compValue}>{formatCurrency(currentBal)}</AppText>
                 </View>
                 <View style={styles.compRow}>

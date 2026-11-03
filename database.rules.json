@@ -1,6 +1,9 @@
 {
   "rules": {
-    ".read": true,
-    ".write": false
+    ".read": false,
+    ".write": false,
+    "config": {
+      ".read": true
+    }
   }
 }

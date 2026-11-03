@@ -77,7 +77,7 @@ export const AppUpdateModal = ({
 
           {/* Title & Version Info */}
           <AppText variant="h3" style={styles.title} numberOfLines={2}>
-            {updateInfo?.title || (isMandatory ? 'Update Finzo' : 'Update Available')}
+            {updateInfo?.title || (isMandatory ? 'Update LoanPilot' : 'Update Available')}
           </AppText>
 
           <AppText variant="caption" color={currentTheme.textSecondary} style={styles.versionSubtext}>
@@ -88,8 +88,8 @@ export const AppUpdateModal = ({
           <AppText variant="bodySmall" color={currentTheme.textSecondary} style={styles.message}>
             {updateInfo?.message || (
               isMandatory
-                ? 'A newer version of Finzo is required to continue using the application.'
-                : 'A newer version of Finzo is available with improvements and optimizations.'
+                ? 'A newer version of LoanPilot is required to continue using the application.'
+                : 'A newer version of LoanPilot is available with improvements and optimizations.'
             )}
           </AppText>
 
@@ -99,7 +99,7 @@ export const AppUpdateModal = ({
               title="Update Now"
               icon={DownloadCloud}
               onPress={handleUpdateNow}
-              accessibilityLabel="Update Finzo now"
+              accessibilityLabel="Update LoanPilot now"
               style={styles.primaryBtn}
             />
 

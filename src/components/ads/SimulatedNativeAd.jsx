@@ -8,7 +8,7 @@ import { useAppTheme } from '../../hooks/useAppTheme';
 
 /**
  * Reusable Simulated Native Ad UI Component.
- * Integrated naturally into Finzo card layouts:
+ * Integrated naturally into LoanPilot card layouts:
  * - Badge: Sponsored / Advertisement
  * - Icon / Graphic Placeholder
  * - Headline ("Example Sponsor")
@@ -18,7 +18,7 @@ import { useAppTheme } from '../../hooks/useAppTheme';
  */
 export const SimulatedNativeAd = ({
   headline = 'Example Sponsor',
-  description = 'Explore modern financial planning utilities with Finzo offline calculators.',
+  description = 'Explore modern financial planning utilities with LoanPilot offline calculators.',
   callToAction = 'Learn More',
   style,
 }) => {

@@ -15,7 +15,7 @@ import rootReducer from './rootReducer';
 import { migrations, PERSIST_VERSION } from './migrations';
 
 const persistConfig = {
-  key: 'finzo_root',
+  key: 'loanpilot_root',
   version: PERSIST_VERSION,
   storage: AsyncStorage,
   migrate: createMigrate(migrations, { debug: false }),

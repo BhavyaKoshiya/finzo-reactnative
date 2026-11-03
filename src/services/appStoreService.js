@@ -2,7 +2,7 @@ import { Platform, Linking } from 'react-native';
 import logger from './logger';
 
 /**
- * Finzo Store Redirection Service.
+ * LoanPilot Store Redirection Service.
  * Centralizes platform store destinations for the application.
  *
  * PRIVACY & SECURITY GUARANTEE:
@@ -10,7 +10,7 @@ import logger from './logger';
  */
 
 // Android Package Name (Frozen in AGENTS.md)
-export const ANDROID_PACKAGE_NAME = 'com.finzo.financecalculator';
+export const ANDROID_PACKAGE_NAME = 'com.loanpilot.app';
 
 // Android Store URIs
 export const ANDROID_PLAY_STORE_INTENT = `market://details?id=${ANDROID_PACKAGE_NAME}`;
@@ -19,9 +19,9 @@ export const ANDROID_PLAY_STORE_WEB_URL = `https://play.google.com/store/apps/de
 /**
  * iOS App Store ID Placeholder:
  * IMPORTANT: The official iOS Apple App ID will be assigned upon creating the App Store listing in App Store Connect.
- * Replace 'FINZO_IOS_APP_ID_PLACEHOLDER' with the real numeric ID (e.g., '6740000000') prior to iOS release.
+ * Replace 'LOANPILOT_IOS_APP_ID_PLACEHOLDER' with the real numeric ID (e.g., '6740000000') prior to iOS release.
  */
-export const IOS_APP_STORE_ID = 'FINZO_IOS_APP_ID_PLACEHOLDER';
+export const IOS_APP_STORE_ID = 'LOANPILOT_IOS_APP_ID_PLACEHOLDER';
 export const IOS_APP_STORE_INTENT = `itms-apps://apps.apple.com/app/id${IOS_APP_STORE_ID}`;
 export const IOS_APP_STORE_WEB_URL = `https://apps.apple.com/app/id${IOS_APP_STORE_ID}`;
 

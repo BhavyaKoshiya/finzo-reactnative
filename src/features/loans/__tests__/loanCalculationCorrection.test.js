@@ -11,7 +11,7 @@ import { createLoanPayment } from '../types/loanPaymentTypes';
 import { calculateEmiBreakdown } from '../utils/loanBalanceUtils';
 import { PAYMENT_TYPES, BALANCE_SOURCES } from '../constants/loanPaymentConstants';
 
-describe('Finzo Loan Balance & Payment Calculation Correction Tests', () => {
+describe('LoanPilot Loan Balance & Payment Calculation Correction Tests', () => {
   // 1. Regular EMI payment
   test('1. Regular EMI payment correctly initializes with regular_emi type', () => {
     const pay = createLoanPayment({

@@ -1,13 +1,13 @@
-# AGENTS.md — Finzo Engineering Constitution & Directives
+# AGENTS.md — LoanPilot Engineering Constitution & Directives
 
-This document outlines the mandatory engineering standards, boundaries, state policies, and architecture for the **Finzo** codebase.
+This document outlines the mandatory engineering standards, boundaries, state policies, and architecture for the **LoanPilot** codebase.
 
 ---
 
 ## 1. PROJECT IDENTITY & METADATA
-- **Application Name**: Finzo
-- **Android Package & Namespace**: `com.finzo.financecalculator`
-- **iOS Bundle Identifier**: `com.finzo.financecalculator`
+- **Application Name**: LoanPilot
+- **Android Package & Namespace**: `com.loanpilot.app`
+- **iOS Bundle Identifier**: `com.loanpilot.app`
 - **React Native Version**: `0.83.10` (Locked - do not upgrade or downgrade)
 - **Primary Market**: India (`en-IN`)
 - **Primary Currency**: INR (₹)
@@ -16,9 +16,9 @@ This document outlines the mandatory engineering standards, boundaries, state po
 ---
 
 ## 2. PRODUCT BOUNDARIES & SCOPE
-Finzo is an offline-first financial calculator and planning utility. It provides calculations and informational tools.
+LoanPilot is an offline-first financial calculator and planning utility. It provides calculations and informational tools.
 
-**Finzo DOES NOT**:
+**LoanPilot DOES NOT**:
 - Provide, approve, or broker loans
 - Connect borrowers with lenders
 - Execute investments or banking services

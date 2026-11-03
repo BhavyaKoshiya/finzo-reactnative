@@ -1,7 +1,7 @@
-# LOAN_PAYOFF_PLANNER_ARCHITECTURE.md — Finzo Loan Payoff Planner Architecture
+# LOAN_PAYOFF_PLANNER_ARCHITECTURE.md — LoanPilot Loan Payoff Planner Architecture
 
 ## 1. Overview
-Finzo Phase 16.11 introduces the **Loan Payoff Planner & What-If Scenario Engine** (`src/features/loans/utils/loanScenarioEngine.js` & `src/features/loans/screens/LoanPayoffPlannerScreen.jsx`).
+LoanPilot Phase 16.11 introduces the **Loan Payoff Planner & What-If Scenario Engine** (`src/features/loans/utils/loanScenarioEngine.js` & `src/features/loans/screens/LoanPayoffPlannerScreen.jsx`).
 
 It allows users to explore hypothetical repayment strategies (Extra Monthly Payment, Increased EMI, One-Time Lump Sum Prepayment, Multiple Planned Prepayments, and Target Payoff Date) and see their potential impact on payoff date and interest avoided without modifying their actual loan ledger, Redux state, payment history, or reminder schedules.
 

@@ -206,7 +206,7 @@ export const LoanPayoffPlannerScreen = ({ route, navigation }) => {
           'Future projections assume interest rate remains constant at ' + loan.annualInterestRate + '% p.a.',
           'Calculations are 100% read-only and do not mutate your actual loan balance or payment history.',
         ],
-        disclaimer: 'Finzo Scenario Planner — Informational estimates only.',
+        disclaimer: 'LoanPilot Scenario Planner — Informational estimates only.',
       };
 
       await generateAndShareReport(reportModel);
@@ -237,7 +237,7 @@ export const LoanPayoffPlannerScreen = ({ route, navigation }) => {
 
         <View style={styles.baselineGrid}>
           <View style={styles.baselineItem}>
-            <AppText variant="caption" color={currentTheme.textMuted}>Outstanding Balance</AppText>
+            <AppText variant="caption" color={currentTheme.textMuted}>Outstanding</AppText>
             <AppText variant="bodyMedium" style={{ fontWeight: '700' }}>{formatCurrency(balanceState.currentBalance)}</AppText>
           </View>
           <View style={styles.baselineItem}>
@@ -579,9 +579,12 @@ const styles = StyleSheet.create({
   baselineGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 12,
   },
   baselineItem: {
     flex: 1,
+    minWidth: 0,
   },
   tabsScroll: {
     marginBottom: 14,

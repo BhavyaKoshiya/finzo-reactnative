@@ -1,5 +1,5 @@
 import { PREPAYMENT_STRATEGIES } from '../constants/loanPaymentConstants';
-import { simulateSchedule, calculateNewEmiForTenure } from './loanPrepaymentSimulation';
+import { simulateSchedule, calculateNewEmiForTenure, resolveRemainingTenureMonths } from './loanPrepaymentSimulation';
 
 /**
  * Calculates the loan profile updates to apply after a prepayment is recorded,
@@ -25,11 +25,8 @@ export const applyPrepaymentStrategy = ({
   const annualRate = Number(loan.annualInterestRate) || 0;
   const currentEmi = Number(loan.emiAmount) || 0;
 
-  // Resolve remaining tenure in months
-  const remainingTenure = loan.remainingTenure || {};
-  const remainingMonths = remainingTenure.unit === 'years'
-    ? (Number(remainingTenure.value) || 0) * 12
-    : (Number(remainingTenure.value) || 0);
+  // Remaining tenure before this prepayment, from the pre-payment balance
+  const remainingMonths = resolveRemainingTenureMonths(loan);
 
   if (remainingMonths <= 0 || currentEmi <= 0) {
     return {};

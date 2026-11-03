@@ -1,5 +1,5 @@
 /**
- * Administrative provisioning script for Finzo Realtime Database /config node.
+ * Administrative provisioning script for LoanPilot Realtime Database /config node.
  * Validates rtdb_config_payload.json before writing to prevent corrupting remote configuration.
  * Safe, non-destructive to unrelated database paths.
  */

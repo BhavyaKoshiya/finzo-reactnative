@@ -1,162 +1,127 @@
-# Google Play Store Listing Metadata — Finzo
+# Google Play Store Listing — LoanPilot
 
-This document contains the official store listing text, categorization, and asset specifications for **Finzo** on the Google Play Store.
+Store listing text, categorization and asset specs for **LoanPilot** (`com.loanpilot.app`).
+
+> Positioning: a personal **loan tracker + prepayment (part-payment) planner** for Indian borrowers, with financial calculators as a secondary feature. LoanPilot is a planning tool, not a lender — keep that clear in every asset.
 
 ---
 
-## 1. App Title & Descriptions
-
-### App Name (Max 30 characters)
+## 1. App Name (max 30)
 
 ```text
-Finzo: Loan & EMI Calculator
+LoanPilot: EMI Prepay Planner
 ```
 
-_(28 characters)_
-
----
-
-### Short Description (Max 80 characters)
+## 2. Short Description (max 80)
 
 ```text
-Smart loan management, EMI schedules, repayment tracking, and financial calculators.
+Track your loans, simulate part-payments & see interest saved. EMI, SIP, FD too.
 ```
 
-_(84 chars -> Let's trim to exactly 80 chars)_
+## 3. Full Description (max 4,000)
 
 ```text
-Smart loan tracking, EMI schedules, payment records, and financial calculators.
+Paying a home, car or personal loan? LoanPilot shows you exactly where your EMI goes — and how much interest and time you can save by prepaying.
+
+Add your real loans, record every EMI and part-payment, and see your outstanding balance, interest paid and debt-free date at a glance. Before you pay extra, simulate it: LoanPilot shows how much interest you save and how many months you cut.
+
+✈️ TRACK YOUR OWN LOANS
+• Add home, car, personal, education or business loans with your actual amount, interest rate, tenure and EMI date
+• See outstanding principal, interest paid vs principal paid, and EMIs remaining
+• Record EMI payments and part-payments as you make them
+• Match your bank statement: update the balance to your lender's figure anytime
+• Handle interest rate changes (repo rate revisions) — choose to reduce EMI or reduce tenure
+• Full amortization schedule for every loan
+
+💸 PREPAYMENT & PART-PAYMENT SIMULATOR
+• Try a one-time or recurring prepayment before you pay it
+• See total interest saved and tenure reduced instantly
+• Compare "reduce EMI" vs "reduce tenure" for the same prepayment
+• Plan a target debt-free date with the payoff planner and track your progress
+
+🔔 NEVER MISS AN EMI
+• EMI due-date reminders on your phone
+• Loan goals with progress based on payments you have actually made
+
+📄 PDF REPORTS
+• Export loan summaries, schedules and calculations as clean PDF reports
+• Share them with family or your CA
+
+🧮 FINANCIAL CALCULATORS
+• EMI calculator for home loan, car loan, personal loan, education loan and business loan
+• SIP calculator, FD calculator, RD calculator
+• CAGR and ROI calculators
+• GST calculator (inclusive / exclusive)
+• Simple interest, compound interest and percentage calculators
+
+🔒 YOUR LOAN DATA STAYS ON YOUR PHONE
+• No sign-up, no login, no bank linking
+• Loan details, payments and notes are stored only on your device
+• Private notes are kept in secure on-device storage
+• Built for India: amounts in ₹ with Indian number formatting (lakh, crore)
+
+━━━━━━━━━━━━━━━━━━━━
+IMPORTANT
+━━━━━━━━━━━━━━━━━━━━
+LoanPilot is a loan tracking and planning tool only.
+• LoanPilot does NOT offer, arrange, broker or disburse loans
+• LoanPilot does NOT connect you with banks, NBFCs or lenders
+• LoanPilot does NOT provide financial, tax or legal advice
+
+All figures are estimates based on the details you enter and may differ from your lender's statement due to rounding, daily interest or charges. Always confirm with your lender before making a payment decision.
+
+LoanPilot is free and supported by ads.
 ```
 
-_(79 characters)_
+## 4. Categorization
 
----
+| Field | Value |
+| :-- | :-- |
+| **App or game** | App |
+| **Category** | Finance |
+| **Tags** (pick in Play Console) | Personal finance, Calculator, Budget / money management |
+| **Contains ads** | Yes |
+| **Financial features declaration** | Select only *"Other" / financial tools – calculators and trackers*. Do **not** select Personal loans, Loan facilitation or any lending option. State: "Loan tracking and calculation tool. Does not offer or facilitate loans." |
 
-### Full Description (Max 4,000 characters)
+## 5. Contact Details
+
+| Field | Value |
+| :-- | :-- |
+| **Developer name** | Varni Creation |
+| **Support email** | play.varni@gmail.com |
+| **Website** | _TBD_ |
+| **Privacy policy URL** | https://varnicreations.blogspot.com/2026/11/loanpilot-privacy-policy.html |
+
+## 6. Graphic Assets
+
+| Asset | Size | Content |
+| :-- | :-- | :-- |
+| **App icon** | 512 × 512 PNG | `android/app/src/main/ic_launcher-playstore.png` |
+| **Feature graphic** | 1024 × 500 PNG/JPG | Plane landing on "₹0" + headline "Plan your loan to ₹0" |
+| **Phone screenshots** | 1080 × 1920 min, 4–8 | See captions below |
+
+### Screenshot captions (in order)
+
+1. **Track every loan in one place** — My Loans dashboard
+2. **See interest saved before you prepay** — Prepayment simulator result
+3. **Reduce EMI or reduce tenure? Compare instantly** — Simulator comparison
+4. **Know your debt-free date** — Payoff planner / goal progress
+5. **Record EMIs & match your bank balance** — Loan details / payment history
+6. **Rate changed? Update in seconds** — Rate revision screen
+7. **EMI, SIP, FD, GST & more calculators** — Calculators tab
+8. **No sign-up. Your loan data stays on your phone** — Privacy screen
+
+Add the line "Not a lender — tracking & planning tool" in small text on screenshot 1.
+
+## 7. Release Notes — v1.0.0 (max 500)
 
 ```text
-Take control of your loans and financial planning with Finzo — the all-in-one loan management, EMI schedule tracking, and financial calculation utility built for clarity and privacy.
+Welcome to LoanPilot!
 
-Whether you are managing existing personal, home, or auto loans, planning prepayments, or calculating investment growth, Finzo provides fast, accurate, and completely offline financial tools.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💡 KEY FEATURES & HIGHLIGHTS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📊 COMPREHENSIVE LOAN MANAGEMENT
-• Track multiple loans in one centralized dashboard.
-• Record principal amounts, interest rates, tenures, and monthly EMIs.
-• Visual payoff progress indicators to see how much you have paid versus what you still owe.
-• Detailed amortization schedules and payment activity logs.
-
-💰 COMPLETE FINANCIAL CALCULATORS
-• Loan & EMI Calculator: Calculate monthly installments, total interest, and complete payment breakdown.
-• Loan Comparison: Compare two loans side-by-side to choose the best interest rate and tenure.
-• SIP Calculator (Systematic Investment Plan): Estimate returns on monthly mutual fund investments with compounding.
-• Fixed Deposit (FD) Calculator: Calculate maturity amounts and total interest earned.
-• Recurring Deposit (RD) Calculator: Plan disciplined savings and track returns.
-• Compound Interest & Simple Interest: Understand compounding frequency and interest growth.
-• GST & Percentage Calculators: Quickly compute inclusive/exclusive GST and quick percentage changes.
-
-🎯 GOAL PLANNING & REPAYMENT STRATEGY
-• Set custom loan payoff goals and target completion dates.
-• Simulate the impact of extra payments, interest rate adjustments, and tenure changes on your total interest payout.
-
-📄 PDF EXPORT & SHARING
-• Export complete, beautifully formatted loan statements and calculation summaries to PDF.
-• Share repayment schedules and calculations directly with family, accountants, or financial advisors.
-
-🔒 100% PRIVATE & OFFLINE-FIRST
-• Zero Cloud Storage: All your loan records, financial notes, and payment histories stay securely stored on your device.
-• No Account Required: No registration, no login credentials, and no linking to bank accounts.
-• Encrypted Sensitive Details: Secure on-device credential storage for account references and private notes.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📌 IMPORTANT INFORMATIONAL NOTICE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Finzo is an offline-first financial calculator and self-directed planning utility.
-
-Finzo:
-• DOES NOT provide, approve, broker, or disburse loans.
-• DOES NOT connect borrowers with lenders or financial institutions.
-• DOES NOT provide personalized financial, legal, or tax advice.
-• DOES NOT guarantee loan approvals, investment returns, or financial savings.
-
-All calculations and schedules are informational tools designed to assist your independent financial planning.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📫 CONTACT & SUPPORT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Developer: BinaryKode Technologies
-Email: bhavyakoshiya.work@gmail.com
-Privacy Policy: https://binarykode-technologies.web.app/pages/finzo-privacy-policy.html
+• Track your home, car & personal loans with real EMI, balance and interest details
+• Simulate part-payments and see interest saved and tenure cut
+• Plan your debt-free date and get EMI reminders
+• Export loan reports as PDF
+• EMI, SIP, FD, RD, GST, CAGR & more calculators
+• No sign-up — your loan data stays on your phone
 ```
-
----
-
-## 2. Store Categorization & Tags
-
-| Field                  | Value                                                                                                                                                            |
-| :--------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Primary Category**   | **Finance**                                                                                                                                                      |
-| **Secondary Category** | **Tools / Productivity**                                                                                                                                         |
-| **Tags / Keywords**    | EMI Calculator, Loan Manager, Loan Tracker, SIP Calculator, FD Calculator, Personal Finance, Loan Repayment Schedule, Amortization Calculator, Financial Utility |
-
----
-
-## 3. Contact & Support Information
-
-| Field                       | Value                                                                     |
-| :-------------------------- | :------------------------------------------------------------------------ |
-| **Developer / Entity Name** | **BinaryKode Technologies**                                               |
-| **Support Email**           | `bhavyakoshiya.work@gmail.com`                                            |
-| **Physical Address**        | Gujarat, India - 394101                                                   |
-| **Website**                 | `https://binarykode-technologies.web.app`                                 |
-| **Privacy Policy URL**      | `https://binarykode-technologies.web.app/pages/finzo-privacy-policy.html` |
-
----
-
-## 4. Graphic Assets Specification
-
-| Asset                 | Dimensions                       | Format / Color                        | Requirements                                                                                                                                                                |
-| :-------------------- | :------------------------------- | :------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **App Icon**          | 512 x 512 px                     | 32-bit PNG with Alpha (Max 1MB)       | High-res Finzo brand logo, flat background, no transparent perimeter                                                                                                        |
-| **Feature Graphic**   | 1024 x 500 px                    | JPG or 24-bit PNG (Max 15MB)          | Bold visual depicting Finzo dashboard, clean typography, no store badges                                                                                                    |
-| **Phone Screenshots** | Min 1080 x 1920 px (16:9 / 18:9) | JPG or 24-bit PNG (Min 4 screenshots) | 1. Loan Dashboard & Payoff Progress<br>2. EMI & Loan Amortization Schedule<br>3. SIP & Investment Calculators<br>4. Repayment Tracking & Goals<br>5. 100% Offline & Private |
-
----
-
-## 5. Release Notes / What's New (Max 500 characters)
-
-### Option A: Initial Public Launch (v1.0.0 / First Release)
-
-```text
-🎉 Welcome to Finzo — your private, offline-first financial calculator & loan management companion!
-
-What's inside:
-• Smart Loan Management: Track loans, EMI schedules & repayment progress in one place
-• Financial Calculators: EMI, SIP, FD, RD, CAGR, GST & Compound Interest
-• Loan Prepayment & Payoff Planner: See how extra payments save interest
-• Export to PDF: Generate & share detailed loan amortization reports
-• 100% Private & Offline: No login, no accounts, your data stays on your device
-```
-
-_(479 characters)_
-
----
-
-### Option B: Version Update (v1.1.1)
-
-```text
-What's new in v1.1.1:
-• Rate Finzo: Easily rate and review Finzo directly from your profile
-• Enhanced Sharing: Share app and calculation summaries with direct store links
-• Dynamic App Version: Accurate native version and build display
-• Offline Stability: Performance enhancements and smoother calculator interactions
-• Bug fixes and UI refinements across loan payoff planning
-
-Thank you for using Finzo! Love the app? Leave us a 5-star review!
-```
-
-_(453 characters)_
-

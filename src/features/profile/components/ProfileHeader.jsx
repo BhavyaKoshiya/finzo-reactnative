@@ -19,7 +19,7 @@ export const ProfileHeader = () => {
         <View style={styles.textGroup}>
           <AppText variant="screenTitle">Profile</AppText>
           <AppText variant="bodySmall" color={currentTheme.textSecondary} style={styles.subtitle}>
-            Finzo Member
+            LoanPilot Member
           </AppText>
         </View>
         <View style={[styles.avatarBox, { backgroundColor: avatarBg }]}>

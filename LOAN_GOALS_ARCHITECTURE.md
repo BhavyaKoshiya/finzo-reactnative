@@ -1,7 +1,7 @@
-# LOAN_GOALS_ARCHITECTURE.md — Finzo Loan Goals & Progress Tracking Architecture
+# LOAN_GOALS_ARCHITECTURE.md — LoanPilot Loan Goals & Progress Tracking Architecture
 
 ## 1. Overview
-Finzo Phase 16.12 introduces the **Loan Goals & Progress Tracking Architecture** (`src/features/loans/types/loanGoalTypes.js`, `src/features/loans/utils/loanGoalUtils.js`, and `src/store/slices/loanGoalsSlice.js`).
+LoanPilot Phase 16.12 introduces the **Loan Goals & Progress Tracking Architecture** (`src/features/loans/types/loanGoalTypes.js`, `src/features/loans/utils/loanGoalUtils.js`, and `src/store/slices/loanGoalsSlice.js`).
 
 It allows users to convert What-If payoff scenarios (Extra Monthly Payments, Target Payoff Date, Prepayment Target, Multiple Prepayment Plan, Target Outstanding Balance) into persistent, local personal financial goals and track actual payment progress over time.
 

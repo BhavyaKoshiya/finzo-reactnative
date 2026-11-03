@@ -54,7 +54,7 @@ export const LoanInsightsPreviewCard = ({ summary, onViewInsights, style }) => {
           <View style={styles.sourceBadge}>
             <AppIcon icon={isBankConfirmed ? ShieldCheck : Calculator} size={10} color={currentTheme.textSecondary} style={{ marginRight: 3 }} />
             <AppText variant="caption" color={currentTheme.textSecondary} style={{ fontSize: 10, fontWeight: '600' }}>
-              {isBankConfirmed ? 'Bank Confirmed' : 'Finzo Estimate'}
+              {isBankConfirmed ? 'Bank Confirmed' : 'LoanPilot Estimate'}
             </AppText>
           </View>
         </View>

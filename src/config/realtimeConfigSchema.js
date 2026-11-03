@@ -1,5 +1,5 @@
 /**
- * Schema validator for Finzo Realtime Configuration.
+ * Schema validator for LoanPilot Realtime Configuration.
  * Validates payload structure, types, string lengths, ranges, and supported schema version.
  */
 export const SUPPORTED_CONFIG_VERSION = 1;

@@ -89,7 +89,7 @@ export const SimulatedInterstitialModal = () => {
           </AppText>
 
           <AppText variant="bodyLarge" color={currentTheme.textSecondary} style={styles.subtext}>
-            Simulated Interstitial Creative — Finzo Swappable Ad Architecture
+            Simulated Interstitial Creative — LoanPilot Swappable Ad Architecture
           </AppText>
 
           <View style={styles.featuresBox}>

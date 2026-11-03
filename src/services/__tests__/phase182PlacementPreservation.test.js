@@ -1,5 +1,5 @@
 /**
- * FINZO — PHASE 18.2 — Ad Placement Preservation & Hardening Tests
+ * LOANPILOT — PHASE 18.2 — Ad Placement Preservation & Hardening Tests
  *
  * Verifies that the existing placement map is unchanged, all suppression/protection
  * logic works correctly, and production safety is enforced.

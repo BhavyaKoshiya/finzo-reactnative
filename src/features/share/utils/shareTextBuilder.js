@@ -11,7 +11,7 @@ export const buildShareText = (exportModel) => {
 
   const displayTitle = customTitle || title || 'Financial Calculation';
   const lines = [
-    `📊 ${displayTitle} (Finzo)`,
+    `📊 ${displayTitle} (LoanPilot)`,
     '────────────────────────',
   ];
 
@@ -36,7 +36,7 @@ export const buildShareText = (exportModel) => {
     lines.push('');
   }
 
-  lines.push('Calculated with Finzo');
+  lines.push('Calculated with LoanPilot');
   lines.push(`Download App: ${ANDROID_PLAY_STORE_WEB_URL}`);
   return lines.join('\n');
 };

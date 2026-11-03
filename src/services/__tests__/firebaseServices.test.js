@@ -299,7 +299,7 @@ describe('Firebase Services QA — Analytics, Crashlytics & Messaging', () => {
       expect(registeredCallback).toBeDefined();
 
       registeredCallback({
-        notification: { title: 'Finzo Update Available', body: 'New features are ready.' },
+        notification: { title: 'LoanPilot Update Available', body: 'New features are ready.' },
         data: {
           updateType: 'mandatory',
           loanAmount: 5000000, // Should be stripped

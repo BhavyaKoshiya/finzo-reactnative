@@ -1,5 +1,5 @@
 /**
- * FINZO — PHASE 19 — Production Data Integrity, Persistence Safety & Recovery Hardening Tests
+ * LOANPILOT — PHASE 19 — Production Data Integrity, Persistence Safety & Recovery Hardening Tests
  *
  * Validates zero data loss, corruption recovery, multi-loan isolation, ledger persistence,
  * Keychain security boundaries, cascade deletions, and zero Firebase financial writes.
@@ -329,8 +329,8 @@ describe('Phase 19 — Production Data Integrity & Persistence Safety', () => {
     Keychain.setGenericPassword.mockResolvedValue(true);
     Keychain.getGenericPassword.mockResolvedValue({ password: 'my_ultra_secret_pin_9876' });
 
-    await securePrivateStorageService.setSecureValue('finzo.loan.loan_1.sensitive.credential', 'my_ultra_secret_pin_9876');
-    const retrieved = await securePrivateStorageService.getSecureValue('finzo.loan.loan_1.sensitive.credential');
+    await securePrivateStorageService.setSecureValue('loanpilot.loan.loan_1.sensitive.credential', 'my_ultra_secret_pin_9876');
+    const retrieved = await securePrivateStorageService.getSecureValue('loanpilot.loan.loan_1.sensitive.credential');
 
     expect(retrieved).toBe('my_ultra_secret_pin_9876');
   });
@@ -339,7 +339,7 @@ describe('Phase 19 — Production Data Integrity & Persistence Safety', () => {
     Keychain.setGenericPassword.mockRejectedValue(new Error('Hardware Keystore Failure'));
 
     await expect(
-      securePrivateStorageService.setSecureValue('finzo.loan.loan_1.sensitive.credential', 'secret')
+      securePrivateStorageService.setSecureValue('loanpilot.loan.loan_1.sensitive.credential', 'secret')
     ).rejects.toThrow("Sensitive information couldn't be securely stored on this device.");
   });
 

@@ -1,12 +1,12 @@
-# CALCULATION_RULES.md — Finzo Financial Precision & Formula Specifications
+# CALCULATION_RULES.md — LoanPilot Financial Precision & Formula Specifications
 
-This document specifies the mandatory mathematical formulas, precision rules, compounding conventions, and validation contracts for all financial calculation engines in **Finzo**.
+This document specifies the mandatory mathematical formulas, precision rules, compounding conventions, and validation contracts for all financial calculation engines in **LoanPilot**.
 
 ---
 
 ## 1. CALCULATION PRECISION & DECIMAL.JS STRATEGY
 
-To eliminate JavaScript floating-point errors (e.g. `0.1 + 0.2 = 0.30000000000000004`), Finzo strictly uses **Decimal.js** for all financial formulas:
+To eliminate JavaScript floating-point errors (e.g. `0.1 + 0.2 = 0.30000000000000004`), LoanPilot strictly uses **Decimal.js** for all financial formulas:
 - **Precision**: 30 significant digits (`precision: 30`).
 - **Rounding Mode**: `Decimal.ROUND_HALF_UP` (standard financial half-up rounding).
 - **Separation**: Intermediate values retain high precision; final outputs are rounded to 2 decimal places (`roundCurrency`, `roundPercentage`).

@@ -179,7 +179,7 @@ export const HomeScreen = ({ navigation }) => {
   const renderHeader = () => (
     <View style={[styles.heroSection, { paddingTop: Math.max(insets.top + 12, 24), backgroundColor: currentTheme.background }]}>
       <AppText variant="caption" color={currentTheme.primary} style={styles.brandTitle}>
-        FINZO
+        LOANPILOT
       </AppText>
       <AppText variant="screenTitle" style={styles.greetingTitle}>
         {getTimeBasedGreeting()}
@@ -249,7 +249,7 @@ export const HomeScreen = ({ navigation }) => {
                     Track Your Real Loans
                   </AppText>
                   <AppText variant="caption" color={currentTheme.textSecondary}>
-                    Manage your home, personal or car loan EMIs in Finzo
+                    Manage your home, personal or car loan EMIs in LoanPilot
                   </AppText>
                 </View>
               </View>
@@ -296,7 +296,7 @@ export const HomeScreen = ({ navigation }) => {
         screen="home"
         placementId={AD_PLACEMENTS.HOME_NATIVE}
         adType="native"
-        headline="Finzo Calculators & Insights"
+        headline="LoanPilot Calculators & Insights"
         description="Calculate loan EMIs, interest savings, prepayments & investment returns offline."
       />
 

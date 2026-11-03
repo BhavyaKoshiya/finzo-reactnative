@@ -129,9 +129,9 @@ export const ProfileScreen = ({ navigation }) => {
     try {
       const storeUrl = appStoreService.getStoreUrl();
       await Share.share({
-        message: `Check out Finzo - an offline-first financial calculator and planning utility for EMI, SIP, FD, GST & real loan tracking!\n\nDownload now: ${storeUrl}`,
+        message: `Check out LoanPilot - an offline-first financial calculator and planning utility for EMI, SIP, FD, GST & real loan tracking!\n\nDownload now: ${storeUrl}`,
         url: storeUrl,
-        title: 'Finzo Finance Calculator',
+        title: 'LoanPilot Finance Calculator',
       });
     } catch (err) {
       Alert.alert('Share Failed', err.message);
@@ -355,7 +355,7 @@ export const ProfileScreen = ({ navigation }) => {
         <ProfileRow
           icon={ShieldCheck}
           title="Privacy & Local Data"
-          subtitle="Finzo is designed to keep your financial data on your device"
+          subtitle="LoanPilot is designed to keep your financial data on your device"
           onPress={() => navigation.navigate(ROUTES.LOCAL_DATA_PRIVACY)}
           accessibilityLabel="View privacy and local data information"
           style={styles.rowMargin}
@@ -369,8 +369,8 @@ export const ProfileScreen = ({ navigation }) => {
         />
       </ProfileSection>
 
-      {/* 5. About Finzo Section */}
-      <ProfileSection title="About Finzo" isLast={!__DEV__}>
+      {/* 5. About LoanPilot Section */}
+      <ProfileSection title="About LoanPilot" isLast={!__DEV__}>
         <ProfileRow
           icon={Info}
           title="App Version"
@@ -379,18 +379,18 @@ export const ProfileScreen = ({ navigation }) => {
         />
         <ProfileRow
           icon={Star}
-          title="Rate Finzo"
-          subtitle={Platform.OS === 'ios' ? 'Love Finzo? Rate us on the App Store' : 'Love Finzo? Rate us on Google Play'}
+          title="Rate LoanPilot"
+          subtitle={Platform.OS === 'ios' ? 'Love LoanPilot? Rate us on the App Store' : 'Love LoanPilot? Rate us on Google Play'}
           onPress={handleRateApp}
-          accessibilityLabel="Rate Finzo on app store"
+          accessibilityLabel="Rate LoanPilot on app store"
           style={styles.rowMargin}
         />
         <ProfileRow
           icon={Share2}
-          title="Share Finzo"
-          subtitle="Tell friends about Finzo offline calculator"
+          title="Share LoanPilot"
+          subtitle="Tell friends about LoanPilot offline calculator"
           onPress={handleShareApp}
-          accessibilityLabel="Share Finzo app"
+          accessibilityLabel="Share LoanPilot app"
         />
       </ProfileSection>
 

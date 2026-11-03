@@ -17,14 +17,14 @@ describe('securePrivateStorageService Platform Secure Storage', () => {
     Keychain.setGenericPassword.mockResolvedValue(true);
 
     const res = await securePrivateStorageService.setSecureValue(
-      'finzo.loan.loan1.sensitive.pwd',
+      'loanpilot.loan.loan1.sensitive.pwd',
       'my_secret_pass'
     );
     expect(res).toBe(true);
     expect(Keychain.setGenericPassword).toHaveBeenCalledWith(
-      'finzo_secure_user',
+      'loanpilot_secure_user',
       'my_secret_pass',
-      expect.objectContaining({ service: 'finzo.loan.loan1.sensitive.pwd' })
+      expect.objectContaining({ service: 'loanpilot.loan.loan1.sensitive.pwd' })
     );
   });
 
@@ -32,7 +32,7 @@ describe('securePrivateStorageService Platform Secure Storage', () => {
     Keychain.getGenericPassword.mockResolvedValue({ password: 'my_secret_pass' });
 
     const val = await securePrivateStorageService.getSecureValue(
-      'finzo.loan.loan1.sensitive.pwd'
+      'loanpilot.loan.loan1.sensitive.pwd'
     );
     expect(val).toBe('my_secret_pass');
   });
@@ -41,11 +41,11 @@ describe('securePrivateStorageService Platform Secure Storage', () => {
     Keychain.resetGenericPassword.mockResolvedValue(true);
 
     const res = await securePrivateStorageService.deleteSecureValue(
-      'finzo.loan.loan1.sensitive.pwd'
+      'loanpilot.loan.loan1.sensitive.pwd'
     );
     expect(res).toBe(true);
     expect(Keychain.resetGenericPassword).toHaveBeenCalledWith({
-      service: 'finzo.loan.loan1.sensitive.pwd',
+      service: 'loanpilot.loan.loan1.sensitive.pwd',
     });
   });
 

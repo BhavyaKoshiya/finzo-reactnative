@@ -1,11 +1,11 @@
-# PROJECT_ARCHITECTURE.md — Finzo System Architecture
+# PROJECT_ARCHITECTURE.md — LoanPilot System Architecture
 
-This document details the architectural blueprint and technical decisions for **Finzo**.
+This document details the architectural blueprint and technical decisions for **LoanPilot**.
 
 ---
 
 ## 1. REACT NATIVE CORE ARCHITECTURE
-Finzo is built using **React Native 0.83.10** on the New Architecture (Fabric / TurboModules enabled by default).
+LoanPilot is built using **React Native 0.83.10** on the New Architecture (Fabric / TurboModules enabled by default).
 - Platform-agnostic JavaScript/TypeScript business logic.
 - Standard React Native Android (`build.gradle`, Kotlin entry points) and iOS (`Podfile`, Xcode target) configurations.
 - Minimal native native-bridge dependencies for maximum portability and fast cold start.

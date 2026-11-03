@@ -1,6 +1,5 @@
 /* eslint-env jest */
 jest.mock('react-native-worklets', () => ({}));
-jest.mock('react-native-worklets-core', () => ({}));
 
 jest.mock('react-native-linear-gradient', () => {
   const React = require('react');
@@ -25,10 +24,10 @@ jest.mock('react-native-bootsplash', () => ({
 
 jest.mock('react-native-html-to-pdf', () => ({
   convert: jest.fn().mockResolvedValue({
-    filePath: '/mock/path/to/Finzo_Report.pdf',
+    filePath: '/mock/path/to/LoanPilot_Report.pdf',
   }),
   generatePDF: jest.fn().mockResolvedValue({
-    filePath: '/mock/path/to/Finzo_Report.pdf',
+    filePath: '/mock/path/to/LoanPilot_Report.pdf',
   }),
 }));
 
@@ -66,7 +65,7 @@ jest.mock('react-native-gifted-charts', () => {
 });
 
 jest.mock('react-native-device-info', () => ({
-  getBundleId: jest.fn(() => 'com.finzo.financecalculator'),
+  getBundleId: jest.fn(() => 'com.loanpilot.app'),
   getUniqueId: jest.fn().mockResolvedValue('mock-device-unique-id'),
   getVersion: jest.fn(() => '1.0.0'),
   getBuildNumber: jest.fn(() => '1'),

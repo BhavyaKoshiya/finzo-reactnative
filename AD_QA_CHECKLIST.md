@@ -1,4 +1,4 @@
-# Finzo — Ad QA Checklist (Phase 18.2)
+# LoanPilot — Ad QA Checklist (Phase 18.2)
 
 Verify each item before marking a phase complete.
 
