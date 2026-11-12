@@ -15,6 +15,7 @@ import {
   ConfigFetcher,
 } from 'react-native-marketing-plugin';
 import logger from '../logger';
+import firebaseAnalyticsService from '../firebaseAnalyticsService';
 
 /**
  * Marketing Plugin Ad Provider Adapter.
@@ -25,6 +26,7 @@ import logger from '../logger';
  * 1. Financial data firewall: zero financial data is passed to the SDK.
  * 2. enableAppOpenOnResume is strictly false.
  * 2a. Consent is gathered with Google's UMP before any ad is requested (GDPR / US states).
+ * 2b. Paid impressions are logged as Firebase `ad_impression` (revenue only, no user data).
  * 3. LoanPilot adDecisionEngine remains authoritative for frequency, cooldowns, and screening.
  * 4. Preloaded ads NEVER automatically display; they remain cached for user-triggered / authorized requests.
  */
@@ -67,6 +69,9 @@ export class MarketingAdProvider extends BaseAdProvider {
           bundleId: this.config.bundleId,
           enableAppOpenOnResume: false,
           requestConsent: true,
+          onAdRevenue: (event) => {
+            firebaseAnalyticsService.logAdImpression(event);
+          },
         });
 
         // No ad may be requested until consent allows it; initialize() is retried later.

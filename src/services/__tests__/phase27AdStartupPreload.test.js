@@ -225,6 +225,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
         bundleId: 'com.loanpilot.app',
         enableAppOpenOnResume: false,
         requestConsent: true,
+        onAdRevenue: expect.any(Function),
       });
 
       await provider.preloadAds();

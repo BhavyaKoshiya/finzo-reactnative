@@ -18,6 +18,7 @@ export const ANALYTICS_EVENTS = {
   PAYMENT_RECORDED: 'payment_recorded',
   GOAL_CREATED: 'goal_created',
   PDF_EXPORTED: 'pdf_exported',
+  AD_IMPRESSION: 'ad_impression',
   // Legacy / Product Events
   REWARDED_AD_STARTED: 'rewarded_ad_started',
   REWARDED_AD_COMPLETED: 'rewarded_ad_completed',
@@ -209,6 +210,33 @@ class FirebaseAnalyticsService {
     }
 
     return false;
+  }
+
+  /**
+   * Logs one paid ad impression as Firebase's standard `ad_impression` event, which
+   * Google Ads imports as ad revenue to optimize campaigns for earning users (target ROAS).
+   * Carries only ad metadata and the ad's revenue, never financial data.
+   *
+   * AdMob impressions are skipped: once AdMob is linked to Firebase it logs
+   * `ad_impression` itself, and logging them here too would count revenue twice.
+   *
+   * @param {{ network: string, format: string, adUnitId: string, value: number, currency: string }} event
+   * @returns {Promise<boolean>}
+   */
+  async logAdImpression({ network, format, adUnitId, value, currency } = {}) {
+    if (network === 'admob') return false;
+    if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0 || !currency) {
+      return false;
+    }
+
+    return this.logEvent(ANALYTICS_EVENTS.AD_IMPRESSION, {
+      ad_platform: 'Google Ad Manager',
+      ad_source: 'Google Ad Manager',
+      ad_format: format,
+      ad_unit_name: adUnitId,
+      value,
+      currency,
+    });
   }
 
   /**

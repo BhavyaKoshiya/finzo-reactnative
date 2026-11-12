@@ -3995,7 +3995,7 @@ __metadata:
     react-native-keychain: ^10.0.0
     react-native-linear-gradient: ^2.8.3
     react-native-logs: ^5.6.0
-    react-native-marketing-plugin: ^0.5.2
+    react-native-marketing-plugin: ^0.5.3
     react-native-reanimated: ^4.5.3
     react-native-safe-area-context: ^5.5.2
     react-native-screens: 4.15.0
@@ -9132,9 +9132,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-marketing-plugin@npm:^0.5.2":
-  version: 0.5.2
-  resolution: "react-native-marketing-plugin@npm:0.5.2"
+"react-native-marketing-plugin@npm:^0.5.3":
+  version: 0.5.3
+  resolution: "react-native-marketing-plugin@npm:0.5.3"
   dependencies:
     react-native-device-info: ^15.0.2
     react-native-google-mobile-ads: ^16.0.2
@@ -9143,7 +9143,7 @@ __metadata:
     react-native: "*"
     react-native-device-info: ">=11.0.0"
     react-native-google-mobile-ads: ">=16.0.2"
-  checksum: 2a65cef4ab5009296e85bcedef4a7bd63f9da41189cba821bba213ce6f5ef9f9853134eeb3e6313f3fbb2119d5620287649c9dca054331892a4b9506b14e4c07
+  checksum: a0cc2bb52d4818b4c2539a4dfc8b68a841c0fc1eea679059248c33edb644d90757ac759d561c81a4c53ae0ab3140d51e55da29487ca419c3032ecb0677f63d4a
   languageName: node
   linkType: hard
 
