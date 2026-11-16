@@ -1,3 +1,4 @@
+import { isIndianCurrency } from '../../../utils/financeFormatters';
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Percent, ChevronRight, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react-native';
@@ -136,7 +137,9 @@ export const RateRevisionPreviewCard = ({
           ) : (
             <AppText variant="caption" color={currentTheme.textMuted}>
               {isFloating
-                ? 'Track repo rate & EBLR revisions as bank notifies you'
+                ? (isIndianCurrency()
+                  ? 'Track repo rate & EBLR revisions as bank notifies you'
+                  : 'Track rate changes as your lender notifies you')
                 : 'Fixed interest rate loan'}
             </AppText>
           )}

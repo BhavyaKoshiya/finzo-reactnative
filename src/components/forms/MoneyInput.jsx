@@ -3,7 +3,8 @@ import { TextInput, StyleSheet, View } from 'react-native';
 import FormField from './FormField';
 import AppText from '../common/AppText';
 import { useAppTheme } from '../../hooks/useAppTheme';
-import { formatINR, parseINRInput } from '../../utils/numberUtils';
+import { formatAmount, parseINRInput } from '../../utils/numberUtils';
+import { getCurrencySymbol } from '../../utils/financeFormatters';
 
 export const MoneyInput = ({
   label,
@@ -28,7 +29,7 @@ export const MoneyInput = ({
       if (value !== undefined && value !== null && value !== '') {
         const num = typeof value === 'number' ? value : parseFloat(value);
         if (!isNaN(num)) {
-          setDisplayString(formatINR(num, false));
+          setDisplayString(formatAmount(num, false));
         } else {
           setDisplayString('');
         }
@@ -65,15 +66,15 @@ export const MoneyInput = ({
       if (!isNaN(num)) {
         if (min !== undefined && num < min) {
           onChangeValue(min);
-          setDisplayString(formatINR(min, false));
+          setDisplayString(formatAmount(min, false));
           return;
         }
         if (max !== undefined && num > max) {
           onChangeValue(max);
-          setDisplayString(formatINR(max, false));
+          setDisplayString(formatAmount(max, false));
           return;
         }
-        setDisplayString(formatINR(num, false));
+        setDisplayString(formatAmount(num, false));
       }
     }
   };
@@ -92,7 +93,7 @@ export const MoneyInput = ({
           color={currentTheme.primary}
           style={styles.prefix}
         >
-          ₹
+          {getCurrencySymbol()}
         </AppText>
         <TextInput
           value={displayString}

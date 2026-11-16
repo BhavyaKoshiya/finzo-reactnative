@@ -1,5 +1,9 @@
-import { formatINR, formatINRCompact } from '../../../calculations/core/currency';
-import { formatPercentage, formatNumber } from '../../../utils/financeFormatters';
+import {
+  formatCurrency,
+  formatCurrencyCompact,
+  formatPercentage,
+  formatNumber,
+} from '../../../utils/financeFormatters';
 
 /**
  * Maps a saved calculation snapshot to its primary metric display value and label.
@@ -24,7 +28,7 @@ export const getSavedCalculationPrimaryResult = (savedItem) => {
   ) {
     const emi = result.monthlyEMI || 0;
     return {
-      primaryValue: `${formatINR(emi)} / mo`,
+      primaryValue: `${formatCurrency(emi)} / mo`,
       primaryLabel: 'Monthly EMI',
     };
   }
@@ -33,7 +37,7 @@ export const getSavedCalculationPrimaryResult = (savedItem) => {
   if (calculatorId === 'sip') {
     const maturity = result.maturityAmount || 0;
     return {
-      primaryValue: `${formatINRCompact(maturity)} est. value`,
+      primaryValue: `${formatCurrencyCompact(maturity)} est. value`,
       primaryLabel: 'Estimated Value',
     };
   }
@@ -42,7 +46,7 @@ export const getSavedCalculationPrimaryResult = (savedItem) => {
   if (calculatorId === 'fd') {
     const maturity = result.maturityAmount || 0;
     return {
-      primaryValue: `${formatINRCompact(maturity)} maturity`,
+      primaryValue: `${formatCurrencyCompact(maturity)} maturity`,
       primaryLabel: 'Maturity Amount',
     };
   }
@@ -51,7 +55,7 @@ export const getSavedCalculationPrimaryResult = (savedItem) => {
   if (calculatorId === 'rd') {
     const maturity = result.maturityAmount || 0;
     return {
-      primaryValue: `${formatINRCompact(maturity)} maturity`,
+      primaryValue: `${formatCurrencyCompact(maturity)} maturity`,
       primaryLabel: 'Maturity Amount',
     };
   }
@@ -79,8 +83,8 @@ export const getSavedCalculationPrimaryResult = (savedItem) => {
     const total = result.totalAmount || 0;
     const gstAmt = result.gstAmount || 0;
     return {
-      primaryValue: formatINR(total),
-      primaryLabel: `Total (${formatINR(gstAmt)} GST)`,
+      primaryValue: formatCurrency(total),
+      primaryLabel: `Total (${formatCurrency(gstAmt)} GST)`,
     };
   }
 
@@ -88,7 +92,7 @@ export const getSavedCalculationPrimaryResult = (savedItem) => {
   if (calculatorId === 'simple-interest') {
     const interest = result.interest || 0;
     return {
-      primaryValue: `${formatINR(interest)} interest`,
+      primaryValue: `${formatCurrency(interest)} interest`,
       primaryLabel: 'Interest Earned',
     };
   }
@@ -97,7 +101,7 @@ export const getSavedCalculationPrimaryResult = (savedItem) => {
   if (calculatorId === 'compound-interest') {
     const interest = result.interestEarned || 0;
     return {
-      primaryValue: `${formatINR(interest)} interest`,
+      primaryValue: `${formatCurrency(interest)} interest`,
       primaryLabel: 'Interest Earned',
     };
   }

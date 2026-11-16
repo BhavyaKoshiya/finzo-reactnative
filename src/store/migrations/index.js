@@ -5,7 +5,7 @@
  * Protects against malformed, null, or corrupted persisted state during app hydration.
  */
 
-export const PERSIST_VERSION = 2;
+export const PERSIST_VERSION = 3;
 
 /**
  * Normalizes any persisted state to ensure all expected slice keys,
@@ -22,9 +22,13 @@ export const normalizePersistedState = (state = {}) => {
   const cleanState = { ...state };
 
   // 1. Settings Slice Normalization
+  // Persisted state always comes from an existing install, so the currency is
+  // already set up and the first-launch currency card does not apply.
   cleanState.settings = {
     themeMode: 'system',
     currency: 'INR',
+    currencySetupDone: true,
+    currencyNoticeDismissed: true,
     locale: 'en-IN',
     loanRemindersEnabled: true,
     ...(cleanState.settings || {}),
@@ -171,6 +175,11 @@ export const migrations = {
   },
   2: (state) => {
     // Version 2: Loan rate revisions slice & loan profile rateType normalization
+    return normalizePersistedState(state);
+  },
+  3: (state) => {
+    // Version 3: Multi-currency. Installs from before it keep INR (their loans were
+    // entered in ₹) and skip first-launch detection and the currency card.
     return normalizePersistedState(state);
   },
 };

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,7 +15,8 @@ import { useAppTheme } from '../../../hooks/useAppTheme';
 import { ROUTES } from '../../../navigation/routes';
 import { selectLoanProfileById } from '../../../store/slices/loanProfilesSlice';
 import { selectPaymentsForLoan } from '../../../store/slices/loanPaymentsSlice';
-import { formatCurrency } from '../../../utils/financeFormatters';
+import { formatCurrency, formatCurrencyCompact, isIndianCurrency } from '../../../utils/financeFormatters';
+import reviewPromptService from '../../../services/reviewPromptService';
 import { PAYMENT_TYPES } from '../constants/loanPaymentConstants';
 import {
   simulateLoanPrepayment,
@@ -23,10 +24,10 @@ import {
 } from '../utils/loanPrepaymentSimulation';
 
 const PRESET_AMOUNTS = [
-  { label: '₹10K', value: 10000 },
-  { label: '₹25K', value: 25000 },
-  { label: '₹50K', value: 50000 },
-  { label: '₹1L', value: 100000 },
+  { value: 10000 },
+  { value: 25000 },
+  { value: 50000 },
+  { value: 100000 },
 ];
 
 export const LoanPrepaymentSimulatorScreen = ({ route, navigation }) => {
@@ -51,22 +52,17 @@ export const LoanPrepaymentSimulatorScreen = ({ route, navigation }) => {
     });
   }, [loan, payments, prepaymentAmount, strategy]);
 
-  if (!loan) {
-    return (
-      <ScreenContainer
-        header={
-          <AppHeader
-            title="Prepayment Simulator"
-            leftAction={{ icon: ArrowLeft, onPress: () => navigation.goBack() }}
-          />
-        }
-      >
-        <View style={styles.notFoundContainer}>
-          <AppText variant="bodyMedium">Target loan profile not found.</AppText>
-        </View>
-      </ScreenContainer>
-    );
+  // Seeing interest saved is a good moment for a rating request; it is recorded when the
+  // user leaves the screen, so the review card never covers the result
+  const sawSavingsRef = useRef(false);
+  if ((simulation?.savings?.interestSaved ?? 0) > 0) {
+    sawSavingsRef.current = true;
   }
+  useEffect(() => () => {
+    if (sawSavingsRef.current) {
+      reviewPromptService.recordPositiveMoment('prepayment_savings_viewed');
+    }
+  }, []);
 
   const isBankConfirmed = simulation?.assumptions?.isBankConfirmed;
 
@@ -100,6 +96,23 @@ export const LoanPrepaymentSimulatorScreen = ({ route, navigation }) => {
       isFixedRate: loan.rateType === 'fixed',
     };
   }, [loan, simulation]);
+
+  if (!loan) {
+    return (
+      <ScreenContainer
+        header={
+          <AppHeader
+            title="Prepayment Simulator"
+            leftAction={{ icon: ArrowLeft, onPress: () => navigation.goBack() }}
+          />
+        }
+      >
+        <View style={styles.notFoundContainer}>
+          <AppText variant="bodyMedium">Target loan profile not found.</AppText>
+        </View>
+      </ScreenContainer>
+    );
+  }
 
   const handleRecordForeclosure = () => {
     if (!foreclosure) return;
@@ -230,7 +243,7 @@ export const LoanPrepaymentSimulatorScreen = ({ route, navigation }) => {
                   color={isSelected ? '#FFFFFF' : currentTheme.textPrimary}
                   style={{ fontWeight: isSelected ? '700' : '500' }}
                 >
-                  {preset.label}
+                  {formatCurrencyCompact(preset.value).replace(' ', '')}
                 </AppText>
               </TouchableOpacity>
             );
@@ -465,14 +478,18 @@ export const LoanPrepaymentSimulatorScreen = ({ route, navigation }) => {
             <View style={[styles.foreclosureNotice, { backgroundColor: '#FEF3C7' }]}>
               <AppIcon icon={Info} size={12} color="#B45309" style={{ marginRight: 6, marginTop: 1 }} />
               <AppText variant="caption" color="#92400E" style={{ flex: 1, fontSize: 11 }}>
-                Fixed-rate loans may have 2–4% foreclosure charges per bank policy. (Floating-rate loans have 0% charges per RBI).
+                {isIndianCurrency()
+                  ? 'Fixed-rate loans may have 2–4% foreclosure charges per bank policy. (Floating-rate loans have 0% charges per RBI).'
+                  : 'Fixed-rate loans may have early repayment charges. Check your loan agreement.'}
               </AppText>
             </View>
           ) : (
             <View style={[styles.foreclosureNotice, { backgroundColor: '#ECFDF5' }]}>
               <AppIcon icon={CheckCircle} size={12} color="#10B981" style={{ marginRight: 6, marginTop: 1 }} />
               <AppText variant="caption" color="#047857" style={{ flex: 1, fontSize: 11 }}>
-                0% foreclosure penalty for individual floating-rate loans per RBI guidelines.
+                {isIndianCurrency()
+                  ? '0% foreclosure penalty for individual floating-rate loans per RBI guidelines.'
+                  : 'Floating-rate loans often allow early repayment. Check your lender\'s terms.'}
               </AppText>
             </View>
           )}

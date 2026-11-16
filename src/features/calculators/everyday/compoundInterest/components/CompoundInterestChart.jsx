@@ -10,7 +10,7 @@ import Animated, {
 import AppText from '../../../../../components/common/AppText';
 import AppCard from '../../../../../components/cards/AppCard';
 import { useAppTheme } from '../../../../../hooks/useAppTheme';
-import { formatINRCompact } from '../../../../../calculations/core/currency';
+import { formatCurrencyCompact } from '../../../../../utils/financeFormatters';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -85,7 +85,7 @@ export const CompoundInterestChart = ({ result, style }) => {
               Total
             </AppText>
             <AppText variant="cardTitle" align="center" color={currentTheme.textPrimary}>
-              {formatINRCompact(total)}
+              {formatCurrencyCompact(total)}
             </AppText>
           </View>
         </View>
@@ -98,7 +98,7 @@ export const CompoundInterestChart = ({ result, style }) => {
                 Principal Amount
               </AppText>
               <AppText variant="bodyMedium">
-                {formatINRCompact(principal)} ({Math.round((principal / total) * 100)}%)
+                {formatCurrencyCompact(principal)} ({Math.round((principal / total) * 100)}%)
               </AppText>
             </View>
           </View>
@@ -110,7 +110,7 @@ export const CompoundInterestChart = ({ result, style }) => {
                 Interest Earned
               </AppText>
               <AppText variant="bodyMedium">
-                {formatINRCompact(interestEarned)} ({Math.round((interestEarned / total) * 100)}%)
+                {formatCurrencyCompact(interestEarned)} ({Math.round((interestEarned / total) * 100)}%)
               </AppText>
             </View>
           </View>

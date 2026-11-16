@@ -12,6 +12,7 @@ import { PAYMENT_TYPES } from '../constants/loanPaymentConstants';
 import { recalculateLoanBalanceFromPayments } from '../utils/paymentBalanceUtils';
 import { applyPrepaymentStrategy } from '../utils/applyPrepaymentStrategy';
 import { formatCurrency } from '../../../utils/financeFormatters';
+import reviewPromptService from '../../../services/reviewPromptService';
 
 export const AddPaymentScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -50,6 +51,12 @@ export const AddPaymentScreen = ({ route, navigation }) => {
       </ScreenContainer>
     );
   }
+
+  // Recording a payment is a good moment to ask for a rating (after the confirmation closes)
+  const closeAfterRecording = () => {
+    navigation.goBack();
+    reviewPromptService.recordPositiveMoment('payment_recorded');
+  };
 
   const handleSavePayment = () => {
     if (!form.validate()) return;
@@ -107,7 +114,7 @@ export const AddPaymentScreen = ({ route, navigation }) => {
             text: 'Keep Active',
             onPress: () => {
               Alert.alert('Payment Recorded', 'Payment has been added to loan history.');
-              navigation.goBack();
+              closeAfterRecording();
             },
           },
           {
@@ -122,7 +129,7 @@ export const AddPaymentScreen = ({ route, navigation }) => {
                 })
               );
               Alert.alert('Loan Completed', `${loan.name} has been marked paid off.`);
-              navigation.goBack();
+              closeAfterRecording();
             },
           },
         ]
@@ -142,7 +149,7 @@ export const AddPaymentScreen = ({ route, navigation }) => {
       Alert.alert(
         'Payment Recorded',
         detailMsg,
-        [{ text: 'OK', onPress: () => navigation.goBack() }]
+        [{ text: 'OK', onPress: closeAfterRecording }]
       );
     }
   };

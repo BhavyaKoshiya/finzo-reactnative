@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import ResultCard from '../../../../../components/cards/ResultCard';
 import CalculatorSummaryRow from '../../../../../components/calculator/CalculatorSummaryRow';
-import { formatINR } from '../../../../../calculations/core/currency';
+import { formatCurrency } from '../../../../../utils/financeFormatters';
 import { formatPercentage } from '../../../../../utils/financeFormatters';
 
 export const ROIResultCard = ({ result, style }) => {
@@ -21,15 +21,15 @@ export const ROIResultCard = ({ result, style }) => {
       <View style={styles.summaryContainer}>
         <CalculatorSummaryRow
           label="Initial Investment Cost"
-          value={formatINR(initialInvestment)}
+          value={formatCurrency(initialInvestment)}
         />
         <CalculatorSummaryRow
           label="Final Value Returned"
-          value={formatINR(finalValue)}
+          value={formatCurrency(finalValue)}
         />
         <CalculatorSummaryRow
           label={isProfit ? 'Net Profit' : 'Net Loss'}
-          value={formatINR(Math.abs(netProfit))}
+          value={formatCurrency(Math.abs(netProfit))}
           isBold
         />
       </View>

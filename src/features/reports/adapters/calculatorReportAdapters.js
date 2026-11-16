@@ -5,7 +5,7 @@ import {
   createSection,
   REPORT_TYPES,
 } from '../models/reportModel';
-import { formatCurrency, formatINR } from '../../../calculations/core/currency';
+import { formatCurrency } from '../../../utils/financeFormatters';
 import { calculateAmortization } from '../../../calculations/emi/calculateAmortization';
 
 /**
@@ -13,7 +13,7 @@ import { calculateAmortization } from '../../../calculations/emi/calculateAmorti
  * Maps inputs and calculation results from all 10 LoanPilot calculators into normalized report models.
  */
 
-const formatMoney = (val) => formatINR(val, { symbol: '₹' });
+const formatMoney = (val) => formatCurrency(val);
 const formatPct = (val) => `${Number(val || 0).toFixed(2)}%`;
 
 /**

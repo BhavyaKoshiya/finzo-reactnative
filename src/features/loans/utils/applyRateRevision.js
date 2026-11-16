@@ -1,3 +1,4 @@
+import { formatCurrency } from '../../../utils/financeFormatters';
 import { RATE_ADJUSTMENT_STRATEGIES } from '../types/rateRevisionTypes';
 import { simulateSchedule, calculateNewEmiForTenure, resolveRemainingTenureMonths } from './loanPrepaymentSimulation';
 
@@ -138,7 +139,7 @@ export const applyRateRevision = ({
   appliedNewEmi = currentEmi;
 
   if (isNegativeAmortization) {
-    warning = `Current EMI of ₹${currentEmi.toLocaleString('en-IN')} is less than the monthly interest of ₹${monthlyInterestAtNewRate.toLocaleString('en-IN')} at ${parsedNewRate}%. EMI must be increased (choose "Adjust EMI").`;
+    warning = `Current EMI of ${formatCurrency(currentEmi)} is less than the monthly interest of ${formatCurrency(monthlyInterestAtNewRate)} at ${parsedNewRate}%. EMI must be increased (choose "Adjust EMI").`;
     return {
       isValid: false,
       error: 'Current EMI cannot cover monthly interest at the new rate.',

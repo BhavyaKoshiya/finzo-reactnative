@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import ResultCard from '../../../../../components/cards/ResultCard';
 import CalculatorSummaryRow from '../../../../../components/calculator/CalculatorSummaryRow';
-import { formatINR } from '../../../../../calculations/core/currency';
+import { formatCurrency } from '../../../../../utils/financeFormatters';
 import { formatPercentage, formatNumber } from '../../../../../utils/financeFormatters';
 
 export const PercentageResultCard = ({ result, style }) => {
@@ -90,7 +90,7 @@ export const PercentageResultCard = ({ result, style }) => {
           />
           <CalculatorSummaryRow
             label="Absolute Difference"
-            value={formatINR(difference)}
+            value={formatCurrency(difference)}
           />
           <CalculatorSummaryRow
             label="Percentage Difference"

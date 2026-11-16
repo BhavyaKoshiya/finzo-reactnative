@@ -1,3 +1,4 @@
+import { formatCurrency } from '../../../utils/financeFormatters';
 import { LOAN_TYPES } from '../constants/loanConstants';
 
 /**
@@ -64,7 +65,7 @@ export const validateLoanProfileInput = (inputs = {}) => {
     // An EMI that does not cover the first month's interest never pays the loan off
     const monthlyInterest = Math.ceil((outstanding * rate) / 1200);
     if (emi <= monthlyInterest) {
-      errors.emiAmount = `EMI must be more than the monthly interest of ₹${monthlyInterest.toLocaleString('en-IN')}. Please check the amount.`;
+      errors.emiAmount = `EMI must be more than the monthly interest of ${formatCurrency(monthlyInterest)}. Please check the amount.`;
     }
   }
 

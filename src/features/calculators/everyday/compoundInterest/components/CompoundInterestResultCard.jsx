@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import ResultCard from '../../../../../components/cards/ResultCard';
 import CalculatorSummaryRow from '../../../../../components/calculator/CalculatorSummaryRow';
-import { formatINR } from '../../../../../calculations/core/currency';
+import { formatCurrency } from '../../../../../utils/financeFormatters';
 import { formatPercentage } from '../../../../../utils/financeFormatters';
 
 export const CompoundInterestResultCard = ({ result, style }) => {
@@ -21,22 +21,22 @@ export const CompoundInterestResultCard = ({ result, style }) => {
     <View style={style}>
       <ResultCard
         title="Compounded Total Amount"
-        value={formatINR(maturityAmount)}
+        value={formatCurrency(maturityAmount)}
         subtitle={`Compounded ${compoundingFrequency} at ${formatPercentage(annualInterestRate)} p.a. over ${tenureYears} year${tenureYears === 1 ? '' : 's'}`}
       />
 
       <View style={styles.summaryContainer}>
         <CalculatorSummaryRow
           label="Principal Amount"
-          value={formatINR(principal)}
+          value={formatCurrency(principal)}
         />
         <CalculatorSummaryRow
           label="Interest Earned"
-          value={formatINR(interestEarned)}
+          value={formatCurrency(interestEarned)}
         />
         <CalculatorSummaryRow
           label="Total Compounded Amount"
-          value={formatINR(maturityAmount)}
+          value={formatCurrency(maturityAmount)}
           isBold
         />
       </View>

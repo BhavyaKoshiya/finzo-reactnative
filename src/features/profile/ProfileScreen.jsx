@@ -18,6 +18,7 @@ import {
   ShieldAlert,
   FileText,
   SlidersHorizontal,
+  Coins,
 } from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppText from '../../components/common/AppText';
@@ -28,6 +29,8 @@ import ProfileSection from './components/ProfileSection';
 import ProfileRow from './components/ProfileRow';
 import PrivacyInfoModal from './components/PrivacyInfoModal';
 import DevAdControlsModal from '../../components/ads/DevAdControlsModal';
+import CurrencyPickerModal from '../../components/currency/CurrencyPickerModal';
+import { getCurrencyMeta } from '../../calculations/core/currency';
 import { RewardCard, rewardService } from '../rewards';
 import ProfileAdMilestoneCard from '../rewards/components/ProfileAdMilestoneCard';
 import {
@@ -48,13 +51,14 @@ import {
   selectTotalOutstanding,
 } from '../../store/slices/loanProfilesSlice';
 import {
+  selectCurrency,
   selectLoanRemindersEnabled,
   setLoanRemindersEnabled,
 } from '../../store/slices/settingsSlice';
 import loanReminderService from '../loans/services/loanReminderService';
 import { realtimeConfigService } from '../../config/realtimeConfigService';
 import { selectRewardedAdsConfig } from '../../config/realtimeConfigSelectors';
-import { formatCurrencyCompact } from '../../utils/financeFormatters';
+import { formatCurrencyCompact, formatNumber } from '../../utils/financeFormatters';
 import { useAppTheme } from '../../hooks/useAppTheme';
 import { ROUTES } from '../../navigation/routes';
 import { navigateToMyLoans } from '../../navigation/navigationHelpers';
@@ -69,6 +73,8 @@ export const ProfileScreen = ({ navigation }) => {
   const { currentTheme, themeMode, setThemeMode, isDark } = useAppTheme();
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
   const [devAdModalVisible, setDevAdModalVisible] = useState(false);
+  const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
+  const currency = getCurrencyMeta(useSelector(selectCurrency));
   const [now, setNow] = useState(new Date());
   const [config, setConfig] = useState(realtimeConfigService.getConfig());
 
@@ -255,7 +261,7 @@ export const ProfileScreen = ({ navigation }) => {
               <View style={styles.statPill}>
                 <AppIcon icon={Star} size={16} color={currentTheme.primary} style={{ marginRight: 6 }} />
                 <AppText variant="caption" style={{ fontWeight: '700' }}>
-                  {points.toLocaleString('en-IN')} points
+                  {formatNumber(points)} points
                 </AppText>
               </View>
 
@@ -286,6 +292,14 @@ export const ProfileScreen = ({ navigation }) => {
 
       {/* 3. Preferences Section */}
       <ProfileSection title="Preferences">
+        <ProfileRow
+          icon={Coins}
+          title="Currency"
+          subtitle={`${currency.symbol.trim()} ${currency.code} · ${currency.name}`}
+          onPress={() => setCurrencyPickerVisible(true)}
+          accessibilityLabel="Change currency"
+          style={styles.rowMargin}
+        />
         <ProfileRow
           icon={Bell}
           title="Loan Payment Reminders"
@@ -448,6 +462,10 @@ export const ProfileScreen = ({ navigation }) => {
         </ProfileSection>
       )}
 
+      <CurrencyPickerModal
+        visible={currencyPickerVisible}
+        onClose={() => setCurrencyPickerVisible(false)}
+      />
       <PrivacyInfoModal
         visible={privacyModalVisible}
         onClose={() => setPrivacyModalVisible(false)}

@@ -20,6 +20,7 @@ import {
   deleteSavedCalculation,
 } from '../../store/slices/savedCalculationsSlice';
 import UpcomingPaymentCard from '../loans/components/UpcomingPaymentCard';
+import CurrencyNoticeCard from './components/CurrencyNoticeCard';
 import LoanReminderSettingsModal from '../loans/components/LoanReminderSettingsModal';
 import {
   selectActiveLoanProfiles,
@@ -199,6 +200,8 @@ export const HomeScreen = ({ navigation }) => {
       contentContainerStyle={{ paddingVertical: 0 }}
       style={styles.container}
     >
+      <CurrencyNoticeCard />
+
       {/* Quick Search Entry */}
       <TouchableOpacity
         activeOpacity={0.8}

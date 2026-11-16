@@ -1,15 +1,16 @@
-export const formatINR = (value, showSymbol = true, decimals = 0) => {
+import { formatCurrency } from './financeFormatters';
+
+/**
+ * Formats an amount in the active currency, e.g. "₹10,00,000", or "10,00,000"
+ * without the symbol (money inputs show the symbol separately).
+ */
+export const formatAmount = (value, showSymbol = true, decimals = 0) => {
+  const options = { includeSymbol: showSymbol, decimalPlaces: decimals };
   if (value === null || value === undefined || isNaN(value)) {
-    return showSymbol ? '₹0' : '0';
+    return formatCurrency(0, options);
   }
   const numericValue = typeof value === 'string' ? parseFloat(value) : value;
-
-  const formatted = new Intl.NumberFormat('en-IN', {
-    maximumFractionDigits: decimals,
-    minimumFractionDigits: decimals,
-  }).format(numericValue);
-
-  return showSymbol ? `₹${formatted}` : formatted;
+  return formatCurrency(numericValue, options);
 };
 
 export const parseINRInput = (input) => {

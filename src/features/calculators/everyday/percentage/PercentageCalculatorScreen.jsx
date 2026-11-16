@@ -23,6 +23,8 @@ import { createCalculationSnapshot } from '../../../saved/types/savedTypes';
 import { restoreSavedCalculationInputs } from '../../../saved/utils/calculationRestoreAdapters';
 import { addSavedCalculation, updateSavedCalculation } from '../../../../store/slices/savedCalculationsSlice';
 import useInterstitialAd from '../../../../hooks/useInterstitialAd';
+import AdPlacement from '../../../../components/ads/AdPlacement';
+import { AD_PLACEMENTS } from '../../../../services/ads/adPlacementConstants';
 
 export const PercentageCalculatorScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -205,6 +207,13 @@ export const PercentageCalculatorScreen = ({ route, navigation }) => {
             {isResultStale && <StaleResultBanner style={styles.cardMargin} />}
 
             <PercentageResultCard result={result} style={styles.cardMargin} />
+
+            <AdPlacement
+              screen="calculators"
+              placementId={AD_PLACEMENTS.CALCULATOR_NATIVE}
+              adType="native"
+              style={styles.cardMargin}
+            />
           </CalculatorResultSection>
         </View>
       )}

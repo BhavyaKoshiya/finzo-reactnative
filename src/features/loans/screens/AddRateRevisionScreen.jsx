@@ -14,7 +14,7 @@ import { selectLoanProfileById, updateLoanProfile } from '../../../store/slices/
 import { addRateRevision } from '../../../store/slices/loanRateRevisionsSlice';
 import { useRateRevisionForm } from '../hooks/useRateRevisionForm';
 import { RATE_ADJUSTMENT_STRATEGIES, RATE_ADJUSTMENT_STRATEGY_OPTIONS } from '../types/rateRevisionTypes';
-import { formatCurrency } from '../../../utils/financeFormatters';
+import { formatCurrency, getCurrencySymbol, isIndianCurrency } from '../../../utils/financeFormatters';
 
 export const AddRateRevisionScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -330,7 +330,7 @@ export const AddRateRevisionScreen = ({ route, navigation }) => {
             <View style={styles.overrideFields}>
               {form.adjustmentStrategy === RATE_ADJUSTMENT_STRATEGIES.ADJUST_EMI ? (
                 <TextInputField
-                  label="Exact Bank EMI (₹)"
+                  label={`Exact Bank EMI (${getCurrencySymbol()})`}
                   placeholder={`e.g. ${form.calculationResult.calculatedNewEmi || ''}`}
                   keyboardType="numeric"
                   value={form.exactNewEmi}
@@ -357,7 +357,7 @@ export const AddRateRevisionScreen = ({ route, navigation }) => {
         <AppCard style={styles.card}>
           <TextInputField
             label="Notes / Remarks (Optional)"
-            placeholder="e.g. RBI repo rate hike 25 bps, SBI EBLR reset"
+            placeholder={isIndianCurrency() ? 'e.g. RBI repo rate hike 25 bps, SBI EBLR reset' : 'e.g. Lender rate increase'}
             value={form.note}
             onChangeText={form.setNote}
             multiline

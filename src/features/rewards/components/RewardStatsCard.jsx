@@ -1,3 +1,4 @@
+import { formatNumber } from '../../../utils/financeFormatters';
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Star, Flame, Trophy, CalendarCheck } from 'lucide-react-native';
@@ -40,7 +41,7 @@ export const RewardStatsCard = ({
             LOANPILOT POINTS ACCUMULATED
           </AppText>
           <AppText variant="screenTitle" color={currentTheme.textPrimary} style={styles.pointsValue}>
-            {points.toLocaleString('en-IN')}{' '}
+            {formatNumber(points)}{' '}
             <AppText variant="bodyMedium" color={currentTheme.textSecondary} style={styles.pointsLabel}>
               pts
             </AppText>

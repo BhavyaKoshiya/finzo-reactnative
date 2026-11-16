@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useStore } from 'react-redux';
 import BootSplash from 'react-native-bootsplash';
 import connectivityService from '../../services/connectivityService';
 import { setConnectivityState } from '../../store/slices/connectivitySlice';
+import { applyDetectedCurrency, selectCurrencySetupDone } from '../../store/slices/settingsSlice';
+import { detectDeviceCurrency } from '../../services/currencyDetectionService';
 import adService from '../../services/adService';
 import { realtimeConfigService } from '../../config/realtimeConfigService';
 import logger from '../../services/logger';
@@ -12,6 +14,7 @@ export const AD_STARTUP_TIMEOUT_MS = 5000;
 
 export const AppStartupGate = ({ children }) => {
   const dispatch = useDispatch();
+  const store = useStore();
   const [isStartupReady, setIsStartupReady] = useState(false);
   const startupDoneRef = useRef(false);
 
@@ -19,6 +22,11 @@ export const AppStartupGate = ({ children }) => {
     let isMounted = true;
 
     const performStartupInit = async () => {
+      // Fresh install only: pick the currency once from the device (offline, instant)
+      if (!selectCurrencySetupDone(store.getState())) {
+        dispatch(applyDetectedCurrency(detectDeviceCurrency()));
+      }
+
       try {
         // 1. Initial connectivity check
         const initialConn = await connectivityService.getConnectivityState();
@@ -105,7 +113,7 @@ export const AppStartupGate = ({ children }) => {
       isMounted = false;
       unsubscribe();
     };
-  }, [dispatch]);
+  }, [dispatch, store]);
 
   if (!isStartupReady) {
     // Keep blank container while native BootSplash is still visible to prevent UI flashes

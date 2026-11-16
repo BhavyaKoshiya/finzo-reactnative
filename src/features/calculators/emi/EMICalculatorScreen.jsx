@@ -168,7 +168,21 @@ export const EMICalculatorScreen = ({ route, navigation }) => {
 
             <EMIResultCard result={result} style={styles.cardMargin} />
 
+            <AdPlacement
+              screen="calculators"
+              placementId={AD_PLACEMENTS.CALCULATOR_NATIVE}
+              adType="native"
+              style={styles.cardMargin}
+            />
+
             <EMIBreakdownChart result={result} style={styles.cardMargin} />
+
+            <AdPlacement
+              screen="calculators"
+              placementId={AD_PLACEMENTS.CALCULATOR_BANNER}
+              adType="banner"
+              style={styles.cardMargin}
+            />
 
             <AmortizationSection
               schedule={amortizationSchedule}
@@ -178,13 +192,6 @@ export const EMICalculatorScreen = ({ route, navigation }) => {
               onToggleViewMode={setScheduleViewMode}
               onViewModeChange={setScheduleViewMode}
               style={styles.cardMargin}
-            />
-
-            <AdPlacement
-              screen="calculators"
-              placementId={AD_PLACEMENTS.CALCULATOR_BANNER}
-              adType="banner"
-              style={{ marginTop: 12 }}
             />
           </CalculatorResultSection>
         </View>

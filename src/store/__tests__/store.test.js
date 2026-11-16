@@ -15,6 +15,8 @@ describe('settingsSlice', () => {
   const initialState = {
     themeMode: 'system',
     currency: 'INR',
+    currencySetupDone: false,
+    currencyNoticeDismissed: false,
     locale: 'en-IN',
     loanRemindersEnabled: true,
   };
@@ -53,7 +55,12 @@ describe('settingsSlice', () => {
       loanRemindersEnabled: false,
     };
     const actual = settingsReducer(modifiedState, resetSettings());
-    expect(actual).toEqual(initialState);
+    expect(actual).toEqual({
+      ...initialState,
+      currency: 'USD',
+      currencySetupDone: true,
+      currencyNoticeDismissed: true,
+    });
   });
 
   it('selectors should return correct values', () => {

@@ -13,7 +13,7 @@ import { selectLoanProfileById } from '../../../store/slices/loanProfilesSlice';
 import { selectRateRevisionsByLoanId } from '../../../store/slices/loanRateRevisionsSlice';
 import { ROUTES } from '../../../navigation/routes';
 import { formatDateForDisplay } from '../../../utils/dateUtils';
-import { formatCurrency } from '../../../utils/financeFormatters';
+import { formatCurrency, isIndianCurrency } from '../../../utils/financeFormatters';
 
 export const LoanRateRevisionsScreen = ({ route, navigation }) => {
   const { currentTheme } = useAppTheme();
@@ -197,7 +197,9 @@ export const LoanRateRevisionsScreen = ({ route, navigation }) => {
               </View>
             </View>
             <AppText variant="caption" color={currentTheme.textMuted} style={{ marginTop: 8 }}>
-              Track floating interest rate changes linked to RBI repo rate / EBLR benchmarks.
+              {isIndianCurrency()
+                ? 'Track floating interest rate changes linked to RBI repo rate / EBLR benchmarks.'
+                : 'Track floating interest rate changes as your lender announces them.'}
             </AppText>
           </AppCard>
         }

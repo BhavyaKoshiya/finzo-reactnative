@@ -30,6 +30,8 @@ import {
   ExportPdfModal,
 } from '../../share';
 import useInterstitialAd from '../../../hooks/useInterstitialAd';
+import AdPlacement from '../../../components/ads/AdPlacement';
+import { AD_PLACEMENTS } from '../../../services/ads/adPlacementConstants';
 
 export const LoanCalculatorScreen = ({ config, route, navigation }) => {
   const dispatch = useDispatch();
@@ -223,7 +225,21 @@ export const LoanCalculatorScreen = ({ config, route, navigation }) => {
 
             <EMIResultCard result={result} style={styles.cardMargin} />
 
+            <AdPlacement
+              screen="calculators"
+              placementId={AD_PLACEMENTS.CALCULATOR_NATIVE}
+              adType="native"
+              style={styles.cardMargin}
+            />
+
             <EMIBreakdownChart result={result} style={styles.cardMargin} />
+
+            <AdPlacement
+              screen="calculators"
+              placementId={AD_PLACEMENTS.CALCULATOR_BANNER}
+              adType="banner"
+              style={styles.cardMargin}
+            />
 
             <AmortizationSection
               schedule={amortizationSchedule}

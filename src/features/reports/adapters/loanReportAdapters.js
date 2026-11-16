@@ -5,13 +5,13 @@ import {
   createSection,
   REPORT_TYPES,
 } from '../models/reportModel';
-import { formatINR } from '../../../calculations/core/currency';
+import { formatCurrency } from '../../../utils/financeFormatters';
 import { getCurrentLoanBalance } from '../../loans/utils/paymentBalanceUtils';
 import { buildLoanInsightSummary } from '../../loans/utils/loanInsightUtils';
 import { formatLoanDate } from '../../loans/utils/loanDateUtils';
 import { PAYMENT_TYPES } from '../../loans/constants/loanPaymentConstants';
 
-const formatMoney = (val) => formatINR(val, { symbol: '₹' });
+const formatMoney = (val) => formatCurrency(val);
 const formatPct = (val) => `${Number(val || 0).toFixed(2)}%`;
 
 /**

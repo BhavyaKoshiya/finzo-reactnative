@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import ResultCard from '../../../../../components/cards/ResultCard';
 import CalculatorSummaryRow from '../../../../../components/calculator/CalculatorSummaryRow';
-import { formatINR } from '../../../../../calculations/core/currency';
+import { formatCurrency } from '../../../../../utils/financeFormatters';
 
 export const SIPResultCard = ({ result, style }) => {
   if (!result) return null;
@@ -13,18 +13,18 @@ export const SIPResultCard = ({ result, style }) => {
     <View style={style}>
       <ResultCard
         title="Estimated Future Value"
-        value={formatINR(maturityAmount)}
+        value={formatCurrency(maturityAmount)}
         subtitle="Based on assumed return rate"
       />
 
       <View style={styles.summaryContainer}>
         <CalculatorSummaryRow
           label="Total Invested Amount"
-          value={formatINR(totalInvested)}
+          value={formatCurrency(totalInvested)}
         />
         <CalculatorSummaryRow
           label="Estimated Returns"
-          value={formatINR(estimatedReturns)}
+          value={formatCurrency(estimatedReturns)}
           isBold
         />
       </View>

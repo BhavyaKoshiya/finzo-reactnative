@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import ResultCard from '../../../../../components/cards/ResultCard';
 import CalculatorSummaryRow from '../../../../../components/calculator/CalculatorSummaryRow';
-import { formatINR } from '../../../../../calculations/core/currency';
+import { formatCurrency } from '../../../../../utils/financeFormatters';
 import { formatPercentage } from '../../../../../utils/financeFormatters';
 
 export const CAGRResultCard = ({ result, style }) => {
@@ -22,15 +22,15 @@ export const CAGRResultCard = ({ result, style }) => {
       <View style={styles.summaryContainer}>
         <CalculatorSummaryRow
           label="Initial Investment"
-          value={formatINR(initialValue)}
+          value={formatCurrency(initialValue)}
         />
         <CalculatorSummaryRow
           label="Final Investment Value"
-          value={formatINR(finalValue)}
+          value={formatCurrency(finalValue)}
         />
         <CalculatorSummaryRow
           label={isPositive ? 'Absolute Gain' : 'Absolute Loss'}
-          value={formatINR(Math.abs(absoluteGain))}
+          value={formatCurrency(Math.abs(absoluteGain))}
           isBold
         />
       </View>

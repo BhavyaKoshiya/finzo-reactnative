@@ -9,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import AppCard from '../../../../../components/cards/AppCard';
 import AppText from '../../../../../components/common/AppText';
-import { formatINR } from '../../../../../calculations/core/currency';
+import { formatCurrency } from '../../../../../utils/financeFormatters';
 import { useAppTheme } from '../../../../../hooks/useAppTheme';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -109,7 +109,7 @@ export const SIPBreakdownChart = ({ result, style }) => {
             </AppText>
           </View>
           <AppText variant="bodyMedium" style={styles.legendValue}>
-            {formatINR(totalInvested)}
+            {formatCurrency(totalInvested)}
           </AppText>
 
           <View style={[styles.legendRow, styles.legendRowMargin]}>
@@ -119,7 +119,7 @@ export const SIPBreakdownChart = ({ result, style }) => {
             </AppText>
           </View>
           <AppText variant="bodyMedium" style={styles.legendValue}>
-            {formatINR(estimatedReturns)}
+            {formatCurrency(estimatedReturns)}
           </AppText>
         </View>
       </View>

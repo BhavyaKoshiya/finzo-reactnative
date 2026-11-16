@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import AppText from '../../../../components/common/AppText';
-import { formatINR } from '../../../../calculations/core/currency';
+import { formatCurrency } from '../../../../utils/financeFormatters';
 import { useAppTheme } from '../../../../hooks/useAppTheme';
 
 export const AmortizationRow = ({ item, isYearly = false, isLast = false }) => {
@@ -16,7 +16,7 @@ export const AmortizationRow = ({ item, isYearly = false, isLast = false }) => {
           {label}
         </AppText>
         <AppText variant="bodySmall" color={currentTheme.textSecondary}>
-          Payment: <AppText variant="bodySmall" color={currentTheme.textPrimary} style={styles.boldText}>{formatINR(item.payment || item.totalPayment)}</AppText>
+          Payment: <AppText variant="bodySmall" color={currentTheme.textPrimary} style={styles.boldText}>{formatCurrency(item.payment || item.totalPayment)}</AppText>
         </AppText>
       </View>
 
@@ -26,7 +26,7 @@ export const AmortizationRow = ({ item, isYearly = false, isLast = false }) => {
             Principal
           </AppText>
           <AppText variant="bodySmall" color={currentTheme.textPrimary}>
-            {formatINR(item.principalComponent)}
+            {formatCurrency(item.principalComponent)}
           </AppText>
         </View>
 
@@ -35,7 +35,7 @@ export const AmortizationRow = ({ item, isYearly = false, isLast = false }) => {
             Interest
           </AppText>
           <AppText variant="bodySmall" color={currentTheme.textSecondary}>
-            {formatINR(item.interestComponent)}
+            {formatCurrency(item.interestComponent)}
           </AppText>
         </View>
 
@@ -44,7 +44,7 @@ export const AmortizationRow = ({ item, isYearly = false, isLast = false }) => {
             Balance
           </AppText>
           <AppText variant="bodySmall" color={currentTheme.textPrimary}>
-            {formatINR(item.closingBalance)}
+            {formatCurrency(item.closingBalance)}
           </AppText>
         </View>
       </View>

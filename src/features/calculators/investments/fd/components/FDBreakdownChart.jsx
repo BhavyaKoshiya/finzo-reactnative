@@ -9,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import AppCard from '../../../../../components/cards/AppCard';
 import AppText from '../../../../../components/common/AppText';
-import { formatINR } from '../../../../../calculations/core/currency';
+import { formatCurrency } from '../../../../../utils/financeFormatters';
 import { useAppTheme } from '../../../../../hooks/useAppTheme';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -108,7 +108,7 @@ export const FDBreakdownChart = ({ result, style }) => {
             </AppText>
           </View>
           <AppText variant="bodyMedium" style={styles.legendValue}>
-            {formatINR(principal)}
+            {formatCurrency(principal)}
           </AppText>
 
           <View style={[styles.legendRow, styles.legendRowMargin]}>
@@ -118,7 +118,7 @@ export const FDBreakdownChart = ({ result, style }) => {
             </AppText>
           </View>
           <AppText variant="bodyMedium" style={styles.legendValue}>
-            {formatINR(interestEarned)}
+            {formatCurrency(interestEarned)}
           </AppText>
         </View>
       </View>

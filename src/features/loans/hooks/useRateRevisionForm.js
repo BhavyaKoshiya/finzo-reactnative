@@ -1,3 +1,4 @@
+import { formatCurrency } from '../../../utils/financeFormatters';
 import { useState, useMemo, useCallback } from 'react';
 import { RATE_ADJUSTMENT_STRATEGIES, createRateRevision } from '../types/rateRevisionTypes';
 import { applyRateRevision } from '../utils/applyRateRevision';
@@ -78,7 +79,7 @@ export const useRateRevisionForm = ({
     if (showBankOverride) {
       if (adjustmentStrategy === RATE_ADJUSTMENT_STRATEGIES.ADJUST_EMI && exactNewEmi) {
         if (isNaN(Number(exactNewEmi)) || Number(exactNewEmi) <= 0) {
-          errs.exactNewEmi = 'Bank EMI must be greater than ₹0';
+          errs.exactNewEmi = `Bank EMI must be greater than ${formatCurrency(0)}`;
         }
       }
       if (adjustmentStrategy === RATE_ADJUSTMENT_STRATEGIES.ADJUST_TENURE && exactNewTenureMonths) {

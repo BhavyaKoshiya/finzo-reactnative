@@ -80,6 +80,8 @@ export const AmortizationSection = ({
                 variant="caption"
                 color={viewMode === 'monthly' ? '#FFFFFF' : currentTheme.textPrimary}
                 style={styles.tabText}
+                align="center"
+                numberOfLines={1}
               >
                 Monthly
               </AppText>
@@ -99,8 +101,10 @@ export const AmortizationSection = ({
                 variant="caption"
                 color={viewMode === 'yearly' ? '#FFFFFF' : currentTheme.textPrimary}
                 style={styles.tabText}
+                align="center"
+                numberOfLines={1}
               >
-                Yearly Summary
+                Yearly
               </AppText>
             </TouchableOpacity>
           </View>
@@ -149,6 +153,7 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontWeight: '600',
+    alignSelf: 'stretch',
   },
 });
 

@@ -9,19 +9,27 @@ Store listing text, categorization and asset specs for **LoanPilot** (`com.loanp
 ## 1. App Name (max 30)
 
 ```text
-LoanPilot: EMI Prepay Planner
+LoanPilot: EMI Loan Calculator
 ```
+
+"EMI calculator" is the most searched phrase in this category, so it belongs in the title (the title carries the most weight in Play Store search). Previous title: `LoanPilot: EMI Prepay Planner`. Play does not allow A/B testing the title, so change it once and compare installs from Play search over the next 2–4 weeks.
 
 ## 2. Short Description (max 80)
 
 ```text
-Track your loans, simulate part-payments & see interest saved. EMI, SIP, FD too.
+EMI calculator & loan tracker. See how much prepaying saves you in interest.
+```
+
+Store listing experiment variant B (test this against A in Play Console):
+
+```text
+See how much interest a ₹1 lakh prepayment saves. EMI calculator & loan tracker.
 ```
 
 ## 3. Full Description (max 4,000)
 
 ```text
-Paying a home, car or personal loan? LoanPilot shows you exactly where your EMI goes — and how much interest and time you can save by prepaying.
+Free EMI calculator and loan tracker for home, car and personal loans. See how much interest and how many months you save by prepaying, before you pay a rupee extra.
 
 Add your real loans, record every EMI and part-payment, and see your outstanding balance, interest paid and debt-free date at a glance. Before you pay extra, simulate it: LoanPilot shows how much interest you save and how many months you cut.
 
@@ -102,8 +110,8 @@ LoanPilot is free and supported by ads.
 
 ### Screenshot captions (in order)
 
-1. **Track every loan in one place** — My Loans dashboard
-2. **See interest saved before you prepay** — Prepayment simulator result
+1. **Prepay ₹1 lakh, save ₹2.88 lakh** — Prepayment simulator result (lead with the outcome: most visitors only see the first two screenshots)
+2. **Track every loan in one place** — My Loans dashboard
 3. **Reduce EMI or reduce tenure? Compare instantly** — Simulator comparison
 4. **Know your debt-free date** — Payoff planner / goal progress
 5. **Record EMIs & match your bank balance** — Loan details / payment history
@@ -112,6 +120,8 @@ LoanPilot is free and supported by ads.
 8. **No sign-up. Your loan data stays on your phone** — Privacy screen
 
 Add the line "Not a lender — tracking & planning tool" in small text on screenshot 1.
+
+Files: `store-assets/screenshots/`. Google Ads image assets (3 themes × 1200×628, 1200×1200, 1200×1500): `store-assets/google-ads/`. Regenerate both with `scripts/make_store_assets.py` (needs Python with Pillow; run it on the original framed screenshots from git).
 
 ## 7. Release Notes — v1.0.0 (max 500)
 

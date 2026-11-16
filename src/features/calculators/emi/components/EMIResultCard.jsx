@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import ResultCard from '../../../../components/cards/ResultCard';
-import { formatINR } from '../../../../calculations/core/currency';
+import { formatCurrency } from '../../../../utils/financeFormatters';
 
 export const EMIResultCard = ({ result, style }) => {
   if (!result) return null;
@@ -12,7 +12,7 @@ export const EMIResultCard = ({ result, style }) => {
     <View style={style}>
       <ResultCard
         title="Monthly EMI"
-        value={formatINR(monthlyEMI)}
+        value={formatCurrency(monthlyEMI)}
       />
     </View>
   );

@@ -9,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import AppCard from '../../../../components/cards/AppCard';
 import AppText from '../../../../components/common/AppText';
-import { formatINR } from '../../../../calculations/core/currency';
+import { formatCurrency } from '../../../../utils/financeFormatters';
 import { getEMIDonutChartData } from '../utils/emiAdapters';
 import { useAppTheme } from '../../../../hooks/useAppTheme';
 
@@ -111,7 +111,7 @@ export const EMIBreakdownChart = ({ result, style }) => {
             </AppText>
           </View>
           <AppText variant="bodyMedium" style={styles.legendValue}>
-            {formatINR(result.principal)}
+            {formatCurrency(result.principal)}
           </AppText>
 
           <View style={[styles.legendRow, styles.legendRowMargin]}>
@@ -121,7 +121,7 @@ export const EMIBreakdownChart = ({ result, style }) => {
             </AppText>
           </View>
           <AppText variant="bodyMedium" style={styles.legendValue}>
-            {formatINR(result.totalInterest)}
+            {formatCurrency(result.totalInterest)}
           </AppText>
         </View>
       </View>

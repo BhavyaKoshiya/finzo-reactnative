@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
 import { AppState, StatusBar, StyleSheet } from 'react-native';
-import { Provider } from 'react-redux';
+import { Provider, useSelector } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import notifee, { EventType } from '@notifee/react-native';
 import { store, persistor } from './src/store';
 import AppNavigator from './src/navigation/AppNavigator';
+import { selectCurrency } from './src/store/slices/settingsSlice';
+import { setActiveCurrency } from './src/utils/financeFormatters';
 import { navigate } from './src/navigation/navigationRef';
 import ROUTES from './src/navigation/routes';
 import loanReminderService from './src/features/loans/services/loanReminderService';
@@ -19,6 +21,16 @@ import adService from './src/services/adService';
 import firebaseAnalyticsService, { ANALYTICS_EVENTS } from './src/services/firebaseAnalyticsService';
 import firebaseCrashlyticsService from './src/services/firebaseCrashlyticsService';
 import firebaseMessagingService from './src/services/firebaseMessagingService';
+
+/**
+ * Points every formatter at the selected currency before its subtree renders, and
+ * remounts the screens when the currency changes so all amounts redraw.
+ */
+function CurrencyScope({ children }) {
+  const currency = useSelector(selectCurrency);
+  setActiveCurrency(currency);
+  return <React.Fragment key={currency}>{children}</React.Fragment>;
+}
 
 function AppContent() {
   useEffect(() => {
@@ -99,7 +111,9 @@ function AppContent() {
       <StatusBar barStyle="dark-content" />
       <ConnectivityGate>
         <AppUpdateGate>
-          <AppNavigator />
+          <CurrencyScope>
+            <AppNavigator />
+          </CurrencyScope>
           <SimulatedInterstitialModal />
         </AppUpdateGate>
       </ConnectivityGate>

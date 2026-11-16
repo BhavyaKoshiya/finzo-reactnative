@@ -25,7 +25,7 @@ export const normalizeNumberInput = (input) => {
     return isNaN(input) || !isFinite(input) ? null : input;
   }
   if (typeof input === 'string') {
-    const cleaned = input.replace(/[₹,\s]/g, '').trim();
+    const cleaned = input.replace(/[₹$€£৳,\s]/g, '').trim();
     if (cleaned === '' || !isDecimalValue(cleaned)) {
       return null;
     }

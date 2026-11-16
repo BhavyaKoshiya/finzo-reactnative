@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import ResultCard from '../../../../../components/cards/ResultCard';
 import CalculatorSummaryRow from '../../../../../components/calculator/CalculatorSummaryRow';
 import AppText from '../../../../../components/common/AppText';
-import { formatINR } from '../../../../../calculations/core/currency';
+import { formatCurrency } from '../../../../../utils/financeFormatters';
 import { formatPercentage } from '../../../../../utils/financeFormatters';
 import { useAppTheme } from '../../../../../hooks/useAppTheme';
 
@@ -18,22 +18,22 @@ export const SimpleInterestResultCard = ({ result, style }) => {
     <View style={style}>
       <ResultCard
         title="Total Amount (Principal + Interest)"
-        value={formatINR(totalAmount)}
+        value={formatCurrency(totalAmount)}
         subtitle={`Simple interest at ${formatPercentage(annualInterestRate)} p.a. over ${tenureYears} year${tenureYears === 1 ? '' : 's'}`}
       />
 
       <View style={styles.summaryContainer}>
         <CalculatorSummaryRow
           label="Principal Amount"
-          value={formatINR(principal)}
+          value={formatCurrency(principal)}
         />
         <CalculatorSummaryRow
           label="Interest Earned"
-          value={formatINR(interest)}
+          value={formatCurrency(interest)}
         />
         <CalculatorSummaryRow
           label="Total Amount"
-          value={formatINR(totalAmount)}
+          value={formatCurrency(totalAmount)}
           isBold
         />
       </View>

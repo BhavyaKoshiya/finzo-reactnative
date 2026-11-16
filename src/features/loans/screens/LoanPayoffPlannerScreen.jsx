@@ -44,10 +44,10 @@ import {
 import { getLoanReportAdapter, generateAndShareReport } from '../../reports';
 
 const PRESET_EXTRA_EMIS = [
-  { label: '+₹1,000', value: 1000 },
-  { label: '+₹2,000', value: 2000 },
-  { label: '+₹5,000', value: 5000 },
-  { label: '+₹10,000', value: 10000 },
+  { value: 1000 },
+  { value: 2000 },
+  { value: 5000 },
+  { value: 10000 },
 ];
 
 const SCENARIO_TABS = [
@@ -297,11 +297,11 @@ export const LoanPayoffPlannerScreen = ({ route, navigation }) => {
             <View style={styles.presetRow}>
               {PRESET_EXTRA_EMIS.map((preset) => (
                 <TouchableOpacity
-                  key={preset.label}
+                  key={preset.value}
                   onPress={() => setExtraMonthlyAmount(preset.value)}
                   style={[styles.presetChip, { borderColor: currentTheme.border }]}
                 >
-                  <AppText variant="caption" color={currentTheme.primary}>{preset.label}</AppText>
+                  <AppText variant="caption" color={currentTheme.primary}>+{formatCurrency(preset.value)}</AppText>
                 </TouchableOpacity>
               ))}
             </View>

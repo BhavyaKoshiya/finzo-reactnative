@@ -321,3 +321,11 @@ jest.mock('@react-native-firebase/database', () => {
   };
 });
 
+
+jest.mock('react-native-in-app-review', () => ({
+  __esModule: true,
+  default: {
+    isAvailable: jest.fn(() => true),
+    RequestInAppReview: jest.fn(() => Promise.resolve(true)),
+  },
+}));

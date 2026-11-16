@@ -1,5 +1,5 @@
 import { formatDisplayDate, formatShortDate, addMonths, calculateDateDifference } from '../dateUtils';
-import { formatINR, parseINRInput, formatPercentage } from '../numberUtils';
+import { formatAmount, parseINRInput, formatPercentage } from '../numberUtils';
 
 describe('dateUtils', () => {
   it('formats display date correctly', () => {
@@ -27,8 +27,8 @@ describe('dateUtils', () => {
 
 describe('numberUtils', () => {
   it('formats INR correctly in Lakhs notation', () => {
-    expect(formatINR(1000000, true)).toBe('₹10,00,000');
-    expect(formatINR(50000, false)).toBe('50,000');
+    expect(formatAmount(1000000, true)).toBe('₹10,00,000');
+    expect(formatAmount(50000, false)).toBe('50,000');
   });
 
   it('parses raw input strings correctly', () => {

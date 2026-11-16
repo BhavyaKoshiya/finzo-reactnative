@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import ResultCard from '../../../../../components/cards/ResultCard';
 import CalculatorSummaryRow from '../../../../../components/calculator/CalculatorSummaryRow';
-import { formatINR } from '../../../../../calculations/core/currency';
+import { formatCurrency } from '../../../../../utils/financeFormatters';
 
 export const FDResultCard = ({ result, style }) => {
   if (!result) return null;
@@ -13,18 +13,18 @@ export const FDResultCard = ({ result, style }) => {
     <View style={style}>
       <ResultCard
         title="Maturity Amount"
-        value={formatINR(maturityAmount)}
+        value={formatCurrency(maturityAmount)}
         subtitle="Total payout at completion"
       />
 
       <View style={styles.summaryContainer}>
         <CalculatorSummaryRow
           label="Deposit Principal Amount"
-          value={formatINR(principal)}
+          value={formatCurrency(principal)}
         />
         <CalculatorSummaryRow
           label="Total Interest Earned"
-          value={formatINR(interestEarned)}
+          value={formatCurrency(interestEarned)}
           isBold
         />
       </View>

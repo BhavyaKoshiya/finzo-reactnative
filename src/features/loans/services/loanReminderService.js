@@ -1,3 +1,4 @@
+import { formatCurrency } from '../../../utils/financeFormatters';
 import {
   getPaymentStatus,
   getReminderDate,
@@ -98,13 +99,13 @@ export const loanReminderService = {
       return null;
     }
 
-    const emiFormatted = Number(loan.emiAmount || 0).toLocaleString('en-IN');
+    const emiFormatted = formatCurrency(Number(loan.emiAmount || 0));
     const loanName = loan.name || 'Loan';
 
     const title = reminderDaysBefore === 1
       ? `${loanName} EMI due tomorrow`
       : `${loanName} EMI due in ${reminderDaysBefore} days`;
-    const body = `₹${emiFormatted} is scheduled for ${nextDueDate}.`;
+    const body = `${emiFormatted} is scheduled for ${nextDueDate}.`;
 
     const payloadData = {
       type: 'loan_payment_reminder',
