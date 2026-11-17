@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { ArrowLeft, Gift, Ban, CheckCircle2, AlertCircle } from 'lucide-react-native';
+import { ArrowLeft, Gift, Ban, CheckCircle2, AlertCircle, Hourglass } from 'lucide-react-native';
 import ScreenContainer from '../../components/containers/ScreenContainer';
 import AppHeader from '../../components/navigation/AppHeader';
 import AppText from '../../components/common/AppText';
@@ -186,16 +186,34 @@ export const RewardsScreen = ({ navigation }) => {
                 <AppText variant="sectionTitle" style={styles.sectionTitle}>
                   Redeem Rewards
                 </AppText>
-                <View style={styles.storeList}>
-                  {redeemablePackages.map((reward) => (
-                    <RedeemRewardCard
-                      key={reward.id}
-                      reward={reward}
-                      userPoints={points}
-                      onRedeemPress={handleOpenRedeemModal}
-                    />
-                  ))}
-                </View>
+                {redeemablePackages.length > 0 ? (
+                  <View style={styles.storeList}>
+                    {redeemablePackages.map((reward) => (
+                      <RedeemRewardCard
+                        key={reward.id}
+                        reward={reward}
+                        userPoints={points}
+                        onRedeemPress={handleOpenRedeemModal}
+                      />
+                    ))}
+                  </View>
+                ) : (
+                  <AppCard style={styles.comingSoonCard}>
+                    <View style={styles.adFreeRow}>
+                      <View style={styles.adFreeIconBox}>
+                        <AppIcon icon={Hourglass} size={22} color={currentTheme.primary} />
+                      </View>
+                      <View style={styles.adFreeTextGroup}>
+                        <AppText variant="bodyMedium" style={styles.adFreeTitle}>
+                          Rewards coming soon
+                        </AppText>
+                        <AppText variant="caption" color={currentTheme.textSecondary}>
+                          Keep collecting points. You'll be able to spend them here soon.
+                        </AppText>
+                      </View>
+                    </View>
+                  </AppCard>
+                )}
                 <AdPlacement
                   screen="rewards"
                   placementId={AD_PLACEMENTS.REWARDS_NATIVE}
@@ -286,6 +304,10 @@ const styles = StyleSheet.create({
   },
   storeList: {
     marginBottom: 10,
+  },
+  comingSoonCard: {
+    padding: 14,
+    marginBottom: 16,
   },
   emptyWrapper: {
     paddingVertical: 20,

@@ -110,7 +110,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
       expect(BootSplash.hide).toHaveBeenCalledWith({ fade: true });
     });
 
-    test('1.3. Ads take longer than 5 seconds -> startup continues at 5 seconds maximum without blocking', async () => {
+    test('1.3. Ads take longer than 8 seconds -> startup continues at 8 seconds maximum without blocking', async () => {
       jest.useFakeTimers();
 
       let adResolved = false;
@@ -120,7 +120,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
             setTimeout(() => {
               adResolved = true;
               resolve(true);
-            }, 8000); // 8 seconds (longer than 5s limit)
+            }, 11000); // longer than the 8s limit
           })
       );
 
@@ -138,13 +138,13 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
       // Initially at T=0, children should not be mounted (only gateContainer View)
       expect(tree.root.findAllByType(Text).length).toBe(0);
 
-      // Fast-forward by 4 seconds (less than 5s timeout)
+      // Fast-forward by 7 seconds (less than the 8s timeout)
       await act(async () => {
-        jest.advanceTimersByTime(4000);
+        jest.advanceTimersByTime(7000);
       });
       expect(tree.root.findAllByType(Text).length).toBe(0);
 
-      // Fast-forward by another 1.1 seconds (crossing 5s timeout)
+      // Fast-forward by another 1.1 seconds (crossing the 8s timeout)
       await act(async () => {
         jest.advanceTimersByTime(1100);
       });
@@ -158,7 +158,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
       // But ad load was NOT cancelled; it is still running
       expect(adResolved).toBe(false);
 
-      // Fast-forward to 8s where ad finishes loading in background
+      // Fast-forward to 11s where ad finishes loading in background
       await act(async () => {
         jest.advanceTimersByTime(3000);
       });
@@ -167,7 +167,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
       jest.useRealTimers();
     });
 
-    test('1.4. 5-second timeout does NOT cancel underlying ad preload and late load succeeds in background', async () => {
+    test('1.4. 8-second timeout does NOT cancel underlying ad preload and late load succeeds in background', async () => {
       jest.useFakeTimers();
 
       let backgroundLoadCompleted = false;
@@ -175,7 +175,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
         setTimeout(() => {
           backgroundLoadCompleted = true;
           resolve(true);
-        }, 7000);
+        }, 9000);
       });
 
       jest.spyOn(adService, 'initialize').mockReturnValue(delayedInit);
@@ -191,7 +191,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
         );
       });
 
-      // Advance past 5s Splash timeout
+      // Advance past the 8s Splash timeout
       await act(async () => {
         jest.advanceTimersByTime(AD_STARTUP_TIMEOUT_MS + 100);
       });
@@ -200,7 +200,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
       expect(tree.root.findAllByType(Text).length).toBeGreaterThan(0);
       expect(backgroundLoadCompleted).toBe(false);
 
-      // Advance past 7s background completion
+      // Advance past 9s background completion
       await act(async () => {
         jest.advanceTimersByTime(2000);
       });
@@ -215,7 +215,7 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
   // 2. AD PRELOAD LIFECYCLE & SAFETY
   // ============================================================
   describe('2. Ad Preload Lifecycle & Invariant Safety', () => {
-    test('2.1. Preloading initializes MarketingAdProvider and triggers banner, native, and interstitial preloads', async () => {
+    test('2.1. Preloading initializes MarketingAdProvider and triggers banner and native preloads, deferring interstitials', async () => {
       const provider = new MarketingAdProvider();
       const initResult = await provider.initialize();
 
@@ -225,13 +225,15 @@ describe('Phase 27: Ad Startup Initialization & Preloading QA', () => {
         bundleId: 'com.loanpilot.app',
         enableAppOpenOnResume: false,
         requestConsent: true,
+        deferInterstitialPreload: true,
         onAdRevenue: expect.any(Function),
       });
 
       await provider.preloadAds();
       expect(bannerAdManager.preloadAll).toHaveBeenCalled();
       expect(nativeAdManager.preloadAll).toHaveBeenCalledWith('nativeNormal');
-      expect(interstitialAdManager.preloadAds).toHaveBeenCalled();
+      // Interstitials load shortly before they are due, not at startup
+      expect(interstitialAdManager.preloadAds).not.toHaveBeenCalled();
       expect(rewardedAdManager.preloadAds).toHaveBeenCalled();
     });
 

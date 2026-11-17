@@ -247,7 +247,17 @@ export const ProfileScreen = ({ navigation }) => {
           style={styles.rewardCardMargin}
         />
 
-        <ProfileAdMilestoneCard />
+        {/* Rewarded ads switched off remotely: a native ad takes the milestone card's place */}
+        {rewardedConfig?.enabled ? (
+          <ProfileAdMilestoneCard />
+        ) : (
+          <AdPlacement
+            screen="profile"
+            placementId={AD_PLACEMENTS.PROFILE_NATIVE}
+            adType="native"
+            style={styles.profileNativeAd}
+          />
+        )}
 
         {/* Compact Points / Streak / Store Summary Card */}
         <TouchableOpacity
@@ -482,6 +492,9 @@ export const ProfileScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  profileNativeAd: {
+    marginBottom: 16,
+  },
   container: {
     flex: 1,
   },

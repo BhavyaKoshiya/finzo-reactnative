@@ -58,7 +58,8 @@ describe('MarketingAdProvider config recovery', () => {
     expect(bannerAdManager.adModel).toBe(remoteAdModel);
     expect(interstitialAdManager.adModel).toBe(remoteAdModel);
     expect(bannerAdManager.preloadAll).toHaveBeenCalled();
-    expect(interstitialAdManager.preloadAds).toHaveBeenCalled();
+    // Interstitials load shortly before they are due, not with the startup preload
+    expect(interstitialAdManager.preloadAds).not.toHaveBeenCalled();
     expect(rewardedAdManager.preloadAds).toHaveBeenCalled();
     expect(provider.isBannerAvailable()).toBe(true);
   });

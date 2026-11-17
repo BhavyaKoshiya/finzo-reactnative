@@ -10,6 +10,9 @@ import { realtimeConfigService } from '../config/realtimeConfigService';
 import firebaseAnalyticsService from './firebaseAnalyticsService';
 import logger from './logger';
 
+/** Default for how many opportunities before an interstitial is due to start loading it. */
+export const INTERSTITIAL_PREPARE_AHEAD = 2;
+
 /**
  * Main Application Advertising Service Boundary.
  * The ONLY service imported by UI components / screens for ad actions.
@@ -153,6 +156,73 @@ class AdService {
     } catch (err) {
       logger.warn('AdService.showPrivacyOptionsForm failed', { error: err?.message });
       return false;
+    }
+  }
+
+  /**
+   * Resolves once the startup (app open) ad is finished, or when `timeoutMs` passes
+   * without one loading. Never rejects.
+   * @param {number} timeoutMs
+   * @returns {Promise<void>}
+   */
+  async waitForStartupAd(timeoutMs) {
+    try {
+      const provider = this.getProvider();
+      if (typeof provider.waitForStartupAd === 'function') {
+        await provider.waitForStartupAd(timeoutMs);
+      }
+    } catch (err) {
+      logger.warn('AdService.waitForStartupAd failed', { error: err?.message });
+    }
+  }
+
+  /** Stops a startup ad that hasn't loaded yet from appearing over the app later. */
+  endStartupAd() {
+    try {
+      const provider = this.getProvider();
+      if (typeof provider.endStartupAd === 'function') provider.endStartupAd();
+    } catch (err) {
+      logger.warn('AdService.endStartupAd failed', { error: err?.message });
+    }
+  }
+
+  /**
+   * How long the launch screen may wait for the startup ad.
+   * @param {number} defaultMs - Used when the remote ad config doesn't say
+   * @returns {number}
+   */
+  getStartupAdWaitMs(defaultMs) {
+    try {
+      const provider = this.getProvider();
+      const ms = typeof provider.getStartupAdWaitMs === 'function' ? provider.getStartupAdWaitMs() : null;
+      return typeof ms === 'number' ? ms : defaultMs;
+    } catch (_err) {
+      return defaultMs;
+    }
+  }
+
+  /**
+   * How many opportunities before an interstitial is due to start loading it.
+   * @returns {number}
+   */
+  getInterstitialPrepareAhead() {
+    try {
+      const provider = this.getProvider();
+      const steps =
+        typeof provider.getInterstitialPrepareAhead === 'function' ? provider.getInterstitialPrepareAhead() : null;
+      return typeof steps === 'number' ? steps : INTERSTITIAL_PREPARE_AHEAD;
+    } catch (_err) {
+      return INTERSTITIAL_PREPARE_AHEAD;
+    }
+  }
+
+  /** Starts loading an interstitial so one is ready when it is next due. */
+  prepareInterstitial(placementId = AD_PLACEMENTS.CALCULATOR_INTERSTITIAL) {
+    try {
+      const provider = this.getProvider();
+      if (typeof provider.prepareInterstitial === 'function') provider.prepareInterstitial(placementId);
+    } catch (err) {
+      logger.warn('AdService.prepareInterstitial failed', { error: err?.message });
     }
   }
 
@@ -374,6 +444,13 @@ class AdService {
     });
 
     if (!oppResult.triggered) {
+      // Load the interstitial a couple of opportunities early so it is ready when due
+      if (
+        oppResult.reason === 'THRESHOLD_NOT_MET' &&
+        oppResult.counter >= oppResult.target - this.getInterstitialPrepareAhead()
+      ) {
+        this.prepareInterstitial(placementId);
+      }
       firebaseAnalyticsService.logInterstitialAdSuppressed({
         placementId,
         screen: options.screen,
@@ -385,6 +462,23 @@ class AdService {
         reason: oppResult.reason,
         counter: oppResult.counter,
         target: oppResult.target,
+      };
+    }
+
+    // Due, but nothing loaded yet: keep it due for the next opportunity instead of losing it
+    const provider = this.getProvider();
+    if (typeof provider.isInterstitialReady === 'function' && !provider.isInterstitialReady(placementId)) {
+      interstitialFrequencyService.deferDueInterstitial(oppResult.target);
+      this.prepareInterstitial(placementId);
+      firebaseAnalyticsService.logInterstitialAdSuppressed({
+        placementId,
+        screen: options.screen,
+        reason: 'NOT_READY',
+      });
+      return {
+        status: AD_STATES.FAILED,
+        provider: provider.getType(),
+        reason: 'NOT_READY',
       };
     }
 

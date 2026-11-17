@@ -170,6 +170,17 @@ export class InterstitialFrequencyService {
   }
 
   /**
+   * Undoes a trigger whose ad wasn't loaded yet, so the very next eligible opportunity
+   * shows it instead of starting the count over.
+   * @param {number} target - The adTime threshold that was reached
+   */
+  deferDueInterstitial(target) {
+    this.opportunityCounter = Math.max(0, normalizeAdTime(target) - 1);
+    this.sessionCount = Math.max(0, this.sessionCount - 1);
+    this.isInterstitialShowing = false;
+  }
+
+  /**
    * Manually resets the opportunity counter.
    */
   resetCounter() {

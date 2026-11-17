@@ -38,6 +38,8 @@ export const PUBLIC_PRIVACY_POLICY_URL =
  * Authoritative alignment with the public LoanPilot Privacy Policy:
  * https://varnicreations.blogspot.com/2026/11/loanpilot-privacy-policy.html
  */
+const GOOGLE_PARTNER_SITES_URL = 'https://policies.google.com/technologies/partner-sites';
+
 export const PrivacyPolicyScreen = ({ navigation }) => {
   const { currentTheme } = useAppTheme();
 
@@ -91,7 +93,7 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
                 color={currentTheme.primary}
                 style={{ fontWeight: '800' }}
               >
-                EFFECTIVE DATE & LAST UPDATED: AUGUST 15, 2026
+                LAST UPDATED: NOVEMBER 17, 2026
               </AppText>
               <AppText
                 variant="caption"
@@ -450,10 +452,52 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             color={currentTheme.textSecondary}
             style={styles.paragraph}
           >
-            Advertising providers (such as Google Mobile Ads) may process device
-            information, mobile advertising identifiers, network details, and ad
-            interaction data to provide, measure, and protect advertisements
-            according to their privacy policies.
+            Ads are served through Google AdMob and Google Ad Manager (Google
+            Mobile Ads), including Google&apos;s advertising partners. They may
+            process device information, mobile advertising identifiers, network
+            details, and ad interaction data to show, measure, and protect
+            advertisements, and may show ads based on your use of this and other
+            apps, according to their privacy policies.
+          </AppText>
+          <AppText
+            variant="bodySmall"
+            color={currentTheme.textSecondary}
+            style={styles.paragraph}
+          >
+            Learn how Google uses information from sites or apps that use its
+            services:{' '}
+            <AppText
+              variant="bodySmall"
+              color={currentTheme.primary}
+              onPress={() => Linking.openURL(GOOGLE_PARTNER_SITES_URL)}
+              accessibilityRole="link"
+            >
+              {GOOGLE_PARTNER_SITES_URL}
+            </AppText>
+          </AppText>
+          <AppText
+            variant="bodySmall"
+            color={currentTheme.textSecondary}
+            style={styles.paragraph}
+          >
+            Ad consent: if you are in the European Economic Area (EEA), the UK,
+            Switzerland, or a US state with applicable privacy laws, Google&apos;s
+            consent tool asks for your choice before personalized ads are shown.
+            If you do not consent, you may still see limited, non-personalized
+            ads. Your choice is stored on your device and can be changed at any
+            time in Profile → Ad Privacy Choices.
+          </AppText>
+          <AppText
+            variant="bodySmall"
+            color={currentTheme.textSecondary}
+            style={styles.paragraph}
+          >
+            US state privacy rights: if you live in a US state with a consumer
+            privacy law (such as California, Virginia, Colorado, Connecticut or
+            Utah), you may have the right to opt out of the &quot;sale&quot; or
+            &quot;sharing&quot; of personal information for targeted advertising.
+            You can opt out at any time in Profile → Ad Privacy Choices, or by
+            resetting or deleting your advertising ID in your device settings.
           </AppText>
           <View style={styles.bulletList}>
             <AppText variant="bodySmall" color={currentTheme.textPrimary}>
@@ -680,9 +724,18 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
             <AppText variant="bodySmall" color={currentTheme.textPrimary}>
               •{' '}
               <AppText variant="bodySmall" style={{ fontWeight: '700' }}>
-                Google Mobile Ads:
+                Google AdMob, Google Ad Manager & Google Mobile Ads:
               </AppText>{' '}
-              Advertising delivery and campaign performance measurement.
+              Advertising delivery and campaign performance measurement. See how
+              Google uses information from apps that use its services at{' '}
+              <AppText
+                variant="bodySmall"
+                color={currentTheme.primary}
+                onPress={() => Linking.openURL(GOOGLE_PARTNER_SITES_URL)}
+                accessibilityRole="link"
+              >
+                {GOOGLE_PARTNER_SITES_URL}
+              </AppText>
             </AppText>
           </View>
         </AppCard>
@@ -727,8 +780,9 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
               <AppText variant="bodySmall" style={{ fontWeight: '700' }}>
                 Advertising Controls:
               </AppText>{' '}
-              Manage personalized advertising choices and reset advertising
-              identifiers through your device operating system settings.
+              Change your ad consent choice in Profile → Ad Privacy Choices (shown
+              where consent is required), or reset or delete your advertising ID
+              in your device settings.
             </AppText>
             <AppText variant="bodySmall" color={currentTheme.textPrimary}>
               •{' '}
@@ -944,8 +998,8 @@ export const PrivacyPolicyScreen = ({ navigation }) => {
                 ADVERTISING
               </AppText>
               <AppText variant="caption" color={currentTheme.textSecondary}>
-                Used to support LoanPilot; networks process device data, not your
-                financial entries.
+                Google AdMob and Ad Manager; networks process device data, not your
+                financial entries. Consent asked where required by law.
               </AppText>
             </View>
 

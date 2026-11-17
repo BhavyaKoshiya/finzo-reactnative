@@ -42,6 +42,33 @@ export class BaseAdProvider {
     return { success: true };
   }
 
+  /**
+   * Resolves once the startup (app open) ad is finished, or when `timeoutMs` passes
+   * without one loading.
+   * @param {number} _timeoutMs
+   * @returns {Promise<void>}
+   */
+  async waitForStartupAd(_timeoutMs) {}
+
+  /** Stops a startup ad that hasn't loaded yet from appearing later. */
+  endStartupAd() {}
+
+  /**
+   * How long the launch screen may wait for the startup ad, from the remote ad config.
+   * @returns {number|null} Milliseconds, or null to use the app default
+   */
+  getStartupAdWaitMs() {
+    return null;
+  }
+
+  /**
+   * How many opportunities before an interstitial is due to start loading it.
+   * @returns {number|null} From the remote ad config, or null to use the app default
+   */
+  getInterstitialPrepareAhead() {
+    return null;
+  }
+
   // 1. BANNER AD API
   isBannerAvailable(_placementId) {
     return false;
@@ -75,6 +102,17 @@ export class BaseAdProvider {
 
   async loadInterstitial(_placementId) {
     return { success: false, reason: 'Provider not configured' };
+  }
+
+  /** Starts loading an interstitial so one is ready when it is next due. */
+  prepareInterstitial(_placementId) {}
+
+  /**
+   * Whether an interstitial can be shown right away. Providers that can't tell report true.
+   * @returns {boolean}
+   */
+  isInterstitialReady(_placementId) {
+    return true;
   }
 
   async showInterstitial(_placementId, _options = {}) {

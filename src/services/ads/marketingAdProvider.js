@@ -29,6 +29,8 @@ import firebaseAnalyticsService from '../firebaseAnalyticsService';
  * 2b. Paid impressions are logged as Firebase `ad_impression` (revenue only, no user data).
  * 3. LoanPilot adDecisionEngine remains authoritative for frequency, cooldowns, and screening.
  * 4. Preloaded ads NEVER automatically display; they remain cached for user-triggered / authorized requests.
+ * 5. The startup app open ad only shows while the launch screen is up (see AppStartupGate).
+ * 6. Interstitials load shortly before they are due (adService.prepareInterstitial), not at startup.
  */
 export class MarketingAdProvider extends BaseAdProvider {
   constructor(config = {}) {
@@ -69,6 +71,7 @@ export class MarketingAdProvider extends BaseAdProvider {
           bundleId: this.config.bundleId,
           enableAppOpenOnResume: false,
           requestConsent: true,
+          deferInterstitialPreload: true,
           onAdRevenue: (event) => {
             firebaseAnalyticsService.logAdImpression(event);
           },
@@ -169,10 +172,8 @@ export class MarketingAdProvider extends BaseAdProvider {
         nativeAdManager.preloadAll(nativeVariant);
       }
 
-      // 3. Interstitial preload (AdMob / Ad Manager)
-      if (typeof interstitialAdManager?.preloadAds === 'function') {
-        await interstitialAdManager.preloadAds();
-      }
+      // Interstitials are not preloaded here: they load shortly before they are due
+      // (prepareInterstitial), so sessions that never reach one don't waste a request.
 
       // 4. Rewarded preload (if enabled in adModel)
       if (marketingPlugin.adModel?.isrewarded && typeof rewardedAdManager?.preloadAds === 'function') {
@@ -188,6 +189,30 @@ export class MarketingAdProvider extends BaseAdProvider {
         logger.warn('MarketingAdProvider.preloadAds error:', { error: err?.message });
       }
       return { success: false, reason: err?.message };
+    }
+  }
+
+  async waitForStartupAd(timeoutMs) {
+    if (typeof marketingPlugin.waitForStartupAppOpen !== 'function') return;
+    await marketingPlugin.waitForStartupAppOpen(timeoutMs);
+  }
+
+  getStartupAdWaitMs() {
+    const seconds = Number(marketingPlugin.adModel?.appOpenWaitTime);
+    if (!Number.isFinite(seconds) || seconds <= 0) return null;
+    // Keep the launch screen between 3 and 15 seconds whatever the config says
+    return Math.min(15, Math.max(3, seconds)) * 1000;
+  }
+
+  getInterstitialPrepareAhead() {
+    const steps = Number(marketingPlugin.adModel?.interstitialPreloadAhead);
+    if (!Number.isFinite(steps) || steps < 0) return null;
+    return Math.floor(steps);
+  }
+
+  endStartupAd() {
+    if (typeof marketingPlugin.endAppOpenStartupWindow === 'function') {
+      marketingPlugin.endAppOpenStartupWindow();
     }
   }
 
@@ -273,6 +298,18 @@ export class MarketingAdProvider extends BaseAdProvider {
     return { success: this.isInterstitialAvailable(_placementId), provider: this.getType() };
   }
 
+  prepareInterstitial(placementId) {
+    if (!this.isInitialized || !this.isInterstitialAvailable(placementId)) return;
+    if (interstitialAdManager.isReady === true) return;
+    interstitialAdManager.preloadAds?.();
+  }
+
+  isInterstitialReady(_placementId) {
+    // Plugin versions without `isReady` can't tell; let the show attempt decide
+    if (typeof interstitialAdManager.isReady !== 'boolean') return true;
+    return interstitialAdManager.isReady;
+  }
+
   async showInterstitial(placementId, _options = {}) {
     try {
       if (!this.isInitialized) {
@@ -338,8 +375,16 @@ export class MarketingAdProvider extends BaseAdProvider {
             settle();
           });
         });
+      } else if (typeof interstitialAdManager.isReady === 'boolean') {
+        // Nothing loaded yet: start loading so the next opportunity can show it
+        this.prepareInterstitial(placementId);
+        return {
+          status: AD_STATES.FAILED,
+          provider: this.getType(),
+          reason: 'NOT_READY',
+        };
       } else {
-        // No preloaded ad available — call show anyway (may be a Qureka/FB fallback)
+        // Older plugin: let it try its own fallbacks
         await marketingPlugin.showInterstitial(targetCounter);
       }
 
