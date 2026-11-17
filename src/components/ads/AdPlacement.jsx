@@ -41,7 +41,13 @@ export const AdPlacement = ({
   const [config, setConfig] = useState(realtimeConfigService.getConfig());
   const [adFailed, setAdFailed] = useState(false);
   const [nativeAdLoaded, setNativeAdLoaded] = useState(false);
+  const [adsReadyTick, setAdsReadyTick] = useState(0);
   const nativeTimeoutRef = useRef(null);
+
+  // Ads can finish starting after this slot is on screen (e.g. the user spent a while on
+  // the consent form): redraw then, instead of staying empty until something else does.
+  useEffect(() => adService.subscribeToReady(() => setAdsReadyTick((tick) => tick + 1)), []);
+  const providerReady = adService.getProvider()?.isConfigured?.() !== false;
 
   useEffect(() => {
     const unsub = realtimeConfigService.subscribe((cfg) => setConfig(cfg));
@@ -50,7 +56,8 @@ export const AdPlacement = ({
 
   // Safety timeout for native ads: collapse if ad never loads or fails
   useEffect(() => {
-    if (adType !== 'native' || adFailed || nativeAdLoaded) {
+    // Only time the load once ads have started; before that nothing is being loaded
+    if (adType !== 'native' || adFailed || nativeAdLoaded || !providerReady) {
       return;
     }
 
@@ -71,7 +78,7 @@ export const AdPlacement = ({
         nativeTimeoutRef.current = null;
       }
     };
-  }, [adType, adFailed, nativeAdLoaded, placementId, screen]);
+  }, [adType, adFailed, nativeAdLoaded, providerReady, adsReadyTick, placementId, screen]);
 
   // Stable callbacks for native ad events
   const handleNativeAdLoaded = useCallback(() => {

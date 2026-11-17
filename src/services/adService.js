@@ -28,6 +28,28 @@ class AdService {
     this.cachedProvider = null;
     this.isInitialized = false;
     this.initPromise = null;
+    this.readyListeners = new Set();
+  }
+
+  /**
+   * Calls `listener` once ads finish starting (e.g. after a consent form that outlasted
+   * the launch screen), so ad slots already on screen can try again.
+   * @param {() => void} listener
+   * @returns {() => void} Unsubscribe
+   */
+  subscribeToReady(listener) {
+    this.readyListeners.add(listener);
+    return () => this.readyListeners.delete(listener);
+  }
+
+  _notifyReady() {
+    this.readyListeners.forEach((listener) => {
+      try {
+        listener();
+      } catch (err) {
+        logger.warn('AdService ready listener failed', { error: err?.message });
+      }
+    });
   }
 
   setProviderOverride(provider) {
@@ -96,10 +118,13 @@ class AdService {
           this.isInitialized = Boolean(result);
           if (!result) {
             this.initPromise = null; // allow a later retry (e.g. after reconnecting)
+          } else {
+            this._notifyReady();
           }
           return result;
         }
         this.isInitialized = true;
+        this._notifyReady();
         return true;
       } catch (err) {
         logger.warn('AdService async initialization error:', { error: err?.message });
